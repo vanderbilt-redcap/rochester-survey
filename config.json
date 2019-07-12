@@ -1,0 +1,29 @@
+{
+	"name": "Rochester Survey",
+	
+	"namespace": "Vanderbilt\\RochesterSurvey",
+	
+	"description": "REDCap external module that administers user-friendly surveys for hearing impaired users.",
+	
+	"authors": [
+		{
+			"name": "Carl Reed",
+			"email": "carl.w.reed@vumc.org",
+			"institution": "Vanderbilt University Medical Center"
+		}
+	],
+	
+	"permissions": [
+		"redcap_survey_page"
+	],
+	
+	"system-settings": [
+	
+	],
+	
+	"project-settings": [
+		
+   	],
+	
+	"framework-version": 2
+}
