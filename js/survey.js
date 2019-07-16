@@ -11,4 +11,26 @@ $(function() {
 	
 	// add dashboard html
 	$("body").append(SURVEY_HTML);
+	
+	$("body").on('click', "#survey-options", Rochester.openOptions);
+	
+	console.log(Rochester.maxFieldIndex);
+	// console.log(Rochester.dataDictionary);
 });
+
+var Rochester = {
+	"fieldIndex": 0,
+	"maxFieldIndex": $("#questiontable > tbody > tr").length
+};
+
+Rochester.openOptions = function() {
+	
+}
+
+Rochester.getNextFieldArray = function() {
+	this.field++;
+}
+
+Rochester.endSurvey = function() {
+	
+}
