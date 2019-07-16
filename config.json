@@ -13,6 +13,16 @@
 		}
 	],
 	
+	"links": {
+		"project": [
+			{
+				"name": "Survey Video Configuration",
+				"icon": "gear",
+				"url": "video_config.php"
+			}
+		]
+	},
+	
 	"permissions": [
 		"redcap_survey_page"
 	],

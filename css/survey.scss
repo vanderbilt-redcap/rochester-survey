@@ -1,0 +1,19 @@
+// recompile command (when working in css folder):
+//sass.bat base.scss base.css
+
+// @import "_normalize.scss";
+@import "bootstrap/scss/bootstrap.scss";
+
+#pagecontainer {
+	display: none;
+}
+
+html, body {
+	background-color: #EAEAEA;
+}
+
+#newcontainer {
+	background-color: #DFDF83;
+	width: 80%;
+	height: 80%;
+}
