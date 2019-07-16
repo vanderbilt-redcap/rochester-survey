@@ -8627,4 +8627,8 @@ html, body {
   padding: 40px 0px;
 }
 
+#survey-navigation button {
+  margin: 40px 20px;
+}
+
 /*# sourceMappingURL=survey.css.map */

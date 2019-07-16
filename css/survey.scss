@@ -22,6 +22,7 @@ html, body {
 }
 
 #survey-navigation {
-	display: flex;
-	justify-content: space-between;
+	button {
+		margin: 40px 20px;
+	}
 }

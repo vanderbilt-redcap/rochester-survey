@@ -12,7 +12,9 @@ $(function() {
 	// add dashboard html
 	$("body").append(SURVEY_HTML);
 	
-	$("body").on('click', "#survey-options", Rochester.openOptions);
+	// event listening
+	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
+	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
 	
 	console.log(Rochester.maxFieldIndex);
 	// console.log(Rochester.dataDictionary);
@@ -27,10 +29,28 @@ Rochester.openOptions = function() {
 	
 }
 
-Rochester.getNextFieldArray = function() {
-	this.field++;
+Rochester.getFieldInfo = function(fieldRow) {
+	
 }
 
 Rochester.endSurvey = function() {
+	console.log('ending survey');
+}
+
+Rochester.backClicked = function() {
 	
+}
+
+Rochester.nextClicked = function() {
+	if (Rochester.hasOwnProperty("targetQuestionRow")) {
+		Rochester.targetQuestionRow = Rochester.targetQuestionRow.next("tr:not(.surveysubmit)");
+		if (Rochester.targetQuestionRow.length == 0) {
+			Rochester.endSurvey();
+		} else {
+			console.log(Rochester.targetQuestionRow);
+		}
+	} else {
+		Rochester.targetQuestionRow = $("#questiontable > tbody > tr:first-child:not(.surveysubmit)");
+		console.log(Rochester.targetQuestionRow);
+	}
 }
