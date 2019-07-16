@@ -8615,13 +8615,16 @@ h3 {
 }
 
 html, body {
-  background-color: #EAEAEA;
+  background-color: #FFF;
 }
 
-#newcontainer {
-  background-color: #DFDF83;
-  width: 80%;
-  height: 80%;
+#rochester-module {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#rochester-module div {
+  padding: 40px 0px;
 }
 
 /*# sourceMappingURL=survey.css.map */
