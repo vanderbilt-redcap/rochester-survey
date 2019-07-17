@@ -2,23 +2,21 @@
 //sass.bat base.scss base.css
 
 // @import "_normalize.scss";
-@import "bootstrap/scss/bootstrap.scss";
-
-#pagecontainer {
-	display: none;
-}
+// @import "bootstrap/scss/bootstrap.scss";
 
 html, body {
 	background-color: #FFF;
 }
 
-#rochester-module {
+#container {
+	border: 1px solid #ccc;
+}
+
+#survey-video, #survey-options, #survey-navigation {
 	display: flex;
-	flex-direction: column;
 	align-items: center;
-	div {
-		padding: 40px 0px;
-	}
+	justify-content: center;
+	padding-bottom: 12px;
 }
 
 #survey-navigation {
