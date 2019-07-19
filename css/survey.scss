@@ -24,3 +24,9 @@ html, body {
 		margin: 40px 20px;
 	}
 }
+
+.unseen {
+   position: absolute !important;
+   top: -9999px !important;
+   left: -9999px !important;
+}
