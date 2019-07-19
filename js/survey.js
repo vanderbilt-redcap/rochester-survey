@@ -48,7 +48,15 @@ Rochester.openOptions = function() {
 }
 
 Rochester.endSurvey = function() {
+	let obname = $("#submit-action").prop("name");
 	console.log('ending survey');
+	if ($('#form select[name="'+obname+'"]').hasClass('rc-autocomplete') && $('#rc-ac-input_'+obname).length) {
+		$('#rc-ac-input_'+obname).trigger('blur');
+	}
+	// Change form action URL to force it to end the survey
+	$('#form').prop('action', $('#form').prop('action')+'&__endsurvey=1' );
+	// Submit the survey
+	dataEntrySubmit(document.getElementById('submit-action'));
 }
 
 Rochester.backClicked = function() {
@@ -84,16 +92,23 @@ Rochester.nextClicked = function() {
 		$("#surveytitlelogo").addClass("unseen");
 		$("#surveyinstructions").addClass("unseen");
 		$("#pagecontent form").removeClass("unseen");
+		$("#survey-navigation button:eq(0)").removeClass("unseen");
 		
 		$("#questiontable tbody").children().addClass("unseen");
-		
+		let foundNewTarget = false;
 		$("#questiontable tbody").children().each(function(i, e) {
 			if (Rochester.isRealField(e)) {
 				Rochester.surveyTarget = e;
 				$(e).removeClass("unseen");
+				foundNewTarget = true;
 				return false;
 			}
 		});
+		
+		// couldn't find any more real fields
+		if (!foundNewTarget) {
+			Rochester.endSurvey();
+		}
 	} else {
 		let foundNewTarget = false;
 		$(Rochester.surveyTarget).nextAll().each(function(i, e) {
@@ -107,7 +122,6 @@ Rochester.nextClicked = function() {
 		});
 		
 		if (!foundNewTarget) {
-			// end survey
 			Rochester.endSurvey();
 		}
 	}
