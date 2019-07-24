@@ -19,4 +19,39 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		echo($injection_element);
 	}
+	
+	function make_form_assoc_table($form_name) {
+		$project = new \Project($module->framework->getProjectId());
+		$form = $project->forms[$form_name];
+		if (empty($form)) {
+			return "<p>Couldn't find field information for survey with form_name: $form_name</p>";
+		}
+		if (empty($form["survey_id"])) {
+			return "<p>This form is not a survey: $form_name</p>";
+		}
+		
+		$html = '
+		<p>You may associate a video URL with a given field or answer.</p>
+		<table class="dataTable">
+			<thead>
+				<th>Type</th>
+				<th>Label</th>
+				<th>Value (1)</th>
+			</thead>
+			<tbody id="field_value_assoc">';
+		
+		// add form field/value rows
+		foreach($form->fields as $field_name => $field) {
+			if (!empty($field)) {
+				$label = $project->metadata[$field_name]["element_label"];
+				// $
+				$options = [];
+				
+			}
+		}
+		
+		$html .= '
+			</tbody>
+		</table>';
+	}
 }
