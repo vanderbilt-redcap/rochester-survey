@@ -1,3 +1,67 @@
+table.field_value {
+  border: 1px solid #000000;
+  width: 80%;
+  text-align: left;
+  border-collapse: collapse;
+}
 
+table.field_value td, table.field_value th {
+  border: 1px solid #000000;
+  padding: 3px 5px;
+}
+
+table.field_value tbody td {
+  font-size: 13px;
+}
+
+table.field_value thead {
+  background: #CFCFCF;
+  background: -moz-linear-gradient(top, #dbdbdb 0%, #d3d3d3 66%, #CFCFCF 100%);
+  background: -webkit-linear-gradient(top, #dbdbdb 0%, #d3d3d3 66%, #CFCFCF 100%);
+  background: linear-gradient(to bottom, #dbdbdb 0%, #d3d3d3 66%, #CFCFCF 100%);
+  border-bottom: 0px solid #000000;
+}
+
+table.field_value thead th {
+  font-size: 15px;
+  font-weight: bold;
+  color: #000000;
+  text-align: left;
+  border-left: 0px solid #D0E4F5;
+}
+
+table.field_value thead th:first-child {
+  border-left: none;
+}
+
+table.field_value tfoot {
+  font-size: 14px;
+  font-weight: bold;
+  color: #000000;
+  border-top: 1px solid #000000;
+}
+
+table.field_value tfoot td {
+  font-size: 14px;
+}
+
+.type_column {
+  max-width: 10%;
+  width: 10%;
+}
+
+.label_column {
+  max-width: 50%;
+  width: 50%;
+}
+
+.value_column {
+  max-width: 40%;
+  width: 40%;
+}
+
+.white-space-pre {
+  white-space: pre-wrap;
+}
 
 /*# sourceMappingURL=video_config.css.map */

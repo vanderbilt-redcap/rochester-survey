@@ -1,6 +1,7 @@
 <?php
 require_once str_replace("temp\\", "", APP_PATH_TEMP) . "redcap_connect.php";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
+$project = new \Project($module->framework->getProjectId());
 ?>
 <div>
 	<h5>Survey Video Configuration</h5>
@@ -21,7 +22,6 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 	</div>
 	<div id="form_assocs">
 		<?php
-			$project = new \Project($module->framework->getProjectId());
 			// if (count($project
 		?>
 	</div>
@@ -34,9 +34,9 @@ $rows = [];
 // each row will represent a question or answer
 // foreach(
 
-echo "<pre>";
-print_r($project->forms);
-echo "</pre>";
+// echo "<pre>";
+// print_r($project);
+// echo "</pre>";
 
 
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';

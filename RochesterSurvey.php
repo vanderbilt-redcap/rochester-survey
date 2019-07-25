@@ -21,8 +21,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function make_form_assoc_table($form_name) {
-		$project = new \Project($module->framework->getProjectId());
-		$form = $project->forms[$form_name];
+		$project = new \Project($this->framework->getProjectId());
+		$form = &$project->forms[$form_name];
 		if (empty($form)) {
 			return "<p>Couldn't find field information for survey with form_name: $form_name</p>";
 		}
@@ -32,26 +32,52 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		$html = '
 		<p>You may associate a video URL with a given field or answer.</p>
-		<table class="dataTable">
+		<table class="field_value">
 			<thead>
-				<th>Type</th>
-				<th>Label</th>
-				<th>Value (1)</th>
+				<th class="type_column">Type</th>
+				<th class="label_column">Label</th>
+				<th class="value_column">Value (1)</th>
 			</thead>
 			<tbody id="field_value_assoc">';
 		
-		// add form field/value rows
-		foreach($form->fields as $field_name => $field) {
+		// $html .= "<tr><td>" . print_r($form, true) . "</td></tr>";
+		
+		foreach($form["fields"] as $field_name => $field) {
 			if (!empty($field)) {
-				$label = $project->metadata[$field_name]["element_label"];
-				// $
-				$options = [];
-				
+				$value_col = "<input type=\"text\" class=\"form-control\" placeholder=\"Value\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\">";
+				$label_col = nl2br($project->metadata[$field_name]["element_label"]);
+				$type_col = "Descriptive";
+				if (!empty($project->metadata[$field_name]["question_num"]))
+					$type_col = "Question";
+				$html .= <<< EOF
+				<tr>
+					<td class="type_column">$type_col</td>
+					<td class="label_column">$label_col</td>
+					<td class="value_column">$value_col</td>
+				</tr>
+EOF;
+				$type_col = "Answer";
+				// preg_match_all("/\,\s*?(.+)\s*?(?:\\n|$)/mgU", $project->metadata[$field_name]["element_enum"], $matches);
+				if (!empty($project->metadata[$field_name]["element_enum"])) {
+					$labels = explode("\\n", $project->metadata[$field_name]["element_enum"]);
+					foreach($labels as $label) {
+						$label = trim(explode(",", $label)[1]);
+						$html .= <<< EOF
+				<tr>
+					<td class="type_column">Answer</td>
+					<td class="label_column">$label</td>
+					<td class="value_column">$value_col</td>
+				</tr>
+EOF;
+					}
+				}
 			}
 		}
 		
 		$html .= '
 			</tbody>
 		</table>';
+		
+		return $html;
 	}
 }

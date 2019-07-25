@@ -9,7 +9,9 @@ $(function() {
 			data: {form_name: $(this).attr("value")},
 			dataType: "html"
 		}).done(function(msg) {
-			$("#form_assocs").innerHtml(msg);
+			$("#form_assocs").html(msg);
+			// console.log(msg);
 		});
+		$("#form_picker").text($(this).text());
 	})
 })
