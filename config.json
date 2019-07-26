@@ -32,7 +32,21 @@
 	],
 	
 	"project-settings": [
-		
+		{
+			"key": "fbf-surveys",
+			"name": "Surveys to show field-by-field",
+			"required": false,
+			"type": "sub_settings",
+			"repeatable": true,
+			"sub_settings": [
+				{
+					"key": "survey_name",
+					"name": "Survey form name",
+					"required": true,
+					"type": "form-list"
+				}
+			]
+		}
    	],
 	
 	"framework-version": 2

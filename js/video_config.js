@@ -14,4 +14,17 @@ $(function() {
 		});
 		$("#form_picker").text($(this).text());
 	})
+	$("body").on("change", ".value_column", function(i, e) {
+		if (!$("#applyToDuplicates").is(":checked")) {
+			console.log("duplicates not set");
+			return false;
+		}
+		let entered_value = $(this).find("input").val();
+		let target_label = $(this).parent().find(".label_column").text();
+		$("tr.value-row").each(function(index, element) {
+			if ($(element).find(".label_column").text() == target_label) {
+				$(element).find("input").val(entered_value);
+			}
+		});
+	})
 })

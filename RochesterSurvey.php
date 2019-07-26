@@ -3,6 +3,17 @@ namespace Vanderbilt\RochesterSurvey;
 
 class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
+		$fbf_surveys = $this->framework->getProjectSetting("survey_name");
+		$found_this_form = false;
+		foreach($fbf_surveys as $name) {
+			if ($instrument === $name) {
+				$found_this_form = true;
+				break;
+			}
+		}
+		if (!$found_this_form)
+			return false;
+		
 		// inject html, js, and css that overrides existing page container
 		// $pid = $project_id;
 		// $data_dictionary_json = json_encode(\Metadata::getDataDictionary("json", true, array(), array(), false, false, null, $pid));
@@ -32,6 +43,10 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		$html = '
 		<p>You may associate a video URL with a given field or answer.</p>
+		<div class="custom-control custom-switch">
+		  <input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
+		  <label class="custom-control-label" for="applyToDuplicates">Duplicate values for fields and answers with identical labels</label>
+		</div>
 		<table class="field_value">
 			<thead>
 				<th class="type_column">Type</th>
@@ -47,10 +62,13 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				$value_col = "<input type=\"text\" class=\"form-control\" placeholder=\"Value\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\">";
 				$label_col = nl2br($project->metadata[$field_name]["element_label"]);
 				$type_col = "Descriptive";
-				if (!empty($project->metadata[$field_name]["question_num"]))
-					$type_col = "Question";
+				if ($project->metadata[$field_name]["element_preceding_header"] == "Form Status") {
+					continue;
+				} else {
+					$type_col = "Question (" . $project->metadata[$field_name]["element_type"] . ")";
+				}
 				$html .= <<< EOF
-				<tr>
+				<tr class="value-row">
 					<td class="type_column">$type_col</td>
 					<td class="label_column">$label_col</td>
 					<td class="value_column">$value_col</td>
@@ -63,7 +81,7 @@ EOF;
 					foreach($labels as $label) {
 						$label = trim(explode(",", $label)[1]);
 						$html .= <<< EOF
-				<tr>
+				<tr class="value-row">
 					<td class="type_column">Answer</td>
 					<td class="label_column">$label</td>
 					<td class="value_column">$value_col</td>
