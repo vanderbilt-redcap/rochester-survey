@@ -6,7 +6,7 @@
 
 table.field_value {
   border: 1px solid #000000;
-  width: 80%;
+  // width: 80%;
   text-align: left;
   border-collapse: collapse;
 }
@@ -46,16 +46,37 @@ table.field_value tfoot td {
 }
 
 .type_column {
-	max-width: 10%;
-	width: 10%;
+	// max-width: 10%;
+	// width: 10%;
 }
 
 .label_column {
-	max-width: 50%;
-	width: 50%;
+	// max-width: 50%;
+	// width: 50%;
 }
 
 .value_column {
-	max-width: 40%;
-	width: 40%;
+	div {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+}
+
+#form_picker {
+	margin-bottom: 16px;
+}
+#save_changes {
+	margin: 24px 0px;
+}
+
+#table-controls {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 20px;
+	button {
+		margin-left: 20px;
+	}
 }

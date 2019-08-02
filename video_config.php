@@ -7,7 +7,7 @@ $project = new \Project($module->framework->getProjectId());
 	<h5>Survey Video Configuration</h5>
 	<p>Select a survey form to associate values for:</p>
 	<div class="dropdown">
-		<button class="btn btn-primary dropdown-toggle" type="button" id="form_picker" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		<button class="btn btn-outline-primary dropdown-toggle" type="button" id="form_picker" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			Survey Forms
 		</button>
 		<div class="dropdown-menu form_picker_dd" aria-labelledby="form_picker">
@@ -50,6 +50,14 @@ $injection_element = "
 <script type=\"text/javascript\">
 	$survey_script
 </script>";
+
+// testing
+// echo "<pre>";
+// $emLog = $module->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
+// while ($row = db_fetch_assoc($emLog)) {
+	// print_r($row);
+// }
+// echo "</pre>";
 
 echo($injection_element);
 ?>

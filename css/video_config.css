@@ -1,6 +1,5 @@
 table.field_value {
   border: 1px solid #000000;
-  width: 80%;
   text-align: left;
   border-collapse: collapse;
 }
@@ -45,23 +44,29 @@ table.field_value tfoot td {
   font-size: 14px;
 }
 
-.type_column {
-  max-width: 10%;
-  width: 10%;
+.value_column div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.label_column {
-  max-width: 50%;
-  width: 50%;
+#form_picker {
+  margin-bottom: 16px;
 }
 
-.value_column {
-  max-width: 40%;
-  width: 40%;
+#save_changes {
+  margin: 24px 0px;
 }
 
-.white-space-pre {
-  white-space: pre-wrap;
+#table-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 20px;
+}
+#table-controls button {
+  margin-left: 20px;
 }
 
 /*# sourceMappingURL=video_config.css.map */

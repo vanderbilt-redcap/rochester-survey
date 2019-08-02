@@ -31,7 +31,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		echo($injection_element);
 	}
 	
-	function make_form_assoc_table($form_name) {
+	function make_field_val_association_page($form_name) {
 		$project = new \Project($this->framework->getProjectId());
 		$form = &$project->forms[$form_name];
 		if (empty($form)) {
@@ -43,15 +43,25 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		$html = '
 		<p>You may associate a video URL with a given field or answer.</p>
-		<div class="custom-control custom-switch">
-		  <input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
-		  <label class="custom-control-label" for="applyToDuplicates">Duplicate values for fields and answers with identical labels</label>
+		<div id="table-controls">
+			<div class="custom-control custom-switch">
+			  <input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
+			  <label class="custom-control-label" for="applyToDuplicates">Duplicate values for fields and answers with identical labels (per column)</label>
+			</div>
+			<br>
+			<button class="btn btn-outline-primary" type="button" id="add_value_col">
+				Add Value Column
+			</button>
 		</div>
-		<table class="field_value">
+		<table id="assoc_table" class="field_value">
 			<thead>
 				<th class="type_column">Type</th>
 				<th class="label_column">Label</th>
-				<th class="value_column">Value (1)</th>
+				<th class="value_column">
+					<div>
+						<span>Value (1)</span>
+					</div>
+				</th>
 			</thead>
 			<tbody id="field_value_assoc">';
 		
@@ -68,7 +78,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 					$type_col = "Question (" . $project->metadata[$field_name]["element_type"] . ")";
 				}
 				$html .= <<< EOF
-				<tr class="value-row">
+				<tr class="value-row" data-field-name="$field_name">
 					<td class="type_column">$type_col</td>
 					<td class="label_column">$label_col</td>
 					<td class="value_column">$value_col</td>
@@ -79,11 +89,12 @@ EOF;
 				if (!empty($project->metadata[$field_name]["element_enum"])) {
 					$labels = explode("\\n", $project->metadata[$field_name]["element_enum"]);
 					foreach($labels as $label) {
+						$raw_value = trim(explode(",", $label)[0]);
 						$label = trim(explode(",", $label)[1]);
 						$html .= <<< EOF
-				<tr class="value-row">
+				<tr class="value-row" data-field-name="$field_name">
 					<td class="type_column">Answer</td>
-					<td class="label_column">$label</td>
+					<td class="label_column" data-raw-value="$raw_value">$label</td>
 					<td class="value_column">$value_col</td>
 				</tr>
 EOF;
@@ -96,6 +107,12 @@ EOF;
 			</tbody>
 		</table>';
 		
+		$html .= <<< EOF
+		<button id="save_changes" class="btn btn-outline-primary" type="button">Save Changes</button>
+EOF;
+		
 		return $html;
 	}
+	
+	// function test
 }
