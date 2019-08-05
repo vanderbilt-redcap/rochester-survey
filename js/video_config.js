@@ -3,7 +3,6 @@ $('head').append('<link rel="stylesheet" type="text/css" href="CSS_URL">');
 $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
 
 $(function() {
-	Rochester = {};
 	$(".form_picker_dd").on("click", "a", function(i, e) {
 		$.ajax({
 			method: "POST",
@@ -44,19 +43,29 @@ $(function() {
 	$("body").on("click", "#save_changes", function(i, e) {
 		// create and build fields object, null where no values are associated
 		Rochester.fields = {};
-		$(".value-row").each(function(j, row) {
-			let fieldName = $(row).attr("data-field-name");
-			let fieldValue = $(row).find(".value_column > input").val();
-			if (fieldValue.length > 0) {
+		$(".value-row .value_column").each(function(j, td) {
+			let row = $(td).parent();
+			let fieldName = row.attr("data-field-name");
+			let cellValue = $(td).find('input').val();
+			let column = $(td).index() - 2;
+			if (cellValue.length > 0) {
 				// create field entry in fields array if necessary
-				if (!Rochester.fields.hasOwnProperty(fieldName))
+				if (!Rochester.fields.hasOwnProperty(fieldName)) {
 					Rochester.fields[fieldName] = {};
-				if ($(row).find(".type_column").text().search("Question") >= 0) {
-					Rochester.fields[fieldName].field = fieldValue;
+					Rochester.fields[fieldName].field = [];
+				}
+				if (row.find(".type_column").text().search("Question") >= 0) {
+					if (!Rochester.fields[fieldName].hasOwnProperty("field")) {
+						Rochester.fields[fieldName].field = [];
+					}
+					Rochester.fields[fieldName].field[column] = cellValue;
 				} else {
+					let rawValue = row.find(".label_column").attr("data-raw-value");
 					if (Rochester.fields[fieldName].hasOwnProperty("choices") == false)
 						Rochester.fields[fieldName].choices = {};
-					Rochester.fields[fieldName].choices[$(row).find(".label_column").attr("data-raw-value")] = fieldValue;
+					if (Rochester.fields[fieldName].choices.hasOwnProperty(rawValue) == false)
+						Rochester.fields[fieldName].choices[rawValue] = [];
+					Rochester.fields[fieldName].choices[rawValue][column] = cellValue;
 				}
 			}
 		});
@@ -65,7 +74,7 @@ $(function() {
 		// console.log("Rochester.fields:");
 		// console.log(JSON.stringify(Rochester.fields));
 		
-		// send to server to save on db
+		// // send to server to save on db
 		$.ajax({
 			method: "POST",
 			url: "video_config_ajax.php",
@@ -75,8 +84,7 @@ $(function() {
 			},
 			dataType: "json"
 		}).done(function(msg) {
-			console.log('abc');
-			console.log(JSON.parse(msg));
+			// console.log(JSON.parse(msg));
 		});
 	})
 	
@@ -87,7 +95,7 @@ $(function() {
 		let entered_value = $(this).find("input").val();
 		let target_label = $(this).parent().find(".label_column").text();
 		let target_column_index = $(this).index()
-		console.log($(this));
+		// console.log($(this));
 		// console.log($(".value_column"));
 		$(".value_column").each(function(index, element) {
 			// console.log($(element).index());
@@ -97,4 +105,16 @@ $(function() {
 			}
 		});
 	})
+	
+	// if the user has saved values previously, set the interface to show those field-value associations
+	if (Rochester.previousSettings) {
+		//determine max set column index
+		let columnsNeeded = 1;
+		for (let fieldName in Rochester.previousSettings) {
+			let set = Rochester.previousSettings[fieldName];
+			if (set.field) {
+				// columnsNeeded = 
+			}
+		}
+	}
 })

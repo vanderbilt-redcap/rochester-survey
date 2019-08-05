@@ -28,16 +28,15 @@ $project = new \Project($module->framework->getProjectId());
 </div>
 <?php
 
-$rows = [];
-
-// build rows array out so js can use it to fill html tbody
-// each row will represent a question or answer
-// foreach(
-
-// echo "<pre>";
-// print_r($project);
-// echo "</pre>";
-
+$emLog = $module->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
+$record = db_fetch_assoc($emLog);
+if (empty($record["value"])) {
+	$prevSettings = "Rochester = {};";
+} else {
+	$prevSettings = "Rochester = {
+		\"previousSettings\": JSON.parse(`{$record["value"]}`)
+	};";
+}
 
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 
@@ -48,16 +47,9 @@ $survey_script = str_replace("video_config_ajax.php", $module->getUrl("video_con
 $injection_element = "
 <!-- video_config for rochester survey module -->
 <script type=\"text/javascript\">
+	$prevSettings
 	$survey_script
 </script>";
-
-// testing
-// echo "<pre>";
-// $emLog = $module->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
-// while ($row = db_fetch_assoc($emLog)) {
-	// print_r($row);
-// }
-// echo "</pre>";
 
 echo($injection_element);
 ?>

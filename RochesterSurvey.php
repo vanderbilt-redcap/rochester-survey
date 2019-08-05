@@ -20,11 +20,25 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// $data_dictionary_json = trim($data_dictionary_json, "\"");
 		// $data_dictionary_json = str_replace(array("\\", "\\\\"), "", $data_dictionary_json);
 		
+		
+		$emLog = $this->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
+		$record = db_fetch_assoc($emLog);
+		$prevSettings = "";
+		if (!empty($record["value"])) {
+		// // } else {
+			// echo "<pre>";
+			$prevSettings = "associatedValues = JSON.parse(`{$record["value"]}`);";
+			// echo $prevSettings;
+			// echo "</pre>";
+			
+		}
+		
 		$survey_script = file_get_contents($this->getUrl("js/survey.js"));
 		$survey_script = str_replace("CSS_URL", $this->getUrl("css/survey.css"), $survey_script);
 		$injection_element = "
 		<!-- Rochester survey interface module -->
 		<script type=\"text/javascript\">
+			$prevSettings
 			$survey_script
 		</script>";
 		

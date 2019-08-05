@@ -44,6 +44,23 @@ table.field_value tfoot td {
   font-size: 14px;
 }
 
+.type_column {
+  min-width: 8%;
+  width: 10%;
+  max-width: 10%;
+}
+
+.label_column {
+  min-width: 18%;
+  width: 25%;
+  max-width: 30%;
+}
+
+.value_column {
+  min-width: 18%;
+  width: 25%;
+  max-width: 30%;
+}
 .value_column div {
   display: flex;
   flex-direction: row;
