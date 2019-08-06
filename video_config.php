@@ -1,6 +1,6 @@
 <?php
-require_once str_replace("temp\\", "", APP_PATH_TEMP) . "redcap_connect.php";
-require_once APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
+require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
+require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 $project = new \Project($module->framework->getProjectId());
 ?>
 <div>

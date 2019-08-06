@@ -10,7 +10,7 @@ var Rochester = {};
 
 Rochester.init = function() {
 	var first_vid_url = "";
-	if (associatedValues) {
+	if (associatedValues != false) {
 		Rochester.values = associatedValues;
 		let url = Rochester.values.record_id.field[0];
 		let video_id = url.split('v=')[1];
