@@ -25,11 +25,16 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$record = db_fetch_assoc($emLog);
 		$prevSettings = "var associatedValues = false;";
 		if (!empty($record["value"])) {
-			$prevSettings = "var associatedValues = JSON.parse(`{$record["value"]}`);";
+			// $prevSettings = "var associatedValues = JSON.parse(`{$record["value"]}`);";
 		}
 		
-		$survey_script = file_get_contents($this->getUrl("js" . DIRECTORY_SEPARATOR . "survey.js"));
-		$survey_script = str_replace("CSS_URL", $this->getUrl("css" . DIRECTORY_SEPARATOR . "survey.css"), $survey_script);
+		$ds = DIRECTORY_SEPARATOR;
+		$url1 = $this->getUrl("js/survey.js");
+		$url2 = $this->getUrl("css/survey.css");
+		echo "<pre>$url1</pre>";
+		echo "<pre>$url2</pre>";
+		$survey_script = file_get_contents($url1);
+		$survey_script = str_replace("CSS_URL", $url2, $survey_script);
 		$injection_element = "
 		<!-- Rochester survey interface module -->
 		<script type=\"text/javascript\">
