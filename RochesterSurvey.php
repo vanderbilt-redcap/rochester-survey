@@ -31,8 +31,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$ds = DIRECTORY_SEPARATOR;
 		$url1 = $this->getUrl("js/survey.js");
 		$url2 = $this->getUrl("css/survey.css");
-		echo "<pre>$url1</pre>";
-		echo "<pre>$url2</pre>";
+		// echo "<pre>$url1</pre>";
+		// echo "<pre>$url2</pre>";
 		$survey_script = file_get_contents($url1);
 		$survey_script = str_replace("CSS_URL", $url2, $survey_script);
 		$injection_element = "
