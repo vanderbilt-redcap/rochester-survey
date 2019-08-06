@@ -25,7 +25,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$record = db_fetch_assoc($emLog);
 		$prevSettings = "var associatedValues = false;";
 		if (!empty($record["value"])) {
-			// $prevSettings = "var associatedValues = JSON.parse(`{$record["value"]}`);";
+			$prevSettings = "var associatedValues = JSON.parse(`{$record["value"]}`);";
 		}
 		
 		$ds = DIRECTORY_SEPARATOR;
