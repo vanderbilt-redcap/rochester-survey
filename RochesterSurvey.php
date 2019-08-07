@@ -14,13 +14,6 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		if (!$found_this_form)
 			return false;
 		
-		// inject html, js, and css that overrides existing page container
-		// $pid = $project_id;
-		// $data_dictionary_json = json_encode(\Metadata::getDataDictionary("json", true, array(), array(), false, false, null, $pid));
-		// $data_dictionary_json = trim($data_dictionary_json, "\"");
-		// $data_dictionary_json = str_replace(array("\\", "\\\\"), "", $data_dictionary_json);
-		
-		
 		$emLog = $this->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
 		$record = db_fetch_assoc($emLog);
 		$prevSettings = "var associatedValues = false;";
@@ -31,8 +24,6 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$ds = DIRECTORY_SEPARATOR;
 		$url1 = $this->getUrl("js/survey.js");
 		$url2 = $this->getUrl("css/survey.css");
-		// echo "<pre>$url1</pre>";
-		// echo "<pre>$url2</pre>";
 		$survey_script = file_get_contents($url1);
 		$survey_script = str_replace("CSS_URL", $url2, $survey_script);
 		$injection_element = "
@@ -55,6 +46,26 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			return "<p>This form is not a survey: $form_name</p>";
 		}
 		
+		$sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$form_name' order by log_id desc limit 1";
+		$log_id = db_fetch_assoc(db_query($sql))["log_id"];
+		$columns = 1;
+		if (!empty($log_id)) {
+			$sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
+			// $associations = json_decode(db_fetch_assoc(db_query($sql))["form-field-value-associations"], true);
+			$result = db_query($sql);
+			$associations = json_decode(db_result($result), true);
+			foreach($associations as $field) {
+				if (!empty($field["field"])) {
+					$columns = max($columns, count($field["field"]));
+				}
+				if (!empty($field["choices"])) {
+					foreach($field["choices"] as $set) {
+						$columns = max($columns, count($set));
+					}
+				}
+			}
+		}
+		
 		$html = '
 		<p>You may associate a video URL with a given field or answer.</p>
 		<div id="table-controls">
@@ -67,17 +78,31 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				Add Value Column
 			</button>
 		</div>
-		<table id="assoc_table" class="field_value">
+		<table id="assoc_table" class="field_value" data-form-name="' . $form_name . '">
 			<thead>
 				<th class="type_column">Type</th>
-				<th class="label_column">Label</th>
-				<th class="value_column">
+				<th class="var_column">Variable</th>
+				<th class="label_column">Label</th>';
+		for ($col = 1; $col <= $columns; $col++) {
+			$html .= "
+				<th class='value_column'>
 					<div>
-						<span>Value (1)</span>
+						<span>Value ($col)</span>";
+			
+			if ($col > 1) {
+				$html .= "
+						<button class='btn btn-outline-secondary remove_column'>
+							Remove
+						</button>";
+			}
+			
+			$html .= "
 					</div>
-				</th>
+				</th>";
+		}
+		$html .= '
 			</thead>
-			<tbody id="field_value_assoc">';
+		<tbody id="field_value_assoc">';
 		
 		// $html .= "<tr><td>" . print_r($form, true) . "</td></tr>";
 		
@@ -89,15 +114,26 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				if ($project->metadata[$field_name]["element_preceding_header"] == "Form Status") {
 					continue;
 				} else {
-					$type_col = "Question (" . $project->metadata[$field_name]["element_type"] . ")";
+					$type_col = "Field (" . $project->metadata[$field_name]["element_type"] . ")";
 				}
-				$html .= <<< EOF
-				<tr class="value-row" data-field-name="$field_name">
-					<td class="type_column">$type_col</td>
-					<td class="label_column">$label_col</td>
-					<td class="value_column">$value_col</td>
-				</tr>
-EOF;
+				$html .= "
+				<tr class='value-row' data-field-name='$field_name'>
+					<td class='type_column'>$type_col</td>
+					<td class='var_column'>[$field_name]</td>
+					<td class='label_column'>$label_col</td>";
+				
+				for ($col = 1; $col <= $columns; $col++) {
+					$input_value = $value_col;
+					if (!empty($associations[$field_name]["field"][$col- 1])) {
+						$temp_value = $associations[$field_name]["field"][$col - 1];
+						$input_value = "<input type='text' class='form-control' value='$temp_value' placeholder='Value' aria-label='Associated value' aria-describedby='basic-addon1'>";
+					}
+					$html .= "
+					<td class='value_column'>$input_value</td>";
+				}
+				
+				$html .= '
+				</tr>';
 				$type_col = "Answer";
 				// preg_match_all("/\,\s*?(.+)\s*?(?:\\n|$)/mgU", $project->metadata[$field_name]["element_enum"], $matches);
 				if (!empty($project->metadata[$field_name]["element_enum"])) {
@@ -105,25 +141,35 @@ EOF;
 					foreach($labels as $label) {
 						$raw_value = trim(explode(",", $label)[0]);
 						$label = trim(explode(",", $label)[1]);
-						$html .= <<< EOF
-				<tr class="value-row" data-field-name="$field_name">
-					<td class="type_column">Answer</td>
-					<td class="label_column" data-raw-value="$raw_value">$label</td>
-					<td class="value_column">$value_col</td>
-				</tr>
-EOF;
+						$html .= "
+				<tr class='value-row' data-field-name='$field_name'>
+					<td class='type_column'>Choice</td>
+					<td class='var_column'>[$field_name][$raw_value]</td>
+					<td class='label_column' data-raw-value='$raw_value'>$label</td>";
+				
+				for ($col = 1; $col <= $columns; $col++) {
+					$input_value = $value_col;
+					if (!empty($associations[$field_name]["choices"][$raw_value][$col- 1])) {
+						$temp_value = $associations[$field_name]["choices"][$raw_value][$col - 1];
+						$input_value = "<input type='text' class='form-control' value='$temp_value' placeholder='Value' aria-label='Associated value' aria-describedby='basic-addon1'>";
+					}
+					$html .= "
+					<td class='value_column'>$input_value</td>";
+				}
+				
+				$html .= "
+				</tr>";
 					}
 				}
 			}
 		}
 		
-		$html .= '
+		$html .= "
 			</tbody>
-		</table>';
+		</table>";
 		
-		$html .= <<< EOF
-		<button id="save_changes" class="btn btn-outline-primary" type="button">Save Changes</button>
-EOF;
+		$html .= "
+		<button id='save_changes' class='btn btn-outline-primary' type='button'>Save Changes</button>";
 		
 		return $html;
 	}

@@ -21,22 +21,9 @@ $project = new \Project($module->framework->getProjectId());
 		</div>
 	</div>
 	<div id="form_assocs">
-		<?php
-			// if (count($project
-		?>
 	</div>
 </div>
 <?php
-
-$emLog = $module->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
-$record = db_fetch_assoc($emLog);
-if (empty($record["value"])) {
-	$prevSettings = "Rochester = {};";
-} else {
-	$prevSettings = "Rochester = {
-		\"previousSettings\": JSON.parse(`{$record["value"]}`)
-	};";
-}
 
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 
@@ -47,7 +34,6 @@ $survey_script = str_replace("video_config_ajax.php", $module->getUrl("video_con
 $injection_element = "
 <!-- video_config for rochester survey module -->
 <script type=\"text/javascript\">
-	$prevSettings
 	$survey_script
 </script>";
 

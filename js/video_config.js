@@ -20,7 +20,7 @@ $(function() {
 		$("#assoc_table").find("th").eq(n).after(`
 				<th class="value_column">
 					<div>
-						<span>Value (${n})</span>
+						<span>Value (${n - 1})</span>
 						<button class="btn btn-outline-secondary remove_column">
 							Remove
 						</button>
@@ -38,41 +38,49 @@ $(function() {
 		$("#assoc_table tr").each(function(j, e) {
 			$(e).find("td").eq(i).remove();
 		});
+		
+		// rename value columns (e.g., value (3) might turn to value (2))
+		$("#assoc_table th.value_column span").each(function(i, e) {
+			$(e).text("Value (" + (i + 1) + ")");
+		});
 	});
 	
 	$("body").on("click", "#save_changes", function(i, e) {
 		// create and build fields object, null where no values are associated
-		Rochester.fields = {};
+		let fields = {};
+		let form_name = $("#assoc_table").attr("data-form-name");
+		if (form_name == false)
+			return;
 		$(".value-row .value_column").each(function(j, td) {
 			let row = $(td).parent();
 			let fieldName = row.attr("data-field-name");
 			let cellValue = $(td).find('input').val();
-			let column = $(td).index() - 2;
+			let column = $(td).index() - 3;
 			if (cellValue.length > 0) {
 				// create field entry in fields array if necessary
-				if (!Rochester.fields.hasOwnProperty(fieldName)) {
-					Rochester.fields[fieldName] = {};
-					Rochester.fields[fieldName].field = [];
+				if (!fields.hasOwnProperty(fieldName)) {
+					fields[fieldName] = {};
 				}
-				if (row.find(".type_column").text().search("Question") >= 0) {
-					if (!Rochester.fields[fieldName].hasOwnProperty("field")) {
-						Rochester.fields[fieldName].field = [];
+				if (row.find(".type_column").text().search("Field") >= 0) {
+					if (!fields[fieldName].hasOwnProperty("field")) {
+						fields[fieldName].field = [];
 					}
-					Rochester.fields[fieldName].field[column] = cellValue;
+					fields[fieldName].field[column] = cellValue;
 				} else {
 					let rawValue = row.find(".label_column").attr("data-raw-value");
-					if (Rochester.fields[fieldName].hasOwnProperty("choices") == false)
-						Rochester.fields[fieldName].choices = {};
-					if (Rochester.fields[fieldName].choices.hasOwnProperty(rawValue) == false)
-						Rochester.fields[fieldName].choices[rawValue] = [];
-					Rochester.fields[fieldName].choices[rawValue][column] = cellValue;
+					if (fields[fieldName].hasOwnProperty("choices") == false)
+						fields[fieldName].choices = {};
+					if (fields[fieldName].choices.hasOwnProperty(rawValue) == false)
+						fields[fieldName].choices[rawValue] = [];
+					fields[fieldName].choices[rawValue][column] = cellValue;
 				}
 			}
 		});
 		
 		// // testing
-		// console.log("Rochester.fields:");
-		// console.log(JSON.stringify(Rochester.fields));
+		console.log("fields:");
+		// console.log(JSON.stringify(fields));
+		console.log(fields);
 		
 		// // send to server to save on db
 		$.ajax({
@@ -80,7 +88,10 @@ $(function() {
 			url: "video_config_ajax.php",
 			data: {
 				action: "save_changes",
-				data: JSON.stringify(Rochester.fields)
+				data: JSON.stringify({
+					"form_data": fields,
+					"form_name": form_name
+				})
 			},
 			dataType: "json"
 		}).done(function(msg) {
@@ -106,15 +117,40 @@ $(function() {
 		});
 	})
 	
-	// if the user has saved values previously, set the interface to show those field-value associations
-	if (Rochester.previousSettings) {
-		//determine max set column index
-		let columnsNeeded = 1;
-		for (let fieldName in Rochester.previousSettings) {
-			let set = Rochester.previousSettings[fieldName];
-			if (set.field) {
-				// columnsNeeded = 
-			}
-		}
-	}
+	// // if the user has saved values previously, set the interface to show those field-value associations
+	// let columnsNeeded = 1;
+	// if (Rochester.previousSettings) {
+		// //determine max set column index
+		// for (let fieldName in Rochester.previousSettings) {
+			// let set = Rochester.previousSettings[fieldName];
+			// if (set.field) {
+				// columnsNeeded = Math.max(columnsNeeded, Rochester.getMaxArrayIndex(set.field));
+			// }
+			// if (set.choices) {
+				// columnsNeeded = Math.max(columnsNeeded, Rochester.getMaxArrayIndex(set.choices));
+			// }
+		// }
+	// }
+	// console.log(columnsNeeded);
+	// // add columns
+	
+	// // fill with values
+
+	// Rochester.getMaxArrayIndex = function(arr) {
+		// if (arr.length === 0) {
+			// return -1;
+		// }
+
+		// var max = arr[0];
+		// var maxIndex = 0;
+
+		// for (var i = 1; i < arr.length; i++) {
+			// if (arr[i] > max) {
+				// maxIndex = i;
+				// max = arr[i];
+			// }
+		// }
+
+		// return maxIndex;
+	// }
 })

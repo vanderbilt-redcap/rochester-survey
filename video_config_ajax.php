@@ -7,7 +7,8 @@ if (!empty($_POST['form_name'])) {
 	// \REDCap::logEvent("Field Value Association Module", print_r($_POST, true), null, null, null, $_GET["pid"]);
 	$data = json_decode($_POST['data'], true);
 	$log_id = $module->framework->log("save_values", [
-		"field-value-associations" => json_encode($data)
+		"form-name" => $data["form_name"],
+		"form-field-value-associations" => json_encode($data["form_data"])
 	]);
 	$data['log_id'] = $log_id;
 	

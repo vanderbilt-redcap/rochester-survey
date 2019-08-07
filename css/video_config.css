@@ -50,6 +50,12 @@ table.field_value tfoot td {
   max-width: 10%;
 }
 
+.var_column {
+  min-width: 8%;
+  width: 10%;
+  max-width: 10%;
+}
+
 .label_column {
   min-width: 18%;
   width: 25%;
@@ -66,6 +72,11 @@ table.field_value tfoot td {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+
+#assoc_table {
+  min-width: 90%;
+  max-width: 90%;
 }
 
 #form_picker {
