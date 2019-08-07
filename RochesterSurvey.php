@@ -14,11 +14,22 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		if (!$found_this_form)
 			return false;
 		
-		$emLog = $this->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
-		$record = db_fetch_assoc($emLog);
-		$prevSettings = "var associatedValues = false;";
-		if (!empty($record["value"])) {
-			$prevSettings = "var associatedValues = JSON.parse(`{$record["value"]}`);";
+		// $emLog = $this->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
+		// $record = db_fetch_assoc($emLog);
+		// $prevSettings = "var associatedValues = false;";
+		// if (!empty($record["value"])) {
+			// $prevSettings = "var associatedValues = JSON.parse(`{$record["value"]}`);";
+		// }
+		
+		$sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$instrument' order by log_id desc limit 1";
+		$log_id = db_fetch_assoc(db_query($sql))["log_id"];
+		$result = "var associatedValues = false;";
+		if (!empty($log_id)) {
+			$sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
+			$result = db_result(db_query($sql));
+			if (!empty($result)) {
+				$result = "var associatedValues = JSON.parse(`$result`);";
+			}
 		}
 		
 		$ds = DIRECTORY_SEPARATOR;
@@ -29,7 +40,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$injection_element = "
 		<!-- Rochester survey interface module -->
 		<script type=\"text/javascript\">
-			$prevSettings
+			$result
 			$survey_script
 		</script>";
 		

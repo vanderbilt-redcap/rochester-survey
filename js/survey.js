@@ -28,8 +28,32 @@ Rochester.init = function() {
 			</div>`);
 	$("#survey-video").after(`
 			<div id="survey-options">
-				<button class="btn btn-secondary">Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i></button>
-			</div>`);
+				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">
+					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>
+				</button>
+			</div>
+			<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div id="signer_buttons">
+								${Rochester.getSignerButtons()}
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+						</div>
+					</div>
+				</div>
+			</div>
+	`);
 	$("#container").after(`
 			<div id="survey-navigation">
 				<button class="btn btn-primary">Back</button>
@@ -40,6 +64,7 @@ Rochester.init = function() {
 	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
 	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
 	$("body").on("click", "#questiontable tr input", Rochester.answerSelected);
+	// $("body").on("click", "#survey-options", Rochester.openOptions);
 	
 	// hide most of #pagecontent (except surveytitlelogo and instructions)
 	$("#pagecontent form").addClass("unseen");
@@ -57,7 +82,7 @@ Rochester.isRealField = function(fieldRow) {
 }
 
 Rochester.openOptions = function() {
-	
+	// $("body").append(``);
 }
 
 Rochester.endSurvey = function() {
@@ -191,3 +216,31 @@ Rochester.answerSelected = function(e) {
 		$("#survey-video iframe").attr("src", vid_url);
 	}
 }
+
+Rochester.getSignerButtons = function() {
+	if (!Rochester.values)
+		return false;
+	
+	// count how many signers we have (same as columns of associations)
+	let signerCount = 1;
+	for (var fieldname in Rochester.values) {
+		let entry = Rochester.values[fieldname];
+		if (entry.field) {
+			signerCount = Math.max(signerCount, entry.field.length);
+		}
+		if (entry.choices) {
+			for (var rawValue in entry.choices) {
+				signerCount = Math.max(signerCount, entry.choices[rawValue].length);
+			}
+		}
+	}
+	// console.log("col max: " + signerCount);
+	
+	// make and return html buttons
+	let html = "";
+	for (i = 1; i <= signerCount; i++) {
+		html += `<button class="btn btn-primary">Signer ${i}</button>`;
+	}
+	return html;
+}
+

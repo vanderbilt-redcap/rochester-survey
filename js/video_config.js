@@ -78,9 +78,9 @@ $(function() {
 		});
 		
 		// // testing
-		console.log("fields:");
+		// console.log("fields:");
 		// console.log(JSON.stringify(fields));
-		console.log(fields);
+		// console.log(fields);
 		
 		// // send to server to save on db
 		$.ajax({
@@ -116,41 +116,4 @@ $(function() {
 			}
 		});
 	})
-	
-	// // if the user has saved values previously, set the interface to show those field-value associations
-	// let columnsNeeded = 1;
-	// if (Rochester.previousSettings) {
-		// //determine max set column index
-		// for (let fieldName in Rochester.previousSettings) {
-			// let set = Rochester.previousSettings[fieldName];
-			// if (set.field) {
-				// columnsNeeded = Math.max(columnsNeeded, Rochester.getMaxArrayIndex(set.field));
-			// }
-			// if (set.choices) {
-				// columnsNeeded = Math.max(columnsNeeded, Rochester.getMaxArrayIndex(set.choices));
-			// }
-		// }
-	// }
-	// console.log(columnsNeeded);
-	// // add columns
-	
-	// // fill with values
-
-	// Rochester.getMaxArrayIndex = function(arr) {
-		// if (arr.length === 0) {
-			// return -1;
-		// }
-
-		// var max = arr[0];
-		// var maxIndex = 0;
-
-		// for (var i = 1; i < arr.length; i++) {
-			// if (arr[i] > max) {
-				// maxIndex = i;
-				// max = arr[i];
-			// }
-		// }
-
-		// return maxIndex;
-	// }
 })
