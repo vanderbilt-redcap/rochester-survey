@@ -81,14 +81,14 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			}
 		}
 		
+		// <h6>Upload Signer Portraits</h6>
+		// <div id="signer_images">
+			// <div class="custom-file">
+				// <label for="signerPortrait1" class="custom-file-label">Signer 1</label>
+				// <input type="file" class="custom-file-input" name="signerPortrait1" id="signerPortrait1">
+			// </div>
+		// </div>
 		$html = '
-		<h6>Upload Signer Portraits</h6>
-		<div id="signer_images">
-			<div class="custom-file">
-				<label for="signerPortrait1" class="custom-file-label">Signer 1</label>
-				<input type="file" class="custom-file-input" name="signerPortrait1" id="signerPortrait1">
-			</div>
-		</div>
 		<h6>Field and Answer Video Association</h6>
 		<p>Enter Youtube or Vimeo URLs for each field and answer.</p>
 		<div id="table-controls">
