@@ -129,9 +129,9 @@ Rochester.init = function() {
 		flat: true,
 		showButtons: false,
 		move: function(color) {
-			$("#container").css("color", Rochester.textColor);
-			$(".fl-button").contents().addBack(".fl-button").css("color", Rochester.textColor);
-			$(".fl-button").contents().addBack(".fl-button").css("border-color", Rochester.textColor);
+			$("#container").css("color", color.toHexString());
+			$(".fl-button").contents().addBack(".fl-button").css("color", color.toHexString());
+			$(".fl-button").contents().addBack(".fl-button").css("border-color", color.toHexString());
 		}
 	});
 	
@@ -380,13 +380,6 @@ Rochester.answerSelected = function(e) {
 	} else {
 		player.stopVideo();
 		player.seekTo(0);
-	}
-	
-	if (Rochester.bgColor) {
-		$("body").css("background-color", Rochester.bgColor);
-		$("html").css("background-color", Rochester.bgColor);
-		$("#pagecontent").css("background-color", Rochester.bgColor);
-		$("#pagecontent").css("background", Rochester.bgColor);
 	}
 }
 
