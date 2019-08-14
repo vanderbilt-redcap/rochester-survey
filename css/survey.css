@@ -1,27 +1,37 @@
-html, body {
+body {
   background-color: #FFF;
+}
+
+#pagecontent * {
+  background: none;
 }
 
 #container {
   border: 1px solid #ccc;
 }
 
-#survey-video, #survey-options, #survey-navigation {
+#survey-video {
   display: flex;
   align-items: center;
   justify-content: center;
   padding-bottom: 12px;
 }
 
-#survey-navigation button {
-  margin: 40px 20px;
+#survey-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: 12px;
 }
 
-#signer-buttons {
+#survey-navigation {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 12px;
 }
-#signer-buttons button {
-  margin-right: 24px;
+#survey-navigation button {
+  margin: 40px 20px;
 }
 
 .unseen {
@@ -58,6 +68,33 @@ html, body {
   border-radius: 50%;
   background: #4CAF50;
   cursor: pointer;
+}
+
+.modal-body {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.modal-body div.row {
+  margin-bottom: 20px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #007eff33;
+  border-radius: 5px;
+}
+.modal-body div.row div.col {
+  width: 100%;
+}
+.modal-body .sp-container {
+  border: 0;
+}
+
+.fl-button i {
+  margin-left: 12px;
+  padding: 4px;
+  border: 1px solid #007bff33;
+  border-radius: 2px;
 }
 
 /*# sourceMappingURL=survey.css.map */

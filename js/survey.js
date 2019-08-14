@@ -1,14 +1,31 @@
 // include css and bootstrap
 $('head').append('<link rel="stylesheet" type="text/css" href="CSS_URL">');
+$('head').append('<link rel="stylesheet" type="text/css" href="SPECTRUM_CSS">');
 
 // load dashboard content
 $(function() {	
 	Rochester.init();
+	Rochester.ajaxURL = "SURVEY_AJAX_URL";
 });
 
+var player;
+function onYouTubeIframeAPIReady() {
+	player = new YT.Player('videoIframe', {
+		// start: 0,
+		events: {
+			'onReady': function(event) {
+				event.target.seekTo(0);
+				event.target.playVideo();
+			}
+		}
+	});
+}
+	  
 var Rochester = {};
 
 Rochester.init = function() {
+	Rochester.signerIndex = 0;
+	Rochester.surveyTarget = $("#surveytitlelogo")[0];
 	var first_vid_url = "";
 	if (associatedValues != false) {
 		Rochester.values = associatedValues;
@@ -21,29 +38,63 @@ Rochester.init = function() {
 		}
 	}
 	
+	// add video button to field labels
+	$(".fl").each(function(i, e) {
+		$(e).after(`<button type='button' class='btn btn-outline-primary fl-button'>
+				<span>Watch Question Video<span><i class='fas fa-video'></i>
+			</button>`);
+	});
+	
 	// add video iframe element, survey control div/button, hide most of the #pagecontent and questiontable children children
 	$("#pagecontainer").prepend(`
 			<div id="survey-video">
-				<iframe width="800" height="560" src="` + first_vid_url + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
 			</div>`);
-	$("#survey-video").after(`
+	
+	var tag = document.createElement('script');
+	tag.id = 'survey-video';
+	tag.src = 'https://www.youtube.com/iframe_api';
+	var firstScriptTag = document.getElementsByTagName('script')[0];
+	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+	
+	$("#container").before(`
 			<div id="survey-options">
-				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">
+				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">
 					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>
 				</button>
+				<button type="button" class="btn btn-danger">
+					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>
+				</button>
 			</div>
-			<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal fade" id="optionsModal" tabindex="-1" role="dialog" aria-labelledby="optionsModalLabel" aria-hidden="true">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+							<h5 class="modal-title" id="optionsModalLabel">Survey Options</h5>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>
 						<div class="modal-body">
-							<div id="signer_buttons">
+							<h5>Choose a Signer</h5>
+							<div class="row justify-content-around">
 								${Rochester.getSignerButtons()}
+							</div>
+							<h5>Adjust Colors</h5>
+							<div class="row justify-content-around">
+								<div class="col text-center">
+									<h5>Background Color</h5>
+									<input id="spectrum_bg_color">
+								</div>
+								<div class="col text-center">
+									<h5>Text Color</h5>
+									<input id="spectrum_text_color">
+								</div>
+							</div>
+							<h5>Adjust Text Size</h5>
+							<div class="row justify-content-around">
+								<button type="button" class="btn btn-outline-primary shrinkFont">Make Text Smaller</button>
+								<button type="button" class="btn btn-outline-primary growFont">Make Text Bigger</button>
 							</div>
 						</div>
 						<div class="modal-footer">
@@ -60,17 +111,86 @@ Rochester.init = function() {
 				<button class="btn btn-primary">Next</button>
 			</div>`);
 	
+	// spectrum color picker creation/initialization
+	$("#spectrum_bg_color").spectrum({
+		color: "#FFF",
+		flat: true,
+		showButtons: false,
+		move: function(color) {
+			$("body").css("background-color", color.toHexString());
+			$("html").css("background-color", color.toHexString());
+			$("#pagecontent").css("background-color", color.toHexString());
+			$("#pagecontent").css("background", color.toHexString());
+		}
+	});
+	$("#spectrum_text_color").spectrum({
+		color: "#FFF",
+		flat: true,
+		showButtons: false,
+		move: function(color) {
+			$("#container").css("color", color.toHexString());
+			$(".fl-button").contents().addBack(".fl-button").css("color", color.toHexString());
+			$(".fl-button").contents().addBack(".fl-button").css("border-color", color.toHexString());
+		}
+	});
+	
 	// register events
 	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
 	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
+	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
 	$("body").on("click", "#questiontable tr input", Rochester.answerSelected);
-	// $("body").on("click", "#survey-options", Rochester.openOptions);
+	$("body").on("click", "#signer-buttons button", function() {
+		Rochester.signerIndex = $(this).index();
+		if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
+			Rochester.setVideoByFieldName("record_id");
+		} else {
+			let fieldName = $(Rochester.surveyTarget).attr('sq_id');
+			Rochester.setVideoByFieldName(fieldName);
+		}
+		
+		$.ajax({
+			method: "POST",
+			url: Rochester.ajaxURL,
+			data: {
+				action: "signer changed",
+				message: "user selected signer " + Rochester.signerIndex
+			},
+			dataType: "json"
+		}).done(function(msg) {
+			console.log(msg);
+		});
+	});
+	$("#fontSizeSlider").on("change", function() {
+		let zoom = $("#fontSizeSlider").val() + "%";
+		$("html").css("zoom", zoom);
+		$("#spectrum_color_picker").spectrum({
+			color: "#FFF",
+			flat: true,
+			showButtons: false,
+			move: function(color) {
+				$("body").css("background-color", color.toHexString());
+				$("html").css("background-color", color.toHexString());
+			}
+		});
+	});
+	$("body").on("click", ".fl-button", function(target) {
+		// set video to this field's associated video
+		let fieldName = $(Rochester.surveyTarget).attr('sq_id');
+		Rochester.setVideoByFieldName(fieldName);
+	});
 	
 	// hide most of #pagecontent (except surveytitlelogo and instructions)
 	$("#pagecontent form").addClass("unseen");
 	$("#survey-navigation button:eq(0)").addClass("unseen");
 	
-	Rochester.surveyTarget = $("#surveytitlelogo")[0];
+	// font resize buttons available in Survey Options modal
+	$("#changeFont").hide();
+	$("body").on("click", ".shrinkFont", function() {
+		$(".decreaseFont").trigger("click");
+	});
+	$("body").on("click", ".growFont", function() {
+		$(".increaseFont").trigger("click");
+	});
 }
 
 Rochester.isRealField = function(fieldRow) {
@@ -87,7 +207,7 @@ Rochester.openOptions = function() {
 
 Rochester.endSurvey = function() {
 	let obname = $("#submit-action").prop("name");
-	console.log('ending survey');
+	// console.log('ending survey');
 	if ($('#form select[name="'+obname+'"]').hasClass('rc-autocomplete') && $('#rc-ac-input_'+obname).length) {
 		$('#rc-ac-input_'+obname).trigger('blur');
 	}
@@ -102,16 +222,27 @@ Rochester.backClicked = function() {
 	// try to find a suitable previous questiontable tbody tr to display
 	$(Rochester.surveyTarget).prevAll().each(function(i, e) {
 		if (Rochester.isRealField(e)) {
+			// hide/show field
 			$(Rochester.surveyTarget).addClass("unseen");
 			Rochester.surveyTarget = e;
 			$(e).removeClass("unseen");
 			
 			// set video to this field's associated video
 			let fieldName = $(e).attr('sq_id');
-			// console.log(fieldName);
-			// if (Rochester.surveyTarget == $("#surveytitlelogo")[0])
-				// fieldName = "record_id";
 			Rochester.setVideoByFieldName(fieldName);
+			player.playVideo();
+				
+			$.ajax({
+				method: "POST",
+				url: Rochester.ajaxURL,
+				data: {
+					action: "field changed",
+					message: "user navigated backwards to field '" + fieldName + "'"
+				},
+				dataType: "json"
+			}).done(function(msg) {
+				console.log(msg);
+			});
 			
 			foundNewTarget = true;
 			return false;
@@ -135,6 +266,31 @@ Rochester.backClicked = function() {
 }
 
 Rochester.nextClicked = function() {
+	let setSurveyToField = function(field) {
+		// hide/show field elements
+		$(Rochester.surveyTarget).addClass("unseen");
+		Rochester.surveyTarget = field;
+		$(field).removeClass("unseen");
+		
+		// set video to this field's associated video
+		let fieldName = $(field).attr('sq_id');
+		Rochester.setVideoByFieldName(fieldName);
+		player.playVideo();
+		
+		// log field change on server
+		$.ajax({
+			method: "POST",
+			url: Rochester.ajaxURL,
+			data: {
+				action: "field changed",
+				message: "user navigated forward to field '" + fieldName + "'"
+			},
+			dataType: "json"
+		}).done(function(msg) {
+			console.log(msg);
+		});
+	}
+	
 	if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
 		// handle case where we're not showing survey contents yet, just survey instructions (e.g., after initialization)
 		$("#surveytitlelogo").addClass("unseen");
@@ -146,12 +302,8 @@ Rochester.nextClicked = function() {
 		let foundNewTarget = false;
 		$("#questiontable tbody").children().each(function(i, e) {
 			if (Rochester.isRealField(e)) {
-				Rochester.surveyTarget = e;
-				$(e).removeClass("unseen");
 				
-				// set video to this field's associated video
-				let fieldName = $(e).attr('sq_id');
-				Rochester.setVideoByFieldName(fieldName);
+				setSurveyToField(e);
 				
 				foundNewTarget = true;
 				return false;
@@ -167,13 +319,8 @@ Rochester.nextClicked = function() {
 		$(Rochester.surveyTarget).nextAll().each(function(i, e) {
 			
 			if (Rochester.isRealField(e)) {
-				$(Rochester.surveyTarget).addClass("unseen");
-				Rochester.surveyTarget = e;
-				$(e).removeClass("unseen");
 				
-				// set video to this field's associated video
-				let fieldName = $(e).attr('sq_id');
-				Rochester.setVideoByFieldName(fieldName);
+				setSurveyToField(e);
 				
 				foundNewTarget = true;
 				return false;
@@ -189,7 +336,7 @@ Rochester.nextClicked = function() {
 Rochester.setVideoByFieldName = function(fieldName) {
 	// set video to this field's associated video
 	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].field) {
-		let url = Rochester.values[fieldName].field[0];
+		let url = Rochester.values[fieldName].field[Rochester.signerIndex];
 		if (url) {
 			let video_id = url.split('v=')[1];
 			let ampersandPosition = video_id.indexOf('&');
@@ -197,8 +344,17 @@ Rochester.setVideoByFieldName = function(fieldName) {
 			if(ampersandPosition != -1) {
 				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
 			}
-			$("#survey-video iframe").attr("src", vid_url);
+			
+			// console.log('setting video for field: ' + fieldName + ' to be url: ' + vid_url + ' signer index: ' + Rochester.signerIndex);
+			// change video source and start from beginning
+			player.loadVideoByUrl({
+				mediaContentUrl: vid_url,
+				startSeconds: 0
+			});
 		}
+	} else {
+		player.stopVideo();
+		player.seekTo(0);
 	}
 }
 
@@ -206,14 +362,23 @@ Rochester.answerSelected = function(e) {
 	let fieldName = $(this).closest("tr").attr('sq_id');
 	let choiceRawValue = $(this).attr("value");
 	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].choices && Rochester.values[fieldName].choices[choiceRawValue]) {
-		let url = Rochester.values[fieldName].choices[choiceRawValue][0];
+		let url = Rochester.values[fieldName].choices[choiceRawValue][Rochester.signerIndex];
 		let video_id = url.split('v=')[1];
 		let ampersandPosition = video_id.indexOf('&');
 		let vid_url = `https://www.youtube.com/embed/` + video_id;
 		if(ampersandPosition != -1) {
 			vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
 		}
-		$("#survey-video iframe").attr("src", vid_url);
+		// $("#survey-video iframe").attr("src", vid_url);
+		player.loadVideoByUrl({
+			mediaContentUrl: vid_url,
+			startSeconds: 0
+		});
+		player.seekTo(0);
+		// player.playVideo();
+	} else {
+		player.stopVideo();
+		player.seekTo(0);
 	}
 }
 
@@ -239,8 +404,11 @@ Rochester.getSignerButtons = function() {
 	// make and return html buttons
 	let html = "";
 	for (i = 1; i <= signerCount; i++) {
-		html += `<button class="btn btn-primary">Signer ${i}</button>`;
+		html += `<button class="btn btn-outline-primary">Signer ${i}</button>`;
 	}
 	return html;
 }
 
+Rochester.exitClicked = function(event) {
+	$("#label-rpps1qa-B").trigger("click");
+}

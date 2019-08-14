@@ -4,31 +4,41 @@
 // @import "_normalize.scss";
 // @import "bootstrap/scss/bootstrap.scss";
 
-html, body {
+body {
 	background-color: #FFF;
+}
+
+#pagecontent {
+	* {
+		background: none;
+	}
 }
 
 #container {
 	border: 1px solid #ccc;
 }
 
-#survey-video, #survey-options, #survey-navigation {
+#survey-video {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	padding-bottom: 12px;
 }
 
-#survey-navigation {
-	button {
-		margin: 40px 20px;
-	}
+#survey-options {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	padding-bottom: 12px;
 }
 
-#signer-buttons {
+#survey-navigation {
 	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-bottom: 12px;
 	button {
-		margin-right: 24px;
+		margin: 40px 20px;
 	}
 }
 
@@ -69,3 +79,49 @@ html, body {
   background: #4CAF50;
   cursor: pointer;
 }
+
+.modal-body {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	justify-content: space-around;
+	
+	div.row {
+		margin-bottom: 20px;
+		width: 100%;
+		padding: 12px;
+		border: 1px solid #007eff33;
+		border-radius: 5px;
+		div.col {
+			width: 100%;
+		}
+	}
+	
+	.sp-container {
+		border: 0;
+	}
+}
+
+.fl-button {
+	i {
+		margin-left: 12px;
+		padding: 4px;
+		border: 1px solid #007bff33;
+		border-radius: 2px;
+	}
+}
+
+// large screen adjustments
+// @media (max-width: 992px) {
+	// #survey-video iframe {
+		// max-width: 100%;
+		// height: 480px;
+	// }
+// }
+
+// @media (mx-width: 768px) {
+	// #survey-video iframe {
+		// max-width: 100%;
+		// height: 320px;
+	// }
+// }
