@@ -117,6 +117,7 @@ Rochester.init = function() {
 		flat: true,
 		showButtons: false,
 		move: function(color) {
+			Rochester.bgColor = color.toHexString();
 			$("body").css("background-color", color.toHexString());
 			$("html").css("background-color", color.toHexString());
 			$("#pagecontent").css("background-color", color.toHexString());
@@ -128,9 +129,9 @@ Rochester.init = function() {
 		flat: true,
 		showButtons: false,
 		move: function(color) {
-			$("#container").css("color", color.toHexString());
-			$(".fl-button").contents().addBack(".fl-button").css("color", color.toHexString());
-			$(".fl-button").contents().addBack(".fl-button").css("border-color", color.toHexString());
+			$("#container").css("color", Rochester.textColor);
+			$(".fl-button").contents().addBack(".fl-button").css("color", Rochester.textColor);
+			$(".fl-button").contents().addBack(".fl-button").css("border-color", Rochester.textColor);
 		}
 	});
 	
@@ -139,7 +140,7 @@ Rochester.init = function() {
 	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
 	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
 	$("body").on("click", "#questiontable tr input", Rochester.answerSelected);
-	$("body").on("click", "#signer-buttons button", function() {
+	$("body").on("click", ".modal-body div:first button", function() {
 		Rochester.signerIndex = $(this).index();
 		if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
 			Rochester.setVideoByFieldName("record_id");
@@ -379,6 +380,13 @@ Rochester.answerSelected = function(e) {
 	} else {
 		player.stopVideo();
 		player.seekTo(0);
+	}
+	
+	if (Rochester.bgColor) {
+		$("body").css("background-color", Rochester.bgColor);
+		$("html").css("background-color", Rochester.bgColor);
+		$("#pagecontent").css("background-color", Rochester.bgColor);
+		$("#pagecontent").css("background", Rochester.bgColor);
 	}
 }
 
