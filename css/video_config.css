@@ -97,4 +97,16 @@ table.field_value tfoot td {
   margin-left: 20px;
 }
 
+#signer_images {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 0px;
+}
+#signer_images div {
+  max-width: 240px;
+  margin-right: 20px;
+}
+
 /*# sourceMappingURL=video_config.css.map */
