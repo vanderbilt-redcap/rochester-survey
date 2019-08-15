@@ -14,26 +14,41 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		if (!$found_this_form)
 			return false;
 		
-		$emLog = $this->framework->query("select * from redcap_external_modules_log_parameters WHERE name='field-value-associations' ORDER BY log_id DESC LIMIT 1");
-		$record = db_fetch_assoc($emLog);
-		$prevSettings = "var associatedValues = false;";
-		if (!empty($record["value"])) {
-			$prevSettings = "var associatedValues = JSON.parse(`{$record["value"]}`);";
+		$sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$instrument' order by log_id desc limit 1";
+		$log_id = db_fetch_assoc(db_query($sql))["log_id"];
+		$result = "var associatedValues = false;";
+		if (!empty($log_id)) {
+			$sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
+			$result = db_result(db_query($sql));
+			if (!empty($result)) {
+				$result = "var associatedValues = JSON.parse(`$result`);";
+			}
 		}
 		
-		$ds = DIRECTORY_SEPARATOR;
+		$spectrum_css_url = $this->getUrl("spectrum/spectrum.css");
+		$spectrum_script = file_get_contents($this->getUrl("spectrum/spectrum.js"));
+		$injection_element1 = "
+		<!-- spectrum color picker (for Rochester survey controls) -->
+		<script type=\"text/javascript\">
+			$spectrum_script
+		</script>";
+		echo($injection_element1);
+		
 		$url1 = $this->getUrl("js/survey.js");
 		$url2 = $this->getUrl("css/survey.css");
+		$url3 = $this->getUrl("survey_ajax.php");
 		$survey_script = file_get_contents($url1);
 		$survey_script = str_replace("CSS_URL", $url2, $survey_script);
-		$injection_element = "
+		$survey_script = str_replace("SPECTRUM_CSS", $spectrum_css_url, $survey_script);
+		$survey_script = str_replace("SURVEY_AJAX_URL", $url3, $survey_script);
+		$injection_element2 = "
 		<!-- Rochester survey interface module -->
 		<script type=\"text/javascript\">
-			$prevSettings
+			$result
 			$survey_script
 		</script>";
 		
-		echo($injection_element);
+		echo($injection_element2);
 	}
 	
 	function make_field_val_association_page($form_name) {
@@ -66,8 +81,16 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			}
 		}
 		
+		// <h6>Upload Signer Portraits</h6>
+		// <div id="signer_images">
+			// <div class="custom-file">
+				// <label for="signerPortrait1" class="custom-file-label">Signer 1</label>
+				// <input type="file" class="custom-file-input" name="signerPortrait1" id="signerPortrait1">
+			// </div>
+		// </div>
 		$html = '
-		<p>You may associate a video URL with a given field or answer.</p>
+		<h6>Field and Answer Video Association</h6>
+		<p>Enter Youtube or Vimeo URLs for each field and answer.</p>
 		<div id="table-controls">
 			<div class="custom-control custom-switch">
 			  <input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
