@@ -9,6 +9,7 @@ body {
 }
 
 #pagecontent {
+	margin-top: none;
 	* {
 		background: none;
 	}
@@ -109,6 +110,15 @@ body {
 		border: 1px solid #007bff33;
 		border-radius: 2px;
 	}
+}
+
+#form {
+	border: none;
+}
+
+.greenhighlight {
+	background-color: none !important;
+	background: none !important;
 }
 
 // large screen adjustments

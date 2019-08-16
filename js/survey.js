@@ -130,6 +130,8 @@ Rochester.init = function() {
 		showButtons: false,
 		move: function(color) {
 			$("#container").css("color", color.toHexString());
+			$("#container").css("border", "2px solid " + color.toHexString());
+			$("#pagecontent").css("margin-top", "none");
 			$(".fl-button").contents().addBack(".fl-button").css("color", color.toHexString());
 			$(".fl-button").contents().addBack(".fl-button").css("border-color", color.toHexString());
 		}
