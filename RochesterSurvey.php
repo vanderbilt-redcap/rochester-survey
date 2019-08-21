@@ -42,17 +42,18 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// file_put_contents("C:/vumc/log.txt", print_r($portraits, true) . "\n");
 		// file_put_contents("C:/vumc/log.txt", print_r($portraitsEmbed, true), FILE_APPEND);
 		
-		$exitSurveyText = $this->framework->getProjectSetting("exitModalText");
-		$exitSurveyVideo = $this->framework->getProjectSetting("exitModalVideo");
-		if (!empty($exitSurveyText)) {
-			$exitSurveyText = "var exitModalText = `" . $exitSurveyText . "`;";
+		$exitModalText = $this->framework->getProjectSetting("exitModalText");
+		$exitModalVideo = $this->framework->getProjectSetting("exitModalVideo");
+		
+		if (!empty($exitModalText)) {
+			$exitModalText = "var exitModalText = `" . $exitModalText . "`;";
 		} else {
-			$exitSurveyText = "";
+			$exitModalText = "var exitModalText = false;";
 		}
-		if (!empty($exitSurveyVideo)) {
-			$exitSurveyVideo = "var exitSurveyVideo = `" . $exitSurveyVideo . "`;";
+		if (!empty($exitModalVideo)) {
+			$exitModalVideo = "var exitModalVideo = `" . $exitModalVideo . "`;";
 		} else {
-			$exitSurveyVideo = "";
+			$exitModalVideo = "var exitModalVideo = false;";
 		}
 		
 		$url1 = $this->getUrl("js/survey.js");
@@ -67,6 +68,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<script type=\"text/javascript\">
 			$result
 			$portraitsEmbed
+			$exitModalText
+			$exitModalVideo
 			$survey_script
 		</script>";
 		

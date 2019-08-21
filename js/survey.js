@@ -477,27 +477,35 @@ Rochester.exitClicked = function(event) {
 				</div>
 				<div class="modal-body">`;
 				
-	// if (exitModalVideo) {
-		// modalHtml += `
-					// <div id="exit-survey-video">
-						// <iframe id="exitVideoIframe" width="800" height="560" src="` + exitModalVideo + "?enablejsapi=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
-					// </div>`;
-		// exitPlayer = new YT.Player('exitVideoIframe', {
-			// events: {
-				// 'onReady': function(event) {
-					// event.target.seekTo(0);
-					// event.target.playVideo();
-				// }
-			// }
-		// });
-	// }
-	// if (exitModalText == "") {
-		// modalHtml += `
-					// <p>Click OK to exit this survey or Cancel to continue.</p>`;
-	// } else {
-		// modalHtml += `
-					// <p>` + exitModalText + `</p>`;
-	// }
+	if (exitModalVideo) {
+		let video_id = exitModalVideo.split('v=')[1];
+		let ampersandPosition = video_id.indexOf('&');
+		let url = `https://www.youtube.com/embed/` + video_id;
+		if(ampersandPosition != -1) {
+			url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
+		}
+		modalHtml += `
+					<div id="exit-survey-video">
+						<iframe id="exitVideoIframe" width="800" height="560" src="` + url + "?enablejsapi=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
+					</div>`;
+		exitPlayer = new YT.Player('exitVideoIframe', {
+			events: {
+				'onReady': function(event) {
+					event.target.seekTo(0);
+					event.target.playVideo();
+				}
+			}
+		});
+	}
+	if (exitModalText) {
+		console.log('a');
+		modalHtml += `
+					<p>` + exitModalText + `</p>`;
+	} else {
+		console.log('b');
+		modalHtml += `
+					<p>Click OK to exit this survey or Cancel to continue.</p>`;
+	}
 	
 	modalHtml += `
 				</div>

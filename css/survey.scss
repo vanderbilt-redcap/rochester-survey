@@ -20,7 +20,7 @@ body {
 	border: 1px solid #ccc;
 }
 
-#survey-video {
+#survey-video, #exit-survey-video {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -162,17 +162,9 @@ body {
 	background: none !important;
 }
 
-// large screen adjustments
-// @media (max-width: 992px) {
-	// #survey-video iframe {
-		// max-width: 100%;
-		// height: 480px;
-	// }
-// }
-
-// @media (mx-width: 768px) {
-	// #survey-video iframe {
-		// max-width: 100%;
-		// height: 320px;
-	// }
-// }
+#exitModal.modal-body {
+    position: relative;
+    overflow-y: auto;
+    max-height: 400px;
+    padding: 15px;
+}

@@ -14,7 +14,7 @@ body {
   border: 1px solid #ccc;
 }
 
-#survey-video {
+#survey-video, #exit-survey-video {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,7 +24,7 @@ body {
   padding-top: 25px;
   height: 0;
 }
-#survey-video iframe {
+#survey-video iframe, #exit-survey-video iframe {
   position: absolute;
   top: 0;
   left: 0;
@@ -146,6 +146,13 @@ body {
 .greenhighlight {
   background-color: none !important;
   background: none !important;
+}
+
+#exitModal.modal-body {
+  position: relative;
+  overflow-y: auto;
+  max-height: 400px;
+  padding: 15px;
 }
 
 /*# sourceMappingURL=survey.css.map */
