@@ -465,5 +465,55 @@ Rochester.openSignerModal = function() {
 }
 
 Rochester.exitClicked = function(event) {
-	$("#label-rpps1qa-B").trigger("click");
+	let modalHtml = `
+	<div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exitModalLabel">Exit Survey?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">`;
+				
+	// if (exitModalVideo) {
+		// modalHtml += `
+					// <div id="exit-survey-video">
+						// <iframe id="exitVideoIframe" width="800" height="560" src="` + exitModalVideo + "?enablejsapi=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
+					// </div>`;
+		// exitPlayer = new YT.Player('exitVideoIframe', {
+			// events: {
+				// 'onReady': function(event) {
+					// event.target.seekTo(0);
+					// event.target.playVideo();
+				// }
+			// }
+		// });
+	// }
+	// if (exitModalText == "") {
+		// modalHtml += `
+					// <p>Click OK to exit this survey or Cancel to continue.</p>`;
+	// } else {
+		// modalHtml += `
+					// <p>` + exitModalText + `</p>`;
+	// }
+	
+	modalHtml += `
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" data-dismiss="modal" id="exitSurveyButton">Exit</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	
+	$("body").prepend(modalHtml);
+	$("body").on("click", "#exitSurveyButton", function() {
+		console.log('here');
+		dataEntrySubmit(document.getElementById('submit-action'));
+	});
+	
+	$("#exitModal").modal('show');
 }

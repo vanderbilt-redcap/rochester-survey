@@ -126,15 +126,21 @@ $(function() {
 		});
 		
 		// // send to server to save on db
+		let data = {
+			"form_data": fields,
+			"form_name": form_name,
+			"exit_survey": {
+				"modalText": $("#exitModalTextInput").val(),
+				"modalVideo": $("#exitVideoUrl").val(),
+			}
+		};
+		
 		$.ajax({
 			method: "POST",
 			url: "video_config_ajax.php",
 			data: {
 				action: "save_changes",
-				data: JSON.stringify({
-					"form_data": fields,
-					"form_name": form_name
-				})
+				data: JSON.stringify(data)
 			},
 			dataType: "json"
 		}).done(function(msg) {

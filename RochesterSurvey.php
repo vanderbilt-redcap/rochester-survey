@@ -42,6 +42,19 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// file_put_contents("C:/vumc/log.txt", print_r($portraits, true) . "\n");
 		// file_put_contents("C:/vumc/log.txt", print_r($portraitsEmbed, true), FILE_APPEND);
 		
+		$exitSurveyText = $this->framework->getProjectSetting("exitModalText");
+		$exitSurveyVideo = $this->framework->getProjectSetting("exitModalVideo");
+		if (!empty($exitSurveyText)) {
+			$exitSurveyText = "var exitModalText = `" . $exitSurveyText . "`;";
+		} else {
+			$exitSurveyText = "";
+		}
+		if (!empty($exitSurveyVideo)) {
+			$exitSurveyVideo = "var exitSurveyVideo = `" . $exitSurveyVideo . "`;";
+		} else {
+			$exitSurveyVideo = "";
+		}
+		
 		$url1 = $this->getUrl("js/survey.js");
 		$url2 = $this->getUrl("css/survey.css");
 		$url3 = $this->getUrl("survey_ajax.php");
@@ -113,7 +126,21 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			</div>";
 		}
 		
+		$exitSurveyText = $this->framework->getProjectSetting("exitModalText");
+		$exitSurveyVideo = $this->framework->getProjectSetting("exitModalVideo");
+		
 		$html .= '
+		</div>
+		<h6>Exit Survey Modal</h6>
+		<div id="exit-modal-config">
+			<div class="form-group">
+				<label for="exitModalTextInput">Text shown to participant in Exit Survey modal:</label>
+				<textarea type="text" class="form-control" id="exitModalTextInput" aria-describedby="exitModalText" rows="3" placeholder="Click "Exit" to exit this survey. Click "Cancel" to return to the survey.">' . $exitSurveyText . '</textarea>
+			</div>
+			<div class="form-group">
+				<label for="exitVideoUrl">Video URL for accompanying video:</label>
+				<input type="text" class="form-control" id="exitVideoUrl" aria-describedby="exitModalVideo" value="' . $exitSurveyVideo . '" placeholder="http://www.youtube.com/..."></textarea>
+			</div>
 		</div>
 		<h6>Field and Answer Video Association</h6>
 		<p>Enter Youtube or Vimeo URLs for each field and answer.</p>

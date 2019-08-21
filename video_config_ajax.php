@@ -59,6 +59,10 @@ if (!empty($_POST['form_name'])) {
 		"form-name" => $data["form_name"],
 		"form-field-value-associations" => json_encode($data["form_data"])
 	]);
+	
+	$module->framework->setProjectSetting("exitModalText", $data['exit_survey']['modalText']);
+	$module->framework->setProjectSetting("exitModalVideo", $data['exit_survey']['modalVideo']);
+	
 	$data['log_id'] = $log_id;
 	
 	echo json_encode(json_encode($data));

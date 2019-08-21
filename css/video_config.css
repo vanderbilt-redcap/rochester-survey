@@ -119,4 +119,8 @@ table.field_value tfoot td {
   max-height: 12%;
 }
 
+textarea, #exitVideoUrl {
+  max-width: 90%;
+}
+
 /*# sourceMappingURL=video_config.css.map */
