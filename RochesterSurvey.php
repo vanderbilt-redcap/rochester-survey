@@ -34,6 +34,14 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		</script>";
 		echo($injection_element1);
 		
+		$portraits = $this->getSignerPortraits();
+		$portraitsEmbed = "var signer_portraits = `false`;";
+		if (!empty($portraits[$instrument])) {
+			$portraitsEmbed = "var signer_portraits = JSON.parse(`" . json_encode($portraits[$instrument]) . "`);";
+		}
+		// file_put_contents("C:/vumc/log.txt", print_r($portraits, true) . "\n");
+		// file_put_contents("C:/vumc/log.txt", print_r($portraitsEmbed, true), FILE_APPEND);
+		
 		$url1 = $this->getUrl("js/survey.js");
 		$url2 = $this->getUrl("css/survey.css");
 		$url3 = $this->getUrl("survey_ajax.php");
@@ -45,6 +53,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<!-- Rochester survey interface module -->
 		<script type=\"text/javascript\">
 			$result
+			$portraitsEmbed
 			$survey_script
 		</script>";
 		
@@ -81,20 +90,37 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			}
 		}
 		
-		// <h6>Upload Signer Portraits</h6>
-		// <div id="signer_images">
-			// <div class="custom-file">
-				// <label for="signerPortrait1" class="custom-file-label">Signer 1</label>
-				// <input type="file" class="custom-file-input" name="signerPortrait1" id="signerPortrait1">
-			// </div>
-		// </div>
 		$html = '
+		<h6>Upload Signer Portraits</h6>
+		<div id="signer-portraits">';
+		
+		$portraits = $this->getSignerPortraits();
+		$imageElements = $portraits[$form_name];
+		
+		for ($col = 1; $col <= $columns; $col++) {
+			$img = !empty($imageElements[$col]) ? $imageElements[$col] : "";
+			
+			$html .= "
+			<div class='signer-portrait'>
+				$img
+				<h6>Signer $col</h6>
+				<div class='input-group'>
+					<div class='custom-file'>
+						<input type='file' class='custom-file-input' id='portrait$col' aria-describedby='upload'>
+						<label class='custom-file-label text-truncate' for='portrait$col'>Choose image</label>
+					</div>
+				</div>
+			</div>";
+		}
+		
+		$html .= '
+		</div>
 		<h6>Field and Answer Video Association</h6>
 		<p>Enter Youtube or Vimeo URLs for each field and answer.</p>
 		<div id="table-controls">
 			<div class="custom-control custom-switch">
-			  <input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
-			  <label class="custom-control-label" for="applyToDuplicates">Duplicate values for fields and answers with identical labels (per column)</label>
+				<input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
+				<label class="custom-control-label" for="applyToDuplicates">Duplicate values for fields and answers with identical labels (per column)</label>
 			</div>
 			<br>
 			<button class="btn btn-outline-primary" type="button" id="add_value_col">
@@ -197,5 +223,37 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		return $html;
 	}
 	
-	// function test
+	function getSignerPortraits() {
+		// get portraits info from module settings
+		$portraits = json_decode($this->framework->getProjectSetting("portraits"), true);
+		$edoc_ids = [];
+		foreach ($portraits as $form_name => $form) {
+			foreach ($form as $portraitIndex => $edoc_id) {
+				$edoc_ids[] = $edoc_id;
+			}
+		}
+		if (!empty($edoc_ids)) {
+			$edoc_ids = "(" . implode($edoc_ids, ", ") . ")";
+			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id in $edoc_ids";
+			$result = db_query($sql);
+			while ($row = db_fetch_assoc($result)) {
+				// foreach ($portraits as $portraitIndex => $edoc_id) {
+				foreach ($portraits as $form_name => $set) {
+					foreach ($form as $portraitIndex => $edoc_id) {
+						if ($edoc_id == $row["doc_id"]) {
+							$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+							$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+							$portraits[$form_name][$portraitIndex] = "<img src='$imgSrc'>";
+						}
+					}
+				}
+			}
+		}
+		
+		if (empty($portraits)) {
+			return false;
+		}
+		
+		return $portraits;
+	}
 }

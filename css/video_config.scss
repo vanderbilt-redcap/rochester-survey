@@ -98,14 +98,24 @@ table.field_value tfoot td {
 	}
 }
 
-#signer_images {
+#signer-portraits {
 	display: flex;
 	flex-direction: row;
-	align-items: center;
+	align-items: flex-end;
 	justify-content: flex-start;
 	padding: 20px 0px;
-	div {
-		max-width: 240px;
+	.signer-portrait {
+		h6 {
+			margin: 8px;
+		}
+		img {
+			min-width: 100%;
+			max-height: 12%;
+		}
+		max-width: 25%;
 		margin-right: 20px;
+		padding: 8px;
+		border: 1px solid #007adf;
+		border-radius: 5px;
 	}
 }

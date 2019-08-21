@@ -11,7 +11,6 @@ $(function() {
 var player;
 function onYouTubeIframeAPIReady() {
 	player = new YT.Player('videoIframe', {
-		// start: 0,
 		events: {
 			'onReady': function(event) {
 				event.target.seekTo(0);
@@ -29,6 +28,7 @@ Rochester.init = function() {
 	var first_vid_url = "";
 	if (associatedValues != false) {
 		Rochester.values = associatedValues;
+		Rochester.countSigners()
 		let url = Rochester.values.record_id.field[0];
 		let video_id = url.split('v=')[1];
 		let ampersandPosition = video_id.indexOf('&');
@@ -142,8 +142,13 @@ Rochester.init = function() {
 	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
 	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
 	$("body").on("click", "#questiontable tr input", Rochester.answerSelected);
-	$("body").on("click", ".modal-body div:first button", function() {
+	// $("body").on("click", ".modal-body div:first button", function() {
+	$("body").on("click", ".signer-portrait", function() {
 		Rochester.signerIndex = $(this).index();
+		let modal = $(this).closest('.modal');
+		if (modal.attr('id') == 'signerModal') {
+			modal.modal('hide');
+		}
 		if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
 			Rochester.setVideoByFieldName("record_id");
 		} else {
@@ -194,6 +199,9 @@ Rochester.init = function() {
 	$("body").on("click", ".growFont", function() {
 		$(".increaseFont").trigger("click");
 	});
+	
+	// prompt user to select a signer
+	Rochester.openSignerModal();
 }
 
 Rochester.isRealField = function(fieldRow) {
@@ -385,9 +393,11 @@ Rochester.answerSelected = function(e) {
 	}
 }
 
-Rochester.getSignerButtons = function() {
-	if (!Rochester.values)
+Rochester.countSigners = function() {
+	if (!Rochester.values) {
+		Rochester.signerCount = 0;
 		return false;
+	}
 	
 	// count how many signers we have (same as columns of associations)
 	let signerCount = 1;
@@ -402,14 +412,56 @@ Rochester.getSignerButtons = function() {
 			}
 		}
 	}
-	// console.log("col max: " + signerCount);
-	
+	Rochester.signerCount = signerCount;
+}
+
+Rochester.getSignerButtons = function() {
 	// make and return html buttons
 	let html = "";
-	for (i = 1; i <= signerCount; i++) {
-		html += `<button class="btn btn-outline-primary">Signer ${i}</button>`;
+	for (i = 1; i <= Rochester.signerCount; i++) {
+		html += `
+					<div class='signer-portrait close-on-select'>
+						` + signer_portraits[i] + `
+						<button type="button" class="btn btn-primary">Signer ` + i + `</button>
+					</div>`;
 	}
 	return html;
+}
+
+Rochester.openSignerModal = function() {
+	let html = `
+	<div class="modal fade" id="signerModal" tabindex="-1" role="dialog" aria-labelledby="signerModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="signerModalLabel">Choose a Signer</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="signer-portraits">`;
+	
+	// for (i = 1; i <= Rochester.signerCount; i++) {
+		// html += `
+					// <div class='signer-portrait close-on-select'>
+						// ` + signer_portraits[i] + `
+						// <button type="button" class="btn btn-primary">Signer ` + i + `</button>
+					// </div>`;
+	// }
+	
+	html += Rochester.getSignerButtons();
+	
+	html += `
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	
+	$("body").prepend(html);
+	$("#signerModal").modal('show');
 }
 
 Rochester.exitClicked = function(event) {

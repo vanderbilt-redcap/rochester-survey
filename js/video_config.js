@@ -2,8 +2,41 @@
 $('head').append('<link rel="stylesheet" type="text/css" href="CSS_URL">');
 $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
 
+var form_name = "";
+
 $(function() {
+	$('body').on('change', ".custom-file-input", function() {
+		// upload user image for signer portrait
+		let fileName = $(this).val().split('\\').pop();
+		$(this).next('.custom-file-label').addClass("selected").html(fileName);
+		let group = $(this).closest('.signer-portrait');
+		let input = group.find('input');
+		let file_data = $(input).prop('files')[0];
+		let form_data = new FormData();
+		form_data.append(input.attr('id'), file_data);
+		form_data.append("portrait_upload", input.attr('id'));
+		form_data.append("portrait_form_name", form_name);
+		$.ajax({
+			url: 'video_config_ajax.php',
+			dataType: 'json',
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: form_data,
+			type: 'POST',
+			success: function(response) {
+				console.log(response);
+				group.find("img").remove();
+				group.prepend(response.html);
+			},
+			complete: function(data) {
+				console.log(data);
+			}
+		});
+	});
+	
 	$(".form_picker_dd").on("click", "a", function(i, e) {
+		form_name = $(this).attr("value");
 		$.ajax({
 			method: "POST",
 			url: "video_config_ajax.php",
@@ -29,6 +62,18 @@ $(function() {
 		$("#assoc_table").find("tr").each(function(i, e) {
 			$(this).find("td").eq(n).after("<td class=\"value_column\"><input type=\"text\" class=\"form-control\" placeholder=\"Value\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\"></td>");
 		});
+		
+		// add another signer portrait upload div
+		let portraitIndex = $('.signer-portrait').length + 1;
+		$("#signer-portraits").append(`
+		<div class="signer-portrait">
+			<div class="input-group">
+				<div class="custom-file">
+					<input type="file" class="custom-file-input" id="portrait${portraitIndex}" aria-describedby="upload">
+					<label class="custom-file-label text-truncate" for="portrait${portraitIndex}">Choose image</label>
+				</div>
+			</div>
+		</div>`);
 	});
 	
 	$("body").on("click", ".remove_column", function() {
@@ -43,6 +88,9 @@ $(function() {
 		$("#assoc_table th.value_column span").each(function(i, e) {
 			$(e).text("Value (" + (i + 1) + ")");
 		});
+		
+		// remove signer portrait upload div
+		$(".signer-portrait:eq(" + (i-3) + ")").remove();
 	});
 	
 	$("body").on("click", "#save_changes", function(i, e) {
@@ -76,11 +124,6 @@ $(function() {
 				}
 			}
 		});
-		
-		// // testing
-		// console.log("fields:");
-		// console.log(JSON.stringify(fields));
-		// console.log(fields);
 		
 		// // send to server to save on db
 		$.ajax({

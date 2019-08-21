@@ -97,16 +97,26 @@ table.field_value tfoot td {
   margin-left: 20px;
 }
 
-#signer_images {
+#signer-portraits {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-start;
   padding: 20px 0px;
 }
-#signer_images div {
-  max-width: 240px;
+#signer-portraits .signer-portrait {
+  max-width: 25%;
   margin-right: 20px;
+  padding: 8px;
+  border: 1px solid #007adf;
+  border-radius: 5px;
+}
+#signer-portraits .signer-portrait h6 {
+  margin: 8px;
+}
+#signer-portraits .signer-portrait img {
+  min-width: 100%;
+  max-height: 12%;
 }
 
 /*# sourceMappingURL=video_config.css.map */
