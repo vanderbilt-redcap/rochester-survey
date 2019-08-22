@@ -9,8 +9,17 @@ $(function() {
 });
 
 var player;
+var player2;
 function onYouTubeIframeAPIReady() {
 	player = new YT.Player('videoIframe', {
+		events: {
+			'onReady': function(event) {
+				event.target.seekTo(0);
+				event.target.playVideo();
+			}
+		}
+	});
+	player2 = new YT.Player('exitVideoIframe', {
 		events: {
 			'onReady': function(event) {
 				event.target.seekTo(0);
@@ -48,11 +57,14 @@ Rochester.init = function() {
 	// add video iframe element, survey control div/button, hide most of the #pagecontent and questiontable children children
 	$("#pagecontainer").prepend(`
 			<div id="survey-video">
-				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
+				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&showinfo=0&ecver=2" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
 			</div>`);
 	
+	// add exit survey iframe video too
+	$("body").append(Rochester.getExitModalHtml());
+	
 	var tag = document.createElement('script');
-	tag.id = 'survey-video';
+	tag.id = 'survey-video-script';
 	tag.src = 'https://www.youtube.com/iframe_api';
 	var firstScriptTag = document.getElementsByTagName('script')[0];
 	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -61,6 +73,9 @@ Rochester.init = function() {
 			<div id="survey-options">
 				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">
 					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>
+				</button>
+				<button type="button" class="btn btn-secondary video">
+					Hide Video<i class="fas fa-video-slash" style="margin-left: 8px"></i>
 				</button>
 				<button type="button" class="btn btn-danger">
 					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>
@@ -140,6 +155,7 @@ Rochester.init = function() {
 	// register events
 	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
 	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
+	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
 	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
 	$("body").on("click", "#questiontable tr input", Rochester.answerSelected);
 	// $("body").on("click", ".modal-body div:first button", function() {
@@ -165,7 +181,7 @@ Rochester.init = function() {
 			},
 			dataType: "json"
 		}).done(function(msg) {
-			console.log(msg);
+			
 		});
 	});
 	$("#fontSizeSlider").on("change", function() {
@@ -185,6 +201,11 @@ Rochester.init = function() {
 		// set video to this field's associated video
 		let fieldName = $(Rochester.surveyTarget).attr('sq_id');
 		Rochester.setVideoByFieldName(fieldName);
+	});
+	
+	// exit survey modal Exit button
+	$("body").on("click", "#exitSurveyButton", function() {
+		dataEntrySubmit(document.getElementById('submit-action'));
 	});
 	
 	// hide most of #pagecontent (except surveytitlelogo and instructions)
@@ -218,7 +239,6 @@ Rochester.openOptions = function() {
 
 Rochester.endSurvey = function() {
 	let obname = $("#submit-action").prop("name");
-	// console.log('ending survey');
 	if ($('#form select[name="'+obname+'"]').hasClass('rc-autocomplete') && $('#rc-ac-input_'+obname).length) {
 		$('#rc-ac-input_'+obname).trigger('blur');
 	}
@@ -241,8 +261,13 @@ Rochester.backClicked = function() {
 			// set video to this field's associated video
 			let fieldName = $(e).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
-			player.playVideo();
-				
+			
+			if ($("#survey-video").css('display') == 'flex') {
+				player.playVideo();
+			} else {
+				player.pauseVideo();
+			}
+			
 			$.ajax({
 				method: "POST",
 				url: Rochester.ajaxURL,
@@ -252,7 +277,7 @@ Rochester.backClicked = function() {
 				},
 				dataType: "json"
 			}).done(function(msg) {
-				console.log(msg);
+				
 			});
 			
 			foundNewTarget = true;
@@ -286,7 +311,12 @@ Rochester.nextClicked = function() {
 		// set video to this field's associated video
 		let fieldName = $(field).attr('sq_id');
 		Rochester.setVideoByFieldName(fieldName);
-		player.playVideo();
+		
+		if ($("#survey-video").css('display') == 'flex') {
+			player.playVideo();
+		} else {
+			player.pauseVideo();
+		}
 		
 		// log field change on server
 		$.ajax({
@@ -298,7 +328,7 @@ Rochester.nextClicked = function() {
 			},
 			dataType: "json"
 		}).done(function(msg) {
-			console.log(msg);
+			
 		});
 	}
 	
@@ -343,6 +373,24 @@ Rochester.nextClicked = function() {
 		}
 	}
 }
+var mybutton;
+Rochester.videoButtonClicked = function() {
+	mybutton = $(this);
+	let html = $(this).html();
+	if (html.search("Hide") != -1) {
+		html = html.replace("Hide", "Show")
+		html = html.replace("video-slash", "video")
+		$(this).html(html);
+		player.pauseVideo();
+		$("#survey-video").css('display', 'none');
+	} else {
+		html = html.replace("Show", "Hide")
+		html = html.replace("video", "video-slash")
+		$(this).html(html);
+		player.playVideo();
+		$("#survey-video").css('display', 'flex');
+	}
+}
 
 Rochester.setVideoByFieldName = function(fieldName) {
 	// set video to this field's associated video
@@ -356,7 +404,6 @@ Rochester.setVideoByFieldName = function(fieldName) {
 				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
 			}
 			
-			// console.log('setting video for field: ' + fieldName + ' to be url: ' + vid_url + ' signer index: ' + Rochester.signerIndex);
 			// change video source and start from beginning
 			player.loadVideoByUrl({
 				mediaContentUrl: vid_url,
@@ -464,7 +511,7 @@ Rochester.openSignerModal = function() {
 	$("#signerModal").modal('show');
 }
 
-Rochester.exitClicked = function(event) {
+Rochester.getExitModalHtml = function() {
 	let modalHtml = `
 	<div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
@@ -486,23 +533,13 @@ Rochester.exitClicked = function(event) {
 		}
 		modalHtml += `
 					<div id="exit-survey-video">
-						<iframe id="exitVideoIframe" width="800" height="560" src="` + url + "?enablejsapi=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
+						<iframe id="exitVideoIframe" width="800" height="560" src="` + url + "?enablejsapi=1&rel=0&showinfo=0&ecver=2" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 					</div>`;
-		exitPlayer = new YT.Player('exitVideoIframe', {
-			events: {
-				'onReady': function(event) {
-					event.target.seekTo(0);
-					event.target.playVideo();
-				}
-			}
-		});
 	}
 	if (exitModalText) {
-		console.log('a');
 		modalHtml += `
 					<p>` + exitModalText + `</p>`;
 	} else {
-		console.log('b');
 		modalHtml += `
 					<p>Click OK to exit this survey or Cancel to continue.</p>`;
 	}
@@ -517,11 +554,12 @@ Rochester.exitClicked = function(event) {
 		</div>
 	</div>`;
 	
-	$("body").prepend(modalHtml);
-	$("body").on("click", "#exitSurveyButton", function() {
-		console.log('here');
-		dataEntrySubmit(document.getElementById('submit-action'));
-	});
-	
+	return modalHtml;
+}
+
+Rochester.exitClicked = function(event) {
 	$("#exitModal").modal('show');
+	player.pauseVideo();
+	player2.seekTo(0);
+	player2.playVideo();
 }

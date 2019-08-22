@@ -3,6 +3,8 @@ namespace Vanderbilt\RochesterSurvey;
 
 class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
+		file_put_contents("C:/root/vumc/log.txt", "here");
+		
 		$fbf_surveys = $this->framework->getProjectSetting("survey_name");
 		$found_this_form = false;
 		foreach($fbf_surveys as $name) {
@@ -19,7 +21,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$result = "var associatedValues = false;";
 		if (!empty($log_id)) {
 			$sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
-			$result = db_result(db_query($sql));
+			$result = db_result(db_query($sql), 0);
 			if (!empty($result)) {
 				$result = "var associatedValues = JSON.parse(`$result`);";
 			}
@@ -91,9 +93,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$columns = 1;
 		if (!empty($log_id)) {
 			$sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
-			// $associations = json_decode(db_fetch_assoc(db_query($sql))["form-field-value-associations"], true);
 			$result = db_query($sql);
-			$associations = json_decode(db_result($result), true);
+			$associations = json_decode(db_result($result, 0), true);
 			foreach($associations as $field) {
 				if (!empty($field["field"])) {
 					$columns = max($columns, count($field["field"]));

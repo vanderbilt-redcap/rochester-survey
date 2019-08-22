@@ -67,6 +67,7 @@ $(function() {
 		let portraitIndex = $('.signer-portrait').length + 1;
 		$("#signer-portraits").append(`
 		<div class="signer-portrait">
+			<h6>Signer ` + portraitIndex + `</h6>
 			<div class="input-group">
 				<div class="custom-file">
 					<input type="file" class="custom-file-input" id="portrait${portraitIndex}" aria-describedby="upload">
