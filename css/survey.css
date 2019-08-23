@@ -14,6 +14,10 @@ body {
   border: 1px solid #ccc;
 }
 
+#questiontable .labelrc {
+  padding-top: 16px;
+}
+
 #survey-video, #exit-survey-video {
   display: flex;
   align-items: center;
