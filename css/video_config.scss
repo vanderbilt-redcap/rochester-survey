@@ -105,8 +105,14 @@ table.field_value tfoot td {
 	justify-content: flex-start;
 	padding: 20px 0px;
 	.signer-portrait {
-		h6 {
-			margin: 8px;
+		div.row {
+			display: flex;
+			justify-content: space-evenly;
+			align-items: center;
+			padding: 8px 0px;
+			h6 {
+				margin: 8px;
+			}
 		}
 		img {
 			min-width: 100%;

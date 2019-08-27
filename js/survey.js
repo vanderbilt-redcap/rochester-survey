@@ -1,6 +1,10 @@
 // include css and bootstrap
 $('head').append('<link rel="stylesheet" type="text/css" href="CSS_URL">');
 $('head').append('<link rel="stylesheet" type="text/css" href="SPECTRUM_CSS">');
+$('head').append('<link rel="stylesheet" type="text/css" href="KEYBOARD_CSS">');
+
+$('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
+$('head').append('<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/ui-lightness/jquery-ui.css" rel="stylesheet">');
 
 // load dashboard content
 $(function() {	
@@ -11,18 +15,12 @@ $(function() {
 var player;
 var player2;
 function onYouTubeIframeAPIReady() {
-	player = new YT.Player('videoIframe', {
-		events: {
-			'onReady': function(event) {
-				event.target.seekTo(0);
-				event.target.playVideo();
-			}
-		}
-	});
+	player = new YT.Player('videoIframe', {});
 	player2 = new YT.Player('exitVideoIframe', {
 		events: {
 			'onReady': function(event) {
 				event.target.seekTo(0);
+				
 				event.target.playVideo();
 			}
 		}
@@ -111,6 +109,17 @@ Rochester.init = function() {
 								<button type="button" class="btn btn-outline-primary shrinkFont">Make Text Smaller</button>
 								<button type="button" class="btn btn-outline-primary growFont">Make Text Bigger</button>
 							</div>
+							<h5>YouTube Player Settings</h5>
+							<div class="row justify-content-around align-items-center" id="ytPlayerControls">
+								<div class="slidecontainer">
+									<label for=""ytVolume">Volume</label>
+									<input type="range" min="1" max="100" value="100" class="slider" id="ytVolume">
+								</div>
+								<div class="custom-control custom-switch">
+									<input type="checkbox" class="custom-control-input" id="ytCaptions">
+									<label class="custom-control-label" for="ytCaptions">Use Closed Captions</label>
+								</div>
+							</div>
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -158,7 +167,6 @@ Rochester.init = function() {
 	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
 	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
 	$("body").on("click", "#questiontable tr input", Rochester.answerSelected);
-	// $("body").on("click", ".modal-body div:first button", function() {
 	$("body").on("click", ".signer-portrait", function() {
 		Rochester.signerIndex = $(this).index();
 		let modal = $(this).closest('.modal');
@@ -171,6 +179,8 @@ Rochester.init = function() {
 			let fieldName = $(Rochester.surveyTarget).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
 		}
+		
+		player.seekTo(0);
 		
 		$.ajax({
 			method: "POST",
@@ -203,6 +213,9 @@ Rochester.init = function() {
 		Rochester.setVideoByFieldName(fieldName);
 	});
 	
+	// yt player controls listen
+	$("body").on('change', '#ytCaptions, #ytVolume', function() {Rochester.useYtControls = true});
+	
 	// exit survey modal Exit button
 	$("body").on("click", "#exitSurveyButton", function() {
 		dataEntrySubmit(document.getElementById('submit-action'));
@@ -219,6 +232,11 @@ Rochester.init = function() {
 	});
 	$("body").on("click", ".growFont", function() {
 		$(".increaseFont").trigger("click");
+	});
+	
+	// add on-screen keyboards to textareas
+	$("textarea").each(function(i, e) {
+		$(e).keyboard({});
 	});
 	
 	// prompt user to select a signer
@@ -262,6 +280,11 @@ Rochester.backClicked = function() {
 			let fieldName = $(e).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
 			
+			if (Rochester.useYtControls) {
+				player.setVolume($("#ytVolume").val());
+				console.log('yt player volume set to: ' + $("#ytVolume").val());
+				console.log(player.getOptions('captions'));
+			}
 			if ($("#survey-video").css('display') == 'flex') {
 				player.playVideo();
 			} else {
@@ -310,9 +333,15 @@ Rochester.nextClicked = function() {
 		
 		// set video to this field's associated video
 		let fieldName = $(field).attr('sq_id');
-		Rochester.setVideoByFieldName(fieldName);
+		let vidFound = Rochester.setVideoByFieldName(fieldName);
 		
-		if ($("#survey-video").css('display') == 'flex') {
+		if (Rochester.useYtControls) {
+			player.setVolume($("#ytVolume").val());
+			player.hideVideoInfo();
+			console.log('yt player volume set to: ' + $("#ytVolume").val());
+			console.log(player.setOption('captions', 'reload', true));
+		}
+		if ($("#survey-video").css('display') == 'flex' && vidFound) {
 			player.playVideo();
 		} else {
 			player.pauseVideo();
@@ -373,9 +402,8 @@ Rochester.nextClicked = function() {
 		}
 	}
 }
-var mybutton;
+
 Rochester.videoButtonClicked = function() {
-	mybutton = $(this);
 	let html = $(this).html();
 	if (html.search("Hide") != -1) {
 		html = html.replace("Hide", "Show")
@@ -409,10 +437,10 @@ Rochester.setVideoByFieldName = function(fieldName) {
 				mediaContentUrl: vid_url,
 				startSeconds: 0
 			});
+			return true;
 		}
 	} else {
-		player.stopVideo();
-		player.seekTo(0);
+		return false;
 	}
 }
 
@@ -466,9 +494,10 @@ Rochester.getSignerButtons = function() {
 	// make and return html buttons
 	let html = "";
 	for (i = 1; i <= Rochester.signerCount; i++) {
+		let img = signer_portraits !== false ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
 		html += `
 					<div class='signer-portrait close-on-select'>
-						` + signer_portraits[i] + `
+						` + img + `
 						<button type="button" class="btn btn-primary">Signer ` + i + `</button>
 					</div>`;
 	}

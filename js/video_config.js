@@ -35,6 +35,38 @@ $(function() {
 		});
 	});
 	
+	// delete portrait button
+	$("body").on("click", ".signer-portait button", function() {
+		console.log('remove this portrait');
+		// upload user image for signer portrait
+		// let fileName = $(this).val().split('\\').pop();
+		// $(this).next('.custom-file-label').addClass("selected").html(fileName);
+		// let group = $(this).closest('.signer-portrait');
+		// let input = group.find('input');
+		// let file_data = $(input).prop('files')[0];
+		// let form_data = new FormData();
+		// form_data.append(input.attr('id'), file_data);
+		// form_data.append("portrait_upload", input.attr('id'));
+		// form_data.append("portrait_form_name", form_name);
+		// $.ajax({
+			// url: 'video_config_ajax.php',
+			// dataType: 'json',
+			// cache: false,
+			// contentType: false,
+			// processData: false,
+			// data: form_data,
+			// type: 'POST',
+			// success: function(response) {
+				// console.log(response);
+				// group.find("img").remove();
+				// group.prepend(response.html);
+			// },
+			// complete: function(data) {
+				// console.log(data);
+			// }
+		// });
+	});
+	
 	$(".form_picker_dd").on("click", "a", function(i, e) {
 		form_name = $(this).attr("value");
 		$.ajax({

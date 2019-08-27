@@ -27,6 +27,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			}
 		}
 		
+		// spectrum color picker inclusion
 		$spectrum_css_url = $this->getUrl("spectrum/spectrum.css");
 		$spectrum_script = file_get_contents($this->getUrl("spectrum/spectrum.js"));
 		$injection_element1 = "
@@ -36,8 +37,20 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		</script>";
 		echo($injection_element1);
 		
+		// on-screen keyboard library include
+		$keyboard_css_url = $this->getUrl("keyboard/css/keyboard.min.css");
+		$keyboard_script = file_get_contents($this->getUrl("keyboard/js/jquery.keyboard.js"));
+		$keyboard_ext_script = file_get_contents($this->getUrl("keyboard/js/jquery.keyboard.extension-all.js"));
+		$injection_element2 = "
+		<!-- on-screen keyboard library -->
+		<script type=\"text/javascript\">
+			$keyboard_script
+			$keyboard_ext_script
+		</script>";
+		echo($injection_element2);
+		
 		$portraits = $this->getSignerPortraits();
-		$portraitsEmbed = "var signer_portraits = `false`;";
+		$portraitsEmbed = "var signer_portraits = false;";
 		if (!empty($portraits[$instrument])) {
 			$portraitsEmbed = "var signer_portraits = JSON.parse(`" . json_encode($portraits[$instrument]) . "`);";
 		}
@@ -64,8 +77,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$survey_script = file_get_contents($url1);
 		$survey_script = str_replace("CSS_URL", $url2, $survey_script);
 		$survey_script = str_replace("SPECTRUM_CSS", $spectrum_css_url, $survey_script);
+		$survey_script = str_replace("KEYBOARD_CSS", $keyboard_css_url, $survey_script);
 		$survey_script = str_replace("SURVEY_AJAX_URL", $url3, $survey_script);
-		$injection_element2 = "
+		$injection_element3 = "
 		<!-- Rochester survey interface module -->
 		<script type=\"text/javascript\">
 			$result
@@ -75,7 +89,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			$survey_script
 		</script>";
 		
-		echo($injection_element2);
+		echo($injection_element3);
 	}
 	
 	function make_field_val_association_page($form_name) {
@@ -120,7 +134,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			$html .= "
 			<div class='signer-portrait'>
 				$img
-				<h6>Signer $col</h6>
+				<div class='row'>
+					<h6>Signer $col</h6>
+				</div>
 				<div class='input-group'>
 					<div class='custom-file'>
 						<input type='file' class='custom-file-input' id='portrait$col' aria-describedby='upload'>
