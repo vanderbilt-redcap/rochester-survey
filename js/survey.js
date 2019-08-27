@@ -586,7 +586,7 @@ Rochester.getExitModalHtml = function() {
 					<p>` + exitModalText + `</p>`;
 	} else {
 		modalHtml += `
-					<p>Click OK to exit this survey or Cancel to continue.</p>`;
+					<p>Click 'Exit' to exit this survey or 'Cancel' to continue.</p>`;
 	}
 	
 	modalHtml += `

@@ -155,7 +155,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<div id="exit-modal-config">
 			<div class="form-group">
 				<label for="exitModalTextInput">Text shown to participant in Exit Survey modal:</label>
-				<textarea type="text" class="form-control" id="exitModalTextInput" aria-describedby="exitModalText" rows="3" placeholder="Click "Exit" to exit this survey. Click "Cancel" to return to the survey.">' . $exitSurveyText . '</textarea>
+				<textarea type="text" class="form-control" id="exitModalTextInput" aria-describedby="exitModalText" rows="3" placeholder="Click `Exit` to exit this survey...">' . $exitSurveyText . '</textarea>
 			</div>
 			<div class="form-group">
 				<label for="exitVideoUrl">Video URL for accompanying video:</label>
