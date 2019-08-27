@@ -114,6 +114,9 @@ body {
 		div.col {
 			width: 100%;
 		}
+		i {
+			font-size: 200px;
+		}
 	}
 	
 	div.signer-portrait {
@@ -124,6 +127,10 @@ body {
 		button {
 			width: 100%;
 			margin-top: 8px;
+		}
+		img {
+			max-width: 300px;
+			max-height: 100%;
 		}
 	}
 	
@@ -143,6 +150,10 @@ body {
 		padding: 16px;
 		i {
 			font-size: 200px;
+		}
+		img {
+			max-width: 300px;
+			max-height: 100%;
 		}
 		button {
 			width: 100%;

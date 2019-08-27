@@ -106,6 +106,9 @@ body {
 #optionsModal .modal-body div.row div.col {
   width: 100%;
 }
+#optionsModal .modal-body div.row i {
+  font-size: 200px;
+}
 #optionsModal .modal-body div.signer-portrait {
   display: flex;
   flex-direction: column;
@@ -115,6 +118,10 @@ body {
 #optionsModal .modal-body div.signer-portrait button {
   width: 100%;
   margin-top: 8px;
+}
+#optionsModal .modal-body div.signer-portrait img {
+  max-width: 300px;
+  max-height: 100%;
 }
 #optionsModal .modal-body .sp-container {
   border: 0;
@@ -133,6 +140,10 @@ body {
 }
 #signerModal .modal-body div.signer-portrait i {
   font-size: 200px;
+}
+#signerModal .modal-body div.signer-portrait img {
+  max-width: 300px;
+  max-height: 100%;
 }
 #signerModal .modal-body div.signer-portrait button {
   width: 100%;
