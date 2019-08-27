@@ -15,7 +15,13 @@ $(function() {
 var player;
 var player2;
 function onYouTubeIframeAPIReady() {
-	player = new YT.Player('videoIframe', {});
+	player = new YT.Player('videoIframe', {
+		// events: {
+			// 'onApiChange': function(target, data) {
+				// console.log(player.getOptions());
+			// }
+		// }
+	});
 	player2 = new YT.Player('exitVideoIframe', {
 		events: {
 			'onReady': function(event) {
@@ -55,7 +61,7 @@ Rochester.init = function() {
 	// add video iframe element, survey control div/button, hide most of the #pagecontent and questiontable children children
 	$("#pagecontainer").prepend(`
 			<div id="survey-video">
-				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&showinfo=0&ecver=2" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
+				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&start=0&modestbranding=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
 			</div>`);
 	
 	// add exit survey iframe video too
@@ -283,7 +289,12 @@ Rochester.backClicked = function() {
 			if (Rochester.useYtControls) {
 				player.setVolume($("#ytVolume").val());
 				console.log('yt player volume set to: ' + $("#ytVolume").val());
-				console.log(player.getOptions('captions'));
+				// if ($("#ytCaptions").prop("checked")) {
+					// player.loadModule("captions");
+					// player.setOption("captions", "track", {"languageCode": "es"});
+				// } else {
+					// player.unloadModule("captions");
+				// }
 			}
 			if ($("#survey-video").css('display') == 'flex') {
 				player.playVideo();
@@ -339,7 +350,12 @@ Rochester.nextClicked = function() {
 			player.setVolume($("#ytVolume").val());
 			player.hideVideoInfo();
 			console.log('yt player volume set to: ' + $("#ytVolume").val());
-			console.log(player.setOption('captions', 'reload', true));
+			// if ($("#ytCaptions").prop("checked")) {
+				// player.loadModule("captions");
+				// player.setOption("captions", "track", {"languageCode": "es"});
+			// } else {
+				// player.unloadModule("captions");
+			// }
 		}
 		if ($("#survey-video").css('display') == 'flex' && vidFound) {
 			player.playVideo();
@@ -427,12 +443,13 @@ Rochester.setVideoByFieldName = function(fieldName) {
 		if (url) {
 			let video_id = url.split('v=')[1];
 			let ampersandPosition = video_id.indexOf('&');
-			let vid_url = `https://www.youtube.com/embed/` + video_id;
+			let vid_url = `https://www.youtube.com/embed/` + video_id + "?enablejsapi=1&rel=0&start=0&modestbranding=1";;
 			if(ampersandPosition != -1) {
-				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
+				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition) + "?enablejsapi=1&rel=0&start=0&modestbranding=1";
 			}
 			
 			// change video source and start from beginning
+			console.log("loading video at URL: " + vid_url);
 			player.loadVideoByUrl({
 				mediaContentUrl: vid_url,
 				startSeconds: 0
@@ -494,7 +511,7 @@ Rochester.getSignerButtons = function() {
 	// make and return html buttons
 	let html = "";
 	for (i = 1; i <= Rochester.signerCount; i++) {
-		let img = signer_portraits !== false ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
+		let img = signer_portraits[i] ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
 		html += `
 					<div class='signer-portrait close-on-select'>
 						` + img + `
