@@ -16,17 +16,16 @@ var player;
 var player2;
 function onYouTubeIframeAPIReady() {
 	player = new YT.Player('videoIframe', {
-		// events: {
-			// 'onApiChange': function(target, data) {
-				// console.log(player.getOptions());
-			// }
-		// }
+		events: {
+			'onReady': function(event) {
+				event.target.seekTo(0);
+			}
+		}
 	});
 	player2 = new YT.Player('exitVideoIframe', {
 		events: {
 			'onReady': function(event) {
 				event.target.seekTo(0);
-				
 				event.target.playVideo();
 			}
 		}
