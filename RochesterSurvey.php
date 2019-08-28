@@ -134,7 +134,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			$img = !empty($imageElements[$col]) ? $imageElements[$col] : "";
 			$delete_button = !empty($imageElements[$col]) ? "<button type='button' class='btn btn-outline-danger'>Delete</button>" : "";
 			$html .= "
-			<div class='signer-portrait'>
+			<div class='image-upload signer-portrait'>
 				$img
 				<div class='row'>
 					<h6>Signer $col</h6>
@@ -164,7 +164,38 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				<label for="exitVideoUrl">Video URL for accompanying video:</label>
 				<input type="text" class="form-control" id="exitVideoUrl" aria-describedby="exitModalVideo" value="' . $exitSurveyVideo . '" placeholder="http://www.youtube.com/..."></textarea>
 			</div>
-		</div>
+		</div>';
+		
+		$logo_edoc_id = $this->framework->getProjectSetting("end-of-survey-image");
+		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$logo_edoc_id";
+		$result = db_query($sql);
+		$endOfSurveyImage = null;
+		$delete_button = null;
+		while ($row = db_fetch_assoc($result)) {
+			$imgData = base64_encode(file_get_contents(EDOC_PATH . $row['stored_name']));
+			$endOfSurveyImage = "<img src='data: {$row['mime_type']};base64,$imgData>";
+			$delete_button = "<button type='button' class='btn btn-outline-danger'>Delete</button>";
+		}
+		
+		$html .= "
+		<h6>End of Survey Image/Logo</h6>
+		<div>
+			<div class='image-upload logo-upload'>
+				$endOfSurveyImage
+				<div class='row'>
+					<h6>Image/Logo</h6>
+					$delete_button
+				</div>
+				<div class='input-group'>
+					<div class='custom-file'>
+						<input type='file' class='custom-file-input' id='logoFilePickerInput' aria-describedby='upload'>
+						<label class='custom-file-label text-truncate' for='logoFilePickerInput'>Choose image</label>
+					</div>
+				</div>
+			</div>
+		</div>";
+		
+		$html .= '
 		<h6>Field and Answer Video Association</h6>
 		<p>Enter Youtube or Vimeo URLs for each field and answer.</p>
 		<div id="table-controls">

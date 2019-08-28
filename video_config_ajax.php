@@ -67,8 +67,9 @@ if ($action == 'get_form_config') {
 	$data['log_id'] = $log_id;
 	
 	echo json_encode(json_encode($data));
-} elseif ($action == 'portrait_upload') {
-	if (empty($_FILES[$_POST['portrait_upload']])) {
+} elseif ($action == 'portrait_upload' or $action=='logo_upload') {
+	$uploaded_image = empty($FILES[$_POST['portrait_upload']]) ? $FILES[$_POST['logo_upload']] : $FILES[$_POST['portrait_upload']];
+	if (empty($uploaded_image)) {
 		exit(json_encode([
 			"error" => true,
 			"notes" => [
@@ -78,7 +79,7 @@ if ($action == 'get_form_config') {
 	}
 	
 	// check for transfer errors
-	if ($_FILES[$_POST['portrait_upload']]["error"] !== 0) {
+	if ($uploaded_image["error"] !== 0) {
 		exit(json_encode([
 			"error" => true,
 			"notes" => [
@@ -89,25 +90,25 @@ if ($action == 'get_form_config') {
 	
 	// have file, so check name, size
 	$errors = [];
-	if (preg_match("/[^A-Za-z0-9. ()-]/", $_FILES[$_POST['portrait_upload']]["name"])) {
+	if (preg_match("/[^A-Za-z0-9. ()-]/", $uploaded_image["name"])) {
 		$errors[] = "File names can only contain alphabet, digit, period, space, hyphen, and parentheses characters.";
 		$errors[] = "	Allowed characters: A-Z a-z 0-9 . ( ) -";
 	}
 	
-	if (strlen($_FILES[$_POST['portrait_upload']]["name"]) > 127) {
+	if (strlen($uploaded_image["name"]) > 127) {
 		$errors[] = "Uploaded file has a name that exceeds the limit of 127 characters.";
 	}
 	
 	$maxsize = file_upload_max_size();
 	if ($maxsize !== -1) {
-		if ($_FILES[$_POST['portrait_upload']]["size"] > $maxsize) {
-			$fileReadable = humanFileSize($_FILES[$_POST['portrait_upload']]["size"], "MB");
+		if ($uploaded_image["size"] > $maxsize) {
+			$fileReadable = humanFileSize($uploaded_image["size"], "MB");
 			$serverReadable = humanFileSize($maxsize, "MB");
 			$errors[] = "Uploaded file size ($fileReadable) exceeds server maximum upload size of $serverReadable.";
 		}
 	}
 	
-	$file = $_FILES[$_POST['portrait_upload']];
+	$file = $uploaded_image;
 	if(!exif_imagetype($file['tmp_name'])) {
 		$errors[] = "Uploaded file does not appear to be an image (.jpg, .jpeg, .png, or .gif).";
 	}
@@ -127,44 +128,66 @@ if ($action == 'get_form_config') {
 	// file_put_contents("C:/vumc/log.txt", "starting log:\n");
 	// file_put_contents("C:/vumc/log.txt", "log entry...\n", FILE_APPNED);
 	
-	$portraits = $module->framework->getProjectSetting("portraits");
-	$formName = $_POST["portrait_form_name"];
-	if (empty($portraits)) {
-		$portraits = [];
-	} else {
-		$portraits = json_decode($portraits, true);
-	}
-	if (empty($portraits[$formName])) {
-		$portraits[$formName] = [];
-	}
-	
-	// determine which portrait index
-	preg_match("/(\d+)/", $_POST['portrait_upload'], $matches);
-	$index = intval($matches[0]);
-	
-	// delete old edoc if edoc_id in storage
-	if (!empty($portraits[$formName][$index])) {
-		$old_edoc_id = $portraits[$formName][$index];
-		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
+	if ($action == 'portrait_upload') {
+		$portraits = $module->framework->getProjectSetting("portraits");
+		$formName = $_POST["portrait_form_name"];
+		if (empty($portraits)) {
+			$portraits = [];
+		} else {
+			$portraits = json_decode($portraits, true);
+		}
+		if (empty($portraits[$formName])) {
+			$portraits[$formName] = [];
+		}
+		
+		// determine which portrait index
+		preg_match("/(\d+)/", $_POST['portrait_upload'], $matches);
+		$index = intval($matches[0]);
+		
+		// delete old edoc if edoc_id in storage
+		if (!empty($portraits[$formName][$index])) {
+			$old_edoc_id = $portraits[$formName][$index];
+			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
+			$result = db_query($sql);
+			while ($row = db_fetch_assoc($result)) {
+				unlink(EDOC_PATH . $row["stored_name"]);
+			}
+		}
+		
+		// save file
+		$edoc_id = $module->framework->saveFile($file['tmp_name']);
+		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
 		$result = db_query($sql);
 		while ($row = db_fetch_assoc($result)) {
-			unlink(EDOC_PATH . $row["stored_name"]);
+			$uri = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+			$iconSrc = "data: {$row["mime_type"]};base64,$uri";
+			$imgElement = "<img src='$iconSrc' class='portrait-image'>";
+			$portraits[$formName][$index] = $edoc_id;
+			$module->framework->setProjectSetting("portraits", json_encode($portraits));
+			$jsonArray = [
+				"success" => true,
+				"portraits" => json_encode($portraits),
+				"html" => $imgElement
+			];
 		}
-	}
-	
-	// save file
-	$edoc_id = $module->framework->saveFile($file['tmp_name']);
-	$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
-	$result = db_query($sql);
-	while ($row = db_fetch_assoc($result)) {
-		$uri = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+	} elseif ($action == 'logo_upload') {
+		// delete old edoc if edoc_id in storage
+		$old_edoc_id = $module->framework->getProjectSetting("end_of_survey_image");
+		if (!empty($old_edoc_id)) {
+			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
+			$result = db_query($sql);
+			while ($row = db_fetch_assoc($result)) {
+				unlink(EDOC_PATH . $row["stored_name"]);
+			}
+		}
+		
+		$new_edoc_id = $module->framework->saveFile($file['tmp_name']);
+		$module->framework->setProjectSetting("end_of_survey_image", $new_edoc_id);
+		$uri = base64_encode(file_get_contents($file['tmp_name']));
 		$iconSrc = "data: {$row["mime_type"]};base64,$uri";
-		$imgElement = "<img src='$iconSrc' class='portrait-image'>";
-		$portraits[$formName][$index] = $edoc_id;
-		$module->framework->setProjectSetting("portraits", json_encode($portraits));
+		$imgElement = "<img src='$iconSrc' class='logo-image'>";
 		$jsonArray = [
 			"success" => true,
-			"portraits" => json_encode($portraits),
 			"html" => $imgElement
 		];
 	}

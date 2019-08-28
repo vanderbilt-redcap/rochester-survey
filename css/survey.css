@@ -43,6 +43,10 @@ body {
   padding-bottom: 12px;
   padding-top: 12px;
 }
+#survey-options button {
+  white-space: nowrap;
+  font-size: 12px;
+}
 
 #survey-navigation {
   display: flex;
@@ -171,6 +175,17 @@ body {
   overflow-y: auto;
   max-height: 400px;
   padding: 15px;
+}
+
+@media (min-width: 768px) {
+  #survey-options button {
+    font-size: 1rem;
+  }
+}
+@media (max-width: 442px) {
+  #survey-options button {
+    font-size: 10px;
+  }
 }
 
 /*# sourceMappingURL=survey.css.map */
