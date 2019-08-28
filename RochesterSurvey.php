@@ -2,9 +2,35 @@
 namespace Vanderbilt\RochesterSurvey;
 
 class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
-	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
-		file_put_contents("C:/root/vumc/log.txt", "here");
+	function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
+		$form_name = $instrument;
+		// file_put_contents("C:/vumc/log.txt", "here");
 		
+		// fetch end of survey image configured for this form (if there is one)
+		$img = null;
+		$end_of_survey_images = $this->framework->getProjectSetting("end_of_survey_images");
+		if (!empty($end_of_survey_images)) {
+			$end_of_survey_images = json_decode($end_of_survey_images, true);
+			$edoc_id = $end_of_survey_images[$form_name];
+			if (!empty($edoc_id)) {
+				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
+				$result = db_query($sql);
+				if ($row = db_fetch_assoc($result)) {
+					$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+					$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+					$img = "<img src='$imgSrc'>";
+				}
+			}
+		}
+		
+		echo "
+		<script type='text/javascript'>
+			$('#pagecontent > div:first > div:eq(0)').append(`<br/><br/>$img`);
+			$('#pagecontent > div:first > div:eq(0) img').css('max-width', '100%');
+		</script>";
+	}
+	
+	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
 		$fbf_surveys = $this->framework->getProjectSetting("survey_name");
 		$found_this_form = false;
 		foreach($fbf_surveys as $name) {
@@ -49,7 +75,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		</script>";
 		echo($injection_element2);
 		
-		$portraits = $this->getSignerPortraits();
+		$portraits = $this->getSignerPortraits($form_name);
 		$portraitsEmbed = "var signer_portraits = false;";
 		if (!empty($portraits[$instrument])) {
 			$portraitsEmbed = "var signer_portraits = JSON.parse(`" . json_encode($portraits[$instrument]) . "`);";
@@ -125,11 +151,10 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<h6>Upload Signer Portraits</h6>
 		<div id="signer-portraits">';
 		
-		$portraits = $this->getSignerPortraits();
+		$portraits = $this->getSignerPortraits($form_name);
 		$imageElements = $portraits[$form_name];
 		
-		file_put_contents("C:/vumc/log.txt", 'portraits:\n' . print_r($portraits, true));
-		
+		// create portrait upload input groups
 		for ($col = 1; $col <= $columns; $col++) {
 			$img = !empty($imageElements[$col]) ? $imageElements[$col] : "";
 			$delete_button = !empty($imageElements[$col]) ? "<button type='button' class='btn btn-outline-danger'>Delete</button>" : "";
@@ -166,34 +191,43 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			</div>
 		</div>';
 		
-		$logo_edoc_id = $this->framework->getProjectSetting("end-of-survey-image");
-		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$logo_edoc_id";
-		$result = db_query($sql);
-		$endOfSurveyImage = null;
+		// fetch end of survey image configured for this form (if there is one)
+		$img = null;
 		$delete_button = null;
-		while ($row = db_fetch_assoc($result)) {
-			$imgData = base64_encode(file_get_contents(EDOC_PATH . $row['stored_name']));
-			$endOfSurveyImage = "<img src='data: {$row['mime_type']};base64,$imgData>";
-			$delete_button = "<button type='button' class='btn btn-outline-danger'>Delete</button>";
+		$end_of_survey_images = $this->framework->getProjectSetting("end_of_survey_images");
+		if (!empty($end_of_survey_images)) {
+			$end_of_survey_images = json_decode($end_of_survey_images, true);
+			$edoc_id = $end_of_survey_images[$form_name];
+			if (!empty($edoc_id)) {
+				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
+				$result = db_query($sql);
+				if ($row = db_fetch_assoc($result)) {
+					$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+					$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+					$img = "<img src='$imgSrc'>";
+					$delete_button = "<button type='button' class='btn btn-outline-danger'>Delete</button>";
+				}
+			}
 		}
 		
 		$html .= "
 		<h6>End of Survey Image/Logo</h6>
-		<div>
+		<div id='end-of-survey-config'>
 			<div class='image-upload logo-upload'>
-				$endOfSurveyImage
+				$img
 				<div class='row'>
 					<h6>Image/Logo</h6>
 					$delete_button
 				</div>
 				<div class='input-group'>
 					<div class='custom-file'>
-						<input type='file' class='custom-file-input' id='logoFilePickerInput' aria-describedby='upload'>
-						<label class='custom-file-label text-truncate' for='logoFilePickerInput'>Choose image</label>
+						<input type='file' class='custom-file-input' id='logo-input' aria-describedby='upload'>
+						<label class='custom-file-label text-truncate' for='logo-input'>Choose image</label>
 					</div>
 				</div>
 			</div>
-		</div>";
+		</div>
+		";
 		
 		$html .= '
 		<h6>Field and Answer Video Association</h6>
@@ -304,30 +338,30 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		return $html;
 	}
 	
-	function getSignerPortraits() {
+	function getSignerPortraits($form_name) {
 		// get portraits info from module settings
 		$portraits = json_decode($this->framework->getProjectSetting("portraits"), true);
+		foreach ($portraits as $name => $set) {
+			if ($name !== $form_name)
+				unset($portraits[$name]);
+		}
 		$edoc_ids = [];
-		foreach ($portraits as $form_name => $form) {
-			foreach ($form as $portraitIndex => $edoc_id) {
-				if (!empty($edoc_id)) {
-					$edoc_ids[] = $edoc_id;
-				}
+		foreach ($portraits[$form_name] as $portraitIndex => $edoc_id) {
+			if (!empty($edoc_id)) {
+				$edoc_ids[] = $edoc_id;
 			}
 		}
+		
 		if (!empty($edoc_ids)) {
 			$edoc_ids = "(" . implode($edoc_ids, ", ") . ")";
 			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id in $edoc_ids";
 			$result = db_query($sql);
 			while ($row = db_fetch_assoc($result)) {
-				// foreach ($portraits as $portraitIndex => $edoc_id) {
-				foreach ($portraits as $form_name => $set) {
-					foreach ($form as $portraitIndex => $edoc_id) {
-						if ($edoc_id == $row["doc_id"]) {
-							$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-							$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
-							$portraits[$form_name][$portraitIndex] = "<img src='$imgSrc'>";
-						}
+				foreach ($portraits[$form_name] as $portraitIndex => $edoc_id) {
+					if ($edoc_id == $row["doc_id"]) {
+						$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+						$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+						$portraits[$form_name][$portraitIndex] = "<img src='$imgSrc'>";
 					}
 				}
 			}

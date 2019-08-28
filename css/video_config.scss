@@ -98,13 +98,13 @@ table.field_value tfoot td {
 	}
 }
 
-#signer-portraits {
+#signer-portraits, #end-of-survey-config {
 	display: flex;
 	flex-direction: row;
 	align-items: flex-end;
 	justify-content: flex-start;
 	padding: 20px 0px;
-	.signer-portrait {
+	.image-upload {
 		div.row {
 			display: flex;
 			justify-content: space-evenly;
