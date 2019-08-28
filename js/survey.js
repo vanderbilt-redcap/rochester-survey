@@ -17,16 +17,53 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
   // YouTube player after the API code downloads.
 var player;
 var player2;
-var yt;
 function onYouTubeIframeAPIReady() {
-	player = new YT.Player('videoIframe', {
+	// player = new YT.Player('videoIframe', {
+		// playerVars: {
+			// modestbranding: 1
+		// },
+		// events: {
+			// onReady: function(event) {
+				// // event.target.seekTo(0);
+			// },
+			// onStateChange: function(target, data){
+				// if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
+					// if (!Rochester.curtain.locked) {
+						// $("#curtain h5").text("Click to replay video.");
+						// $("#curtain").show();
+					// }
+				// } else {
+					// $("#curtain").hide();
+				// }
+			// }
+		// }
+	// });
+	player2 = new YT.Player('exitVideoIframe', {
+		playerVars: {
+			autoplay: 1,
+			modestbranding: 1
+		}
+	});
+}
+
+function onYouTubePlayerAPIReady() {
+	let vid_id = "";
+	let url = Rochester.values.record_id.field[0];
+	vid_id = url.split('v=')[1];
+	let ampersandPosition = vid_id.indexOf('&');
+	if (ampersandPosition != -1) {
+		vid_id = vid_id.substring(0, ampersandPosition);
+	}
+	
+	console.log('playe robject replaced');
+	player = new YT.Player('ytplayer', {
+		height: '560',
+		width: '800',
+		videoId: vid_id,
 		playerVars: {
 			modestbranding: 1
 		},
 		events: {
-			onReady: function(event) {
-				// event.target.seekTo(0);
-			},
 			onStateChange: function(target, data){
 				if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
 					if (!Rochester.curtain.locked) {
@@ -39,14 +76,8 @@ function onYouTubeIframeAPIReady() {
 			}
 		}
 	});
-	player2 = new YT.Player('exitVideoIframe', {
-		playerVars: {
-			autoplay: 1,
-			modestbranding: 1
-		}
-	});
 }
-	  
+
 var Rochester = {};
 
 // load dashboard content
@@ -54,24 +85,19 @@ $(function() {
 	$('body').css('display', 'block');
 	Rochester.init();
 	Rochester.ajaxURL = "SURVEY_AJAX_URL";
+	
+	// setTimeout(function(){
+		// console.log('loading next video')
+		// player.loadVideoById('kTvHIDKLFqc')
+	// }, 5000)
 });
 
 Rochester.init = function() {
 	Rochester.curtain = {};
 	Rochester.signerIndex = 0;
 	Rochester.surveyTarget = $("#surveytitlelogo")[0];
-	var first_vid_url = "";
-	if (associatedValues != false) {
-		Rochester.values = associatedValues;
-		Rochester.countSigners()
-		let url = Rochester.values.record_id.field[0];
-		let video_id = url.split('v=')[1];
-		let ampersandPosition = video_id.indexOf('&');
-		first_vid_url = `https://www.youtube.com/embed/` + video_id;
-		if(ampersandPosition != -1) {
-			first_vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
-		}
-	}
+	Rochester.values = associatedValues;
+	Rochester.countSigners();
 	
 	// add video button to field labels
 	$(".fl").each(function(i, e) {
@@ -86,8 +112,10 @@ Rochester.init = function() {
 				<div id='curtain'>
 					<h5>Select a Signer</h5>
 				</div>
-				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
+				<div id='ytplayer'></div>
 			</div>`);
+	
+	// <iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
 	
 	// add exit survey iframe video too
 	$("body").append(Rochester.getExitModalHtml());
@@ -151,7 +179,7 @@ Rochester.init = function() {
 			let fieldName = $(Rochester.surveyTarget).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
 		}
-		player.seekTo(0);
+		// player.seekTo(0);
 		
 		$.ajax({
 			method: "POST",
@@ -168,15 +196,15 @@ Rochester.init = function() {
 	$("body").on("click", "#curtain", function() {
 		if ($("#curtain h5").text() !== "No video assigned for this survey question or answer.") {
 			$("#curtain").hide();
-			player.playVideo();
+			// player.playVideo();
 		}
 	});
 	
 	// play first video when signer select modal closes
 	$("body").on('#signerModal hidden.bs.modal', function() {
 		$("#curtain").hide();
-		player.seekTo(0);
-		player.playVideo();
+		// player.seekTo(0);
+		// player.playVideo();
 	});
 	
 	$("#fontSizeSlider").on("change", function() {
@@ -402,13 +430,13 @@ Rochester.videoButtonClicked = function() {
 		html = html.replace("Hide", "Show")
 		html = html.replace("video-slash", "video")
 		$(this).html(html);
-		player.pauseVideo();
+		// player.pauseVideo();
 		$("#survey-video").css('display', 'none');
 	} else {
 		html = html.replace("Show", "Hide")
 		html = html.replace("video", "video-slash")
 		$(this).html(html);
-		player.playVideo();
+		// player.playVideo();
 		$("#survey-video").css('display', 'flex');
 	}
 }
@@ -435,7 +463,7 @@ Rochester.setVideoByFieldName = function(fieldName) {
 				$("#curtain h5").text("Click to replay video.");
 				$("#survey-video iframe").removeClass('unseen');
 				player.loadVideoById(video_id);
-				player.seekTo(0);
+				// player.seekTo(0);
 				Rochester.curtain.locked = false;
 				return true;
 			}
@@ -444,7 +472,7 @@ Rochester.setVideoByFieldName = function(fieldName) {
 	
 	Rochester.curtain.locked = true;
 	$("#survey-video iframe").addClass('unseen');
-	player.pauseVideo();
+	// player.pauseVideo();
 	$("#curtain h5").text("No video assigned for this survey question or answer.");
 	$("#curtain").show();
 }
@@ -456,20 +484,16 @@ Rochester.answerSelected = function(e) {
 		let url = Rochester.values[fieldName].choices[choiceRawValue][Rochester.signerIndex];
 		let video_id = url.split('v=')[1];
 		let ampersandPosition = video_id.indexOf('&');
-		let vid_url = `https://www.youtube.com/embed/` + video_id;
 		if(ampersandPosition != -1) {
-			vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
+			video_id = video_id.substring(0, ampersandPosition);
 		}
 		// $("#survey-video iframe").attr("src", vid_url);
-		player.loadVideoByUrl({
-			mediaContentUrl: vid_url,
-			startSeconds: 0
-		});
-		player.seekTo(0);
+		player.loadVideoById(video_id);
+		// player.seekTo(0);
 		// player.playVideo();
 	} else {
-		player.stopVideo();
-		player.seekTo(0);
+		// player.stopVideo();
+		// player.seekTo(0);
 	}
 }
 
@@ -647,7 +671,7 @@ Rochester.getExitModalHtml = function() {
 
 Rochester.exitClicked = function(event) {
 	$("#exitModal").modal('show');
-	player.pauseVideo();
+	// player.pauseVideo();
 	player2.seekTo(0);
 	player2.playVideo();
 }
