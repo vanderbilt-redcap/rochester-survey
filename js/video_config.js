@@ -14,14 +14,21 @@ $(function() {
 		// upload user image for signer portrait
 		let fileName = $(this).val().split('\\').pop();
 		$(this).next('.custom-file-label').addClass("selected").html(fileName);
-		let group = $(this).closest('.signer-portrait');
+		let group = $(this).closest('.image-upload');
 		let input = group.find('input');
 		let file_data = $(input).prop('files')[0];
 		let form_data = new FormData();
-		form_data.append("action", "portrait_upload");
-		form_data.append(input.attr('id'), file_data);
-		form_data.append("portrait_upload", input.attr('id'));
-		form_data.append("portrait_form_name", form_name);
+		
+		if (group.hasClass('signer-portrait')) {
+			form_data.append("action", "portrait_upload");
+			form_data.append("portrait_index", input.attr('id'));
+		} else if (group.hasClass('logo-upload')) {
+			form_data.append("action", "logo_upload");
+		}
+		
+		form_data.append("image", file_data);
+		form_data.append("form_name", form_name);
+		
 		$.ajax({
 			url: 'video_config_ajax.php',
 			dataType: 'json',
@@ -49,14 +56,23 @@ $(function() {
 	});
 	
 	// delete portrait button
-	$("body").on("click", ".signer-portrait button", function() {
+	$("body").on("click", ".image-upload button", function() {
 		// delete portrait for this signer index
-		let group = $(this).closest('.signer-portrait');
+		let group = $(this).closest('.image-upload');
 		let data = {
-			action: 'portrait_delete',
-			index: group.index() + 1,
+			action: 'image_delete',
 			form_name: form_name
 		};
+		
+		if (group.hasClass('signer-portrait')) {
+			data.portrait = true;
+			data.index = group.index() + 1;
+		} else if (group.hasClass('logo-upload')) {
+			data.end_of_survey = true;
+		}
+		
+		console.log(data);
+		
 		$.ajax({
 			url: 'video_config_ajax.php',
 			dataType: 'json',

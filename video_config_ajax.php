@@ -48,7 +48,7 @@ function file_upload_max_size() {
 }
 /////////////
 
-// $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 $action = $_POST['action'];
 if ($action == 'get_form_config') {
 	$html = $module->make_field_val_association_page($_POST['form_name']);
@@ -67,47 +67,41 @@ if ($action == 'get_form_config') {
 	$data['log_id'] = $log_id;
 	
 	echo json_encode(json_encode($data));
-} elseif ($action == 'portrait_upload') {
-	if (empty($_FILES[$_POST['portrait_upload']])) {
-		exit(json_encode([
-			"error" => true,
-			"notes" => [
-				"Please attach a workbook file and then click 'Upload'."
-			]
-		]));
-	}
+} elseif (!empty($_FILES['image'])) {
+	$uploaded_image = $_FILES['image'];
+	$form_name = $_POST['form_name'];
 	
 	// check for transfer errors
-	if ($_FILES[$_POST['portrait_upload']]["error"] !== 0) {
+	if ($uploaded_image["error"] !== 0) {
 		exit(json_encode([
 			"error" => true,
 			"notes" => [
-				"An error occured while uploading your workbook. Please try again."
+				"An error occured while uploading your image. Please try again."
 			]
 		]));
 	}
 	
 	// have file, so check name, size
 	$errors = [];
-	if (preg_match("/[^A-Za-z0-9. ()-]/", $_FILES[$_POST['portrait_upload']]["name"])) {
+	if (preg_match("/[^A-Za-z0-9. ()-]/", $uploaded_image["name"])) {
 		$errors[] = "File names can only contain alphabet, digit, period, space, hyphen, and parentheses characters.";
 		$errors[] = "	Allowed characters: A-Z a-z 0-9 . ( ) -";
 	}
 	
-	if (strlen($_FILES[$_POST['portrait_upload']]["name"]) > 127) {
+	if (strlen($uploaded_image["name"]) > 127) {
 		$errors[] = "Uploaded file has a name that exceeds the limit of 127 characters.";
 	}
 	
 	$maxsize = file_upload_max_size();
 	if ($maxsize !== -1) {
-		if ($_FILES[$_POST['portrait_upload']]["size"] > $maxsize) {
-			$fileReadable = humanFileSize($_FILES[$_POST['portrait_upload']]["size"], "MB");
+		if ($uploaded_image["size"] > $maxsize) {
+			$fileReadable = humanFileSize($uploaded_image["size"], "MB");
 			$serverReadable = humanFileSize($maxsize, "MB");
 			$errors[] = "Uploaded file size ($fileReadable) exceeds server maximum upload size of $serverReadable.";
 		}
 	}
 	
-	$file = $_FILES[$_POST['portrait_upload']];
+	$file = $uploaded_image;
 	if(!exif_imagetype($file['tmp_name'])) {
 		$errors[] = "Uploaded file does not appear to be an image (.jpg, .jpeg, .png, or .gif).";
 	}
@@ -124,59 +118,100 @@ if ($action == 'get_form_config') {
 		"notes" => "REDCap wasn't able to retrieve the image from the database."
 	];
 	
-	// file_put_contents("C:/vumc/log.txt", "starting log:\n");
-	// file_put_contents("C:/vumc/log.txt", "log entry...\n", FILE_APPNED);
-	
-	$portraits = $module->framework->getProjectSetting("portraits");
-	$formName = $_POST["portrait_form_name"];
-	if (empty($portraits)) {
-		$portraits = [];
-	} else {
-		$portraits = json_decode($portraits, true);
-	}
-	if (empty($portraits[$formName])) {
-		$portraits[$formName] = [];
-	}
-	
-	// determine which portrait index
-	preg_match("/(\d+)/", $_POST['portrait_upload'], $matches);
-	$index = intval($matches[0]);
-	
-	// delete old edoc if edoc_id in storage
-	if (!empty($portraits[$formName][$index])) {
-		$old_edoc_id = $portraits[$formName][$index];
-		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
+	if ($action == 'portrait_upload') {
+		$portraits = $module->framework->getProjectSetting("portraits");
+		if (empty($portraits)) {
+			$portraits = [];
+		} else {
+			$portraits = json_decode($portraits, true);
+		}
+		if (empty($portraits[$form_name])) {
+			$portraits[$form_name] = [];
+		}
+		
+		// determine which portrait index
+		preg_match("/(\d+)/", $_POST['portrait_index'], $matches);
+		$index = intval($matches[0]);
+		
+		// delete old edoc if edoc_id in storage
+		if (!empty($portraits[$form_name][$index])) {
+			$old_edoc_id = $portraits[$form_name][$index];
+			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
+			$result = db_query($sql);
+			while ($row = db_fetch_assoc($result)) {
+				unlink(EDOC_PATH . $row["stored_name"]);
+			}
+		}
+		
+		// save file
+		$new_edoc_id = $module->framework->saveFile($file['tmp_name']);
+		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$new_edoc_id";
 		$result = db_query($sql);
 		while ($row = db_fetch_assoc($result)) {
-			unlink(EDOC_PATH . $row["stored_name"]);
+			$uri = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+			$iconSrc = "data: {$row["mime_type"]};base64,$uri";
+			$imgElement = "<img src='$iconSrc' class='portrait-image'>";
+			$portraits[$form_name][$index] = $new_edoc_id;
+			$module->framework->setProjectSetting("portraits", json_encode($portraits));
+			$jsonArray = [
+				"success" => true,
+				"html" => $imgElement
+			];
+		}
+	} elseif ($action == 'logo_upload') {
+		$end_of_survey_images = $module->framework->getProjectSetting("end_of_survey_images");
+		if (empty($end_of_survey_images)) {
+			$end_of_survey_images = [];
+		} else {
+			$end_of_survey_images = json_decode($end_of_survey_images, true);
+		}
+		
+		$old_edoc_id = $end_of_survey_images[$form_name];
+		if (!empty($old_edoc_id)) {
+			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
+			$result = db_query($sql);
+			while ($row = db_fetch_assoc($result)) {
+				unlink(EDOC_PATH . $row["stored_name"]);
+			}
+		}
+		
+		// save file
+		$new_edoc_id = $module->framework->saveFile($file['tmp_name']);
+		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$new_edoc_id";
+		$result = db_query($sql);
+		while ($row = db_fetch_assoc($result)) {
+			$uri = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+			$iconSrc = "data: {$row["mime_type"]};base64,$uri";
+			$imgElement = "<img src='$iconSrc' class='logo-image'>";
+			$end_of_survey_images[$form_name] = $new_edoc_id;
+			$module->framework->setProjectSetting("end_of_survey_images", json_encode($end_of_survey_images));
+			$jsonArray = [
+				"success" => true,
+				"html" => $imgElement
+			];
 		}
 	}
 	
-	// save file
-	$edoc_id = $module->framework->saveFile($file['tmp_name']);
-	$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
-	$result = db_query($sql);
-	while ($row = db_fetch_assoc($result)) {
-		$uri = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-		$iconSrc = "data: {$row["mime_type"]};base64,$uri";
-		$imgElement = "<img src='$iconSrc' class='portrait-image'>";
-		$portraits[$formName][$index] = $edoc_id;
-		$module->framework->setProjectSetting("portraits", json_encode($portraits));
-		$jsonArray = [
-			"success" => true,
-			"portraits" => json_encode($portraits),
-			"html" => $imgElement
-		];
-	}
-	
 	exit(json_encode($jsonArray));
-} elseif ($action == 'portrait_delete') {
-	// change module setting 'portraits' json
-	$portraits = json_decode($module->framework->getProjectSetting("portraits"), true);
-	$old_edoc_id = $portraits[$_POST['form_name']][$_POST['index']];
-	$portraits[$_POST['form_name']][$_POST['index']] = null;
-	$module->framework->setProjectSetting("portraits", json_encode($portraits));
+} elseif ($action == 'image_delete') {
+	$portrait = $_POST['portrait'];
+	$end_of_survey = $_POST['end_of_survey'];
+	$form_name = $_POST['form_name'];
 	
+	if ($portrait) {
+		// change module setting 'portraits' json
+		$portraits = json_decode($module->framework->getProjectSetting("portraits"), true);
+		$old_edoc_id = $portraits[$form_name][$_POST['index']];
+		$portraits[$form_name][$_POST['index']] = null;
+		$module->framework->setProjectSetting("portraits", json_encode($portraits));
+	} elseif ($end_of_survey) {
+		// change module setting 'end_of_survey_images' json
+		$end_of_survey_images = json_decode($module->framework->getProjectSetting("end_of_survey_images"), true);
+		$old_edoc_id = $end_of_survey_images[$form_name];
+		$end_of_survey_images[$form_name] = null;
+		$module->framework->setProjectSetting("end_of_survey_images", json_encode($end_of_survey_images));
+	}
+		
 	// remove old edoc
 	$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
 	$result = db_query($sql);
