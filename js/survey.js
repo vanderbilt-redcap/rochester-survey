@@ -28,9 +28,13 @@ function onYouTubeIframeAPIReady() {
 				// event.target.seekTo(0);
 			},
 			onStateChange: function(target, data){
-				if (target.data == 0 || target.data == 2) { // if paused or video ended
-					// hide video
-					// show play button div or 'no assigned video' message
+				if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
+					if (!Rochester.curtain.locked) {
+						$("#curtain h5").text("Click to replay video.");
+						$("#curtain").show();
+					}
+				} else {
+					$("#curtain").hide();
 				}
 			}
 		}
@@ -53,6 +57,7 @@ $(function() {
 });
 
 Rochester.init = function() {
+	Rochester.curtain = {};
 	Rochester.signerIndex = 0;
 	Rochester.surveyTarget = $("#surveytitlelogo")[0];
 	var first_vid_url = "";
@@ -78,6 +83,9 @@ Rochester.init = function() {
 	// add video iframe element, survey control div/button, hide most of the #pagecontent and questiontable children children
 	$("#pagecontainer").prepend(`
 			<div id="survey-video">
+				<div id='curtain'>
+					<h5>Select a Signer</h5>
+				</div>
 				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
 			</div>`);
 	
@@ -135,7 +143,7 @@ Rochester.init = function() {
 		let modal = $(this).closest('.modal');
 		if (modal.attr('id') == 'signerModal') {
 			modal.modal('hide');
-			player.playVideo();
+			$("#curtain").hide();
 		}
 		if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
 			Rochester.setVideoByFieldName("record_id");
@@ -157,6 +165,20 @@ Rochester.init = function() {
 			
 		});
 	});
+	$("body").on("click", "#curtain", function() {
+		if ($("#curtain h5").text() !== "No video assigned for this survey question or answer.") {
+			$("#curtain").hide();
+			player.playVideo();
+		}
+	});
+	
+	// play first video when signer select modal closes
+	$("body").on('#signerModal hidden.bs.modal', function() {
+		$("#curtain").hide();
+		player.seekTo(0);
+		player.playVideo();
+	});
+	
 	$("#fontSizeSlider").on("change", function() {
 		let zoom = $("#fontSizeSlider").val() + "%";
 		$("html").css("zoom", zoom);
@@ -393,27 +415,38 @@ Rochester.videoButtonClicked = function() {
 
 Rochester.setVideoByFieldName = function(fieldName) {
 	// set video to this field's associated video
+	// console.log('z');
 	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].field) {
 		let url = Rochester.values[fieldName].field[Rochester.signerIndex];
+		// console.log('a');
 		if (url) {
+			// console.log('b');
 			let video_id = url.split('v=')[1];
-			let ampersandPosition = video_id.indexOf('&');
-			let vid_url = `https://www.youtube.com/embed/` + video_id;
-			if(ampersandPosition != -1) {
-				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
+			if (video_id) {
+				// console.log('c');
+				let ampersandPosition = video_id.indexOf('&');
+				if(ampersandPosition != -1) {
+					video_id = video_id.substring(0, ampersandPosition);
+				}
+				
+				// change video source and start from beginning
+				console.log("loading video with ID: " + video_id);
+				$("#curtain").hide();
+				$("#curtain h5").text("Click to replay video.");
+				$("#survey-video iframe").removeClass('unseen');
+				player.loadVideoById(video_id);
+				player.seekTo(0);
+				Rochester.curtain.locked = false;
+				return true;
 			}
-			
-			// change video source and start from beginning
-			console.log("loading video at URL: " + vid_url);
-			player.loadVideoByUrl({
-				mediaContentUrl: vid_url,
-				startSeconds: 0
-			});
-			return true;
 		}
-	} else {
-		return false;
 	}
+	
+	Rochester.curtain.locked = true;
+	$("#survey-video iframe").addClass('unseen');
+	player.pauseVideo();
+	$("#curtain h5").text("No video assigned for this survey question or answer.");
+	$("#curtain").show();
 }
 
 Rochester.answerSelected = function(e) {

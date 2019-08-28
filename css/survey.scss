@@ -44,6 +44,24 @@ body {
 	}
 }
 
+#curtain {
+	background-color: #000;
+	z-index: 2;
+	color: #fff;
+	font-size: 24px;
+	text-align: center;
+	vertical-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 90%;
+}
+
 #survey-options {
 	display: flex;
 	align-items: center;
