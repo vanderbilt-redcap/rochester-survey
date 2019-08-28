@@ -70,19 +70,19 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		</script>";
 		echo($injection_element1);
 		
-		// on-screen keyboard library include
-		$keyboard_css_url = $this->getUrl("keyboard/css/keyboard.min.css");
-		$keyboard_script = file_get_contents($this->getUrl("keyboard/js/jquery.keyboard.js"));
-		$keyboard_ext_script = file_get_contents($this->getUrl("keyboard/js/jquery.keyboard.extension-all.js"));
-		$injection_element2 = "
-		<!-- on-screen keyboard library -->
-		<script type=\"text/javascript\">
-			$keyboard_script
-			$keyboard_ext_script
-		</script>";
-		echo($injection_element2);
+		// // on-screen keyboard library include
+		// $keyboard_css_url = $this->getUrl("keyboard/css/keyboard.min.css");
+		// $keyboard_script = file_get_contents($this->getUrl("keyboard/js/jquery.keyboard.js"));
+		// $keyboard_ext_script = file_get_contents($this->getUrl("keyboard/js/jquery.keyboard.extension-all.js"));
+		// $injection_element2 = "
+		// <!-- on-screen keyboard library -->
+		// <script type=\"text/javascript\">
+			// $keyboard_script
+			// $keyboard_ext_script
+		// </script>";
+		// echo($injection_element2);
 		
-		$portraits = $this->getSignerPortraits($form_name);
+		$portraits = $this->getSignerPortraits($instrument);
 		$portraitsEmbed = "var signer_portraits = false;";
 		if (!empty($portraits[$instrument])) {
 			$portraitsEmbed = "var signer_portraits = JSON.parse(`" . json_encode($portraits[$instrument]) . "`);";

@@ -20,9 +20,12 @@ var player2;
 var yt;
 function onYouTubeIframeAPIReady() {
 	player = new YT.Player('videoIframe', {
+		playerVars: {
+			modestbranding: 1
+		},
 		events: {
 			onReady: function(event) {
-				event.target.seekTo(0);
+				// event.target.seekTo(0);
 			},
 			onStateChange: function(target, data){
 				if (target.data == 0 || target.data == 2) { // if paused or video ended
@@ -33,11 +36,9 @@ function onYouTubeIframeAPIReady() {
 		}
 	});
 	player2 = new YT.Player('exitVideoIframe', {
-		events: {
-			'onReady': function(event) {
-				event.target.seekTo(0);
-				event.target.playVideo();
-			}
+		playerVars: {
+			autoplay: 1,
+			modestbranding: 1
 		}
 	});
 }
@@ -45,7 +46,8 @@ function onYouTubeIframeAPIReady() {
 var Rochester = {};
 
 // load dashboard content
-$(function() {	
+$(function() {
+	$('body').css('display', 'block');
 	Rochester.init();
 	Rochester.ajaxURL = "SURVEY_AJAX_URL";
 });
@@ -133,6 +135,7 @@ Rochester.init = function() {
 		let modal = $(this).closest('.modal');
 		if (modal.attr('id') == 'signerModal') {
 			modal.modal('hide');
+			player.playVideo();
 		}
 		if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
 			Rochester.setVideoByFieldName("record_id");
@@ -140,7 +143,6 @@ Rochester.init = function() {
 			let fieldName = $(Rochester.surveyTarget).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
 		}
-		
 		player.seekTo(0);
 		
 		$.ajax({
@@ -249,11 +251,11 @@ Rochester.backClicked = function() {
 					// // player.unloadModule("captions");
 				// // }
 			// }
-			if ($("#survey-video").css('display') == 'flex') {
-				player.playVideo();
-			} else {
-				player.pauseVideo();
-			}
+			// if ($("#survey-video").css('display') == 'flex') {
+				// player.playVideo();
+			// } else {
+				// player.pauseVideo();
+			// }
 			
 			$.ajax({
 				method: "POST",
@@ -310,11 +312,11 @@ Rochester.nextClicked = function() {
 				// // player.unloadModule("captions");
 			// // }
 		// }
-		if ($("#survey-video").css('display') == 'flex' && vidFound) {
-			player.playVideo();
-		} else {
-			player.pauseVideo();
-		}
+		// if ($("#survey-video").css('display') == 'flex' && vidFound) {
+			// player.playVideo();
+		// } else {
+			// player.pauseVideo();
+		// }
 		
 		// log field change on server
 		$.ajax({
@@ -396,9 +398,9 @@ Rochester.setVideoByFieldName = function(fieldName) {
 		if (url) {
 			let video_id = url.split('v=')[1];
 			let ampersandPosition = video_id.indexOf('&');
-			let vid_url = `https://www.youtube.com/embed/` + video_id + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en";;
+			let vid_url = `https://www.youtube.com/embed/` + video_id;
 			if(ampersandPosition != -1) {
-				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition) + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en";
+				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
 			}
 			
 			// change video source and start from beginning
@@ -586,7 +588,7 @@ Rochester.getExitModalHtml = function() {
 		}
 		modalHtml += `
 					<div id="exit-survey-video">
-						<iframe id="exitVideoIframe" width="800" height="560" src="` + url + "?enablejsapi=1&rel=0&showinfo=0&ecver=2&cc_load_policy=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+						<iframe id="exitVideoIframe" width="800" height="560" src="` + url + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 					</div>`;
 	}
 	if (exitModalText) {
