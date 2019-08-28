@@ -6,19 +6,29 @@ $('head').append('<link rel="stylesheet" type="text/css" href="KEYBOARD_CSS">');
 $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
 $('head').append('<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/ui-lightness/jquery-ui.css" rel="stylesheet">');
 
-// load dashboard content
-$(function() {	
-	Rochester.init();
-	Rochester.ajaxURL = "SURVEY_AJAX_URL";
-});
+  // Load the IFrame Player API code asynchronously.
+var tag = document.createElement('script');
+tag.id = 'survey-video-script';
+tag.src = 'https://www.youtube.com/iframe_api';
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+  // Replace the 'videoIframe' element with an <iframe> and
+  // YouTube player after the API code downloads.
 var player;
 var player2;
+var yt;
 function onYouTubeIframeAPIReady() {
 	player = new YT.Player('videoIframe', {
 		events: {
-			'onReady': function(event) {
+			onReady: function(event) {
 				event.target.seekTo(0);
+			},
+			onStateChange: function(target, data){
+				if (target.data == 0 || target.data == 2) { // if paused or video ended
+					// hide video
+					// show play button div or 'no assigned video' message
+				}
 			}
 		}
 	});
@@ -33,6 +43,12 @@ function onYouTubeIframeAPIReady() {
 }
 	  
 var Rochester = {};
+
+// load dashboard content
+$(function() {	
+	Rochester.init();
+	Rochester.ajaxURL = "SURVEY_AJAX_URL";
+});
 
 Rochester.init = function() {
 	Rochester.signerIndex = 0;
@@ -60,80 +76,16 @@ Rochester.init = function() {
 	// add video iframe element, survey control div/button, hide most of the #pagecontent and questiontable children children
 	$("#pagecontainer").prepend(`
 			<div id="survey-video">
-				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&start=0&modestbranding=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
+				<iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
 			</div>`);
 	
 	// add exit survey iframe video too
 	$("body").append(Rochester.getExitModalHtml());
 	
-	var tag = document.createElement('script');
-	tag.id = 'survey-video-script';
-	tag.src = 'https://www.youtube.com/iframe_api';
-	var firstScriptTag = document.getElementsByTagName('script')[0];
-	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+	// add options modal
+	$("#container").before(Rochester.getOptionsModalHtml());
 	
-	$("#container").before(`
-			<div id="survey-options">
-				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">
-					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>
-				</button>
-				<button type="button" class="btn btn-secondary video">
-					Hide Video<i class="fas fa-video-slash" style="margin-left: 8px"></i>
-				</button>
-				<button type="button" class="btn btn-danger">
-					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>
-				</button>
-			</div>
-			<div class="modal fade" id="optionsModal" tabindex="-1" role="dialog" aria-labelledby="optionsModalLabel" aria-hidden="true">
-				<div class="modal-dialog" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="optionsModalLabel">Survey Options</h5>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body">
-							<h5>Choose a Signer</h5>
-							<div class="row justify-content-around">
-								${Rochester.getSignerButtons()}
-							</div>
-							<h5>Adjust Colors</h5>
-							<div class="row justify-content-around">
-								<div class="col text-center">
-									<h5>Background Color</h5>
-									<input id="spectrum_bg_color">
-								</div>
-								<div class="col text-center">
-									<h5>Text Color</h5>
-									<input id="spectrum_text_color">
-								</div>
-							</div>
-							<h5>Adjust Text Size</h5>
-							<div class="row justify-content-around">
-								<button type="button" class="btn btn-outline-primary shrinkFont">Make Text Smaller</button>
-								<button type="button" class="btn btn-outline-primary growFont">Make Text Bigger</button>
-							</div>
-							<h5>YouTube Player Settings</h5>
-							<div class="row justify-content-around align-items-center" id="ytPlayerControls">
-								<div class="slidecontainer">
-									<label for=""ytVolume">Volume</label>
-									<input type="range" min="1" max="100" value="100" class="slider" id="ytVolume">
-								</div>
-								<div class="custom-control custom-switch">
-									<input type="checkbox" class="custom-control-input" id="ytCaptions">
-									<label class="custom-control-label" for="ytCaptions">Use Closed Captions</label>
-								</div>
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-							<button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
-						</div>
-					</div>
-				</div>
-			</div>
-	`);
+	// add survey navigation buttons
 	$("#container").after(`
 			<div id="survey-navigation">
 				<button class="btn btn-primary">Back</button>
@@ -165,6 +117,10 @@ Rochester.init = function() {
 			$(".fl-button").contents().addBack(".fl-button").css("border-color", color.toHexString());
 		}
 	});
+	
+	// hide most of #pagecontent (except surveytitlelogo and instructions)
+	$("#pagecontent form").addClass("unseen");
+	$("#survey-navigation button:eq(0)").addClass("unseen");
 	
 	// register events
 	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
@@ -212,6 +168,8 @@ Rochester.init = function() {
 			}
 		});
 	});
+	
+	// allow users to load question video after selecting answers
 	$("body").on("click", ".fl-button", function(target) {
 		// set video to this field's associated video
 		let fieldName = $(Rochester.surveyTarget).attr('sq_id');
@@ -219,16 +177,12 @@ Rochester.init = function() {
 	});
 	
 	// yt player controls listen
-	$("body").on('change', '#ytCaptions, #ytVolume', function() {Rochester.useYtControls = true});
+	// $("body").on('change', '#ytCaptions, #ytVolume', function() {Rochester.useYtControls = true});
 	
 	// exit survey modal Exit button
 	$("body").on("click", "#exitSurveyButton", function() {
 		dataEntrySubmit(document.getElementById('submit-action'));
 	});
-	
-	// hide most of #pagecontent (except surveytitlelogo and instructions)
-	$("#pagecontent form").addClass("unseen");
-	$("#survey-navigation button:eq(0)").addClass("unseen");
 	
 	// font resize buttons available in Survey Options modal
 	$("#changeFont").hide();
@@ -240,9 +194,9 @@ Rochester.init = function() {
 	});
 	
 	// add on-screen keyboards to textareas
-	$("textarea").each(function(i, e) {
-		$(e).keyboard({});
-	});
+	// $("textarea").each(function(i, e) {
+		// $(e).keyboard({});
+	// });
 	
 	// prompt user to select a signer
 	Rochester.openSignerModal();
@@ -285,16 +239,16 @@ Rochester.backClicked = function() {
 			let fieldName = $(e).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
 			
-			if (Rochester.useYtControls) {
-				player.setVolume($("#ytVolume").val());
-				console.log('yt player volume set to: ' + $("#ytVolume").val());
-				// if ($("#ytCaptions").prop("checked")) {
-					// player.loadModule("captions");
-					// player.setOption("captions", "track", {"languageCode": "es"});
-				// } else {
-					// player.unloadModule("captions");
-				// }
-			}
+			// if (Rochester.useYtControls) {
+				// player.setVolume($("#ytVolume").val());
+				// console.log('yt player volume set to: ' + $("#ytVolume").val());
+				// // if ($("#ytCaptions").prop("checked")) {
+					// // player.loadModule("captions");
+					// // player.setOption("captions", "track", {"languageCode": "es"});
+				// // } else {
+					// // player.unloadModule("captions");
+				// // }
+			// }
 			if ($("#survey-video").css('display') == 'flex') {
 				player.playVideo();
 			} else {
@@ -345,17 +299,17 @@ Rochester.nextClicked = function() {
 		let fieldName = $(field).attr('sq_id');
 		let vidFound = Rochester.setVideoByFieldName(fieldName);
 		
-		if (Rochester.useYtControls) {
-			player.setVolume($("#ytVolume").val());
-			player.hideVideoInfo();
-			console.log('yt player volume set to: ' + $("#ytVolume").val());
-			// if ($("#ytCaptions").prop("checked")) {
-				// player.loadModule("captions");
-				// player.setOption("captions", "track", {"languageCode": "es"});
-			// } else {
-				// player.unloadModule("captions");
-			// }
-		}
+		// if (Rochester.useYtControls) {
+			// player.setVolume($("#ytVolume").val());
+			// player.hideVideoInfo();
+			// console.log('yt player volume set to: ' + $("#ytVolume").val());
+			// // if ($("#ytCaptions").prop("checked")) {
+				// // player.loadModule("captions");
+				// // player.setOption("captions", "track", {"languageCode": "es"});
+			// // } else {
+				// // player.unloadModule("captions");
+			// // }
+		// }
 		if ($("#survey-video").css('display') == 'flex' && vidFound) {
 			player.playVideo();
 		} else {
@@ -442,9 +396,9 @@ Rochester.setVideoByFieldName = function(fieldName) {
 		if (url) {
 			let video_id = url.split('v=')[1];
 			let ampersandPosition = video_id.indexOf('&');
-			let vid_url = `https://www.youtube.com/embed/` + video_id + "?enablejsapi=1&rel=0&start=0&modestbranding=1";;
+			let vid_url = `https://www.youtube.com/embed/` + video_id + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en";;
 			if(ampersandPosition != -1) {
-				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition) + "?enablejsapi=1&rel=0&start=0&modestbranding=1";
+				vid_url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition) + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en";
 			}
 			
 			// change video source and start from beginning
@@ -556,6 +510,60 @@ Rochester.openSignerModal = function() {
 	$("#signerModal").modal('show');
 }
 
+Rochester.getOptionsModalHtml = function() {
+	return `
+			<div id="survey-options">
+				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">
+					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>
+				</button>
+				<button type="button" class="btn btn-secondary video">
+					Hide Video<i class="fas fa-video-slash" style="margin-left: 8px"></i>
+				</button>
+				<button type="button" class="btn btn-danger">
+					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>
+				</button>
+			</div>
+			<div class="modal fade" id="optionsModal" tabindex="-1" role="dialog" aria-labelledby="optionsModalLabel" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="optionsModalLabel">Survey Options</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<h5>Choose a Signer</h5>
+							<div class="row justify-content-around">
+								${Rochester.getSignerButtons()}
+							</div>
+							<h5>Adjust Colors</h5>
+							<div class="row justify-content-around">
+								<div class="col text-center">
+									<h5>Background Color</h5>
+									<input id="spectrum_bg_color">
+								</div>
+								<div class="col text-center">
+									<h5>Text Color</h5>
+									<input id="spectrum_text_color">
+								</div>
+							</div>
+							<h5>Adjust Text Size</h5>
+							<div class="row justify-content-around">
+								<button type="button" class="btn btn-outline-primary shrinkFont">Make Text Smaller</button>
+								<button type="button" class="btn btn-outline-primary growFont">Make Text Bigger</button>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+						</div>
+					</div>
+				</div>
+			</div>
+	`;
+}
+
 Rochester.getExitModalHtml = function() {
 	let modalHtml = `
 	<div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">
@@ -578,7 +586,7 @@ Rochester.getExitModalHtml = function() {
 		}
 		modalHtml += `
 					<div id="exit-survey-video">
-						<iframe id="exitVideoIframe" width="800" height="560" src="` + url + "?enablejsapi=1&rel=0&showinfo=0&ecver=2" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+						<iframe id="exitVideoIframe" width="800" height="560" src="` + url + "?enablejsapi=1&rel=0&showinfo=0&ecver=2&cc_load_policy=1" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 					</div>`;
 	}
 	if (exitModalText) {

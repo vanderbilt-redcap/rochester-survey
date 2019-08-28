@@ -128,14 +128,17 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$portraits = $this->getSignerPortraits();
 		$imageElements = $portraits[$form_name];
 		
+		file_put_contents("C:/vumc/log.txt", 'portraits:\n' . print_r($portraits, true));
+		
 		for ($col = 1; $col <= $columns; $col++) {
 			$img = !empty($imageElements[$col]) ? $imageElements[$col] : "";
-			
+			$delete_button = !empty($imageElements[$col]) ? "<button type='button' class='btn btn-outline-danger'>Delete</button>" : "";
 			$html .= "
 			<div class='signer-portrait'>
 				$img
 				<div class='row'>
 					<h6>Signer $col</h6>
+					$delete_button
 				</div>
 				<div class='input-group'>
 					<div class='custom-file'>
@@ -276,7 +279,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$edoc_ids = [];
 		foreach ($portraits as $form_name => $form) {
 			foreach ($form as $portraitIndex => $edoc_id) {
-				$edoc_ids[] = $edoc_id;
+				if (!empty($edoc_id)) {
+					$edoc_ids[] = $edoc_id;
+				}
 			}
 		}
 		if (!empty($edoc_ids)) {

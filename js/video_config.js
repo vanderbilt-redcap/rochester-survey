@@ -5,6 +5,11 @@ $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath
 var form_name = "";
 
 $(function() {
+	$('body').on('click touchstart', ".custom-file-input", function() {
+		// upload user image for signer portrait
+		$(this).val('')
+	});
+	
 	$('body').on('change', ".custom-file-input", function() {
 		// upload user image for signer portrait
 		let fileName = $(this).val().split('\\').pop();
@@ -13,6 +18,7 @@ $(function() {
 		let input = group.find('input');
 		let file_data = $(input).prop('files')[0];
 		let form_data = new FormData();
+		form_data.append("action", "portrait_upload");
 		form_data.append(input.attr('id'), file_data);
 		form_data.append("portrait_upload", input.attr('id'));
 		form_data.append("portrait_form_name", form_name);
@@ -28,43 +34,43 @@ $(function() {
 				console.log(response);
 				group.find("img").remove();
 				group.prepend(response.html);
+				if (group.find("div.row button").length == 0 && !response.error) {
+					group.find("div.row").append("<button type='button' class='btn btn-outline-danger'>Delete</button>");
+				}
+				
+				if (response.error) {
+					group.find("button").remove();
+				}
 			},
 			complete: function(data) {
-				console.log(data);
+				// console.log(data);
 			}
 		});
 	});
 	
 	// delete portrait button
-	$("body").on("click", ".signer-portait button", function() {
-		console.log('remove this portrait');
-		// upload user image for signer portrait
-		// let fileName = $(this).val().split('\\').pop();
-		// $(this).next('.custom-file-label').addClass("selected").html(fileName);
-		// let group = $(this).closest('.signer-portrait');
-		// let input = group.find('input');
-		// let file_data = $(input).prop('files')[0];
-		// let form_data = new FormData();
-		// form_data.append(input.attr('id'), file_data);
-		// form_data.append("portrait_upload", input.attr('id'));
-		// form_data.append("portrait_form_name", form_name);
-		// $.ajax({
-			// url: 'video_config_ajax.php',
-			// dataType: 'json',
-			// cache: false,
-			// contentType: false,
-			// processData: false,
-			// data: form_data,
-			// type: 'POST',
-			// success: function(response) {
-				// console.log(response);
-				// group.find("img").remove();
-				// group.prepend(response.html);
-			// },
-			// complete: function(data) {
+	$("body").on("click", ".signer-portrait button", function() {
+		// delete portrait for this signer index
+		let group = $(this).closest('.signer-portrait');
+		let data = {
+			action: 'portrait_delete',
+			index: group.index() + 1,
+			form_name: form_name
+		};
+		$.ajax({
+			url: 'video_config_ajax.php',
+			dataType: 'json',
+			data: data,
+			type: 'POST',
+			success: function(response) {
+				console.log(response);
+			},
+			complete: function(data) {
 				// console.log(data);
-			// }
-		// });
+				group.find("img").remove();
+				group.find("button").remove();
+			}
+		});
 	});
 	
 	$(".form_picker_dd").on("click", "a", function(i, e) {
@@ -72,7 +78,10 @@ $(function() {
 		$.ajax({
 			method: "POST",
 			url: "video_config_ajax.php",
-			data: {form_name: $(this).attr("value")},
+			data: {
+				action: "get_form_config",
+				form_name: $(this).attr("value")
+			},
 			dataType: "html"
 		}).done(function(msg) {
 			$("#form_assocs").html(msg);
@@ -160,11 +169,11 @@ $(function() {
 		
 		// // send to server to save on db
 		let data = {
-			"form_data": fields,
-			"form_name": form_name,
-			"exit_survey": {
-				"modalText": $("#exitModalTextInput").val(),
-				"modalVideo": $("#exitVideoUrl").val(),
+			form_data: fields,
+			form_name: form_name,
+			exit_survey: {
+				modalText: $("#exitModalTextInput").val(),
+				modalVideo: $("#exitVideoUrl").val(),
 			}
 		};
 		
