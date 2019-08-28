@@ -30,6 +30,13 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		</script>";
 	}
 	
+	function redcap_every_page_top($pid) {
+		echo "
+		<script type='text/javascript'>
+			$('body').css('display', 'none');
+		</script>";
+	}
+	
 	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
 		$fbf_surveys = $this->framework->getProjectSetting("survey_name");
 		$found_this_form = false;

@@ -25,6 +25,7 @@
 	
 	"permissions": [
 		"redcap_survey_page",
+		"redcap_every_page_top",
 		"redcap_survey_complete"
 	],
 	
