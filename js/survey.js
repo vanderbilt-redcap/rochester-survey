@@ -177,10 +177,9 @@ Rochester.init = function() {
 	$("body").on("click", ".signer-portrait", function() {
 		Rochester.signerIndex = $(this).index();
 		let modal = $(this).closest('.modal');
+		modal.modal('hide');
 		if (modal.attr('id') == 'signerModal') {
-			modal.modal('hide');
 			if (!Rochester.curtain.locked) {
-				// console.log("showing curtain from signer selected");
 				$("#curtain").hide();
 			}
 		}
