@@ -168,13 +168,13 @@ Rochester.init = function() {
 	$("#survey-navigation button:eq(0)").addClass("unseen");
 	
 	// register events
-	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
-	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
-	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
-	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
+	$("body").on('click touchstart', "#survey-navigation button:first-child", Rochester.backClicked);
+	$("body").on('click touchstart', "#survey-navigation button:last-child", Rochester.nextClicked);
+	$("body").on('click touchstart', "#survey-options button.video", Rochester.videoButtonClicked);
+	$("body").on('click touchstart', "#survey-options button:last-child", Rochester.exitClicked);
 	// $("body").on("click", "#questiontable tr input", Rochester.answerSelected);
-	$("body").on("click", "#questiontable tr [class^=choice]", Rochester.answerSelected);
-	$("body").on("click", ".signer-portrait", function() {
+	$("body").on("click touchstart", "#questiontable tr [class^=choice]", Rochester.answerSelected);
+	$("body").on("click touchstart", ".signer-portrait", function() {
 		Rochester.signerIndex = $(this).index();
 		let modal = $(this).closest('.modal');
 		modal.modal('hide');
@@ -203,7 +203,7 @@ Rochester.init = function() {
 			
 		});
 	});
-	$("body").on("click", "#curtain", function() {
+	$("body").on("click touchstart", "#curtain", function() {
 		if (!Rochester.curtain.locked) {
 			// console.log("showing curtain from event #curtain clicked");
 			$("#curtain").hide();
@@ -236,7 +236,7 @@ Rochester.init = function() {
 	});
 	
 	// allow users to load question video after selecting answers
-	$("body").on("click", ".fl-button", function(target) {
+	$("body").on("click touchstart", ".fl-button", function(target) {
 		// set video to this field's associated video
 		let fieldName = $(Rochester.surveyTarget).attr('sq_id');
 		Rochester.setVideoByFieldName(fieldName);
@@ -246,16 +246,16 @@ Rochester.init = function() {
 	// $("body").on('change', '#ytCaptions, #ytVolume', function() {Rochester.useYtControls = true});
 	
 	// exit survey modal Exit button
-	$("body").on("click", "#exitSurveyButton", function() {
+	$("body").on("click touchstart", "#exitSurveyButton", function() {
 		dataEntrySubmit(document.getElementById('submit-action'));
 	});
 	
 	// font resize buttons available in Survey Options modal
 	$("#changeFont").hide();
-	$("body").on("click", ".shrinkFont", function() {
+	$("body").on("click touchstart", ".shrinkFont", function() {
 		$(".decreaseFont").trigger("click");
 	});
-	$("body").on("click", ".growFont", function() {
+	$("body").on("click touchstart", ".growFont", function() {
 		$(".increaseFont").trigger("click");
 	});
 	
