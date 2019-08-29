@@ -66,7 +66,8 @@ function onYouTubePlayerAPIReady() {
 		width: '800',
 		videoId: vid_id,
 		playerVars: {
-			modestbranding: 1
+			modestbranding: 1,
+			playsinline: 1
 		},
 		events: {
 			onStateChange: function(target, data){
