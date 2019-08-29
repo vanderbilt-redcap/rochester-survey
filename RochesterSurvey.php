@@ -34,6 +34,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		echo "
 		<script type='text/javascript'>
 			$('body').css('display', 'none');
+			$(function() {
+				$('body').css('display', 'block');
+			});
 		</script>";
 	}
 	
