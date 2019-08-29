@@ -48,25 +48,59 @@ function file_upload_max_size() {
 }
 /////////////
 
-$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 $action = $_POST['action'];
+if ($action !== 'save_changes') {
+	$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+}
+
 if ($action == 'get_form_config') {
 	$html = $module->make_field_val_association_page($_POST['form_name']);
 	echo $html;
 } elseif ($action == 'save_changes') {
-	// \REDCap::logEvent("Field Value Association Module", print_r($_POST, true), null, null, null, $_GET["pid"]);
 	$data = json_decode($_POST['data'], true);
+	$filtered = [
+		"form_data" => [],
+		"exit_survey" => []
+	];
+	
+	// sanitize JSON -- starting with non-url fields
+	$filtered['form_name'] = filter_var($data['form_name'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+	$filtered['exit_survey']['modalText'] = filter_var($data['exit_survey']['modalText'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+	$filtered['exit_survey']['modalVideo'] = filter_var($data['exit_survey']['modalVideo'], FILTER_VALIDATE_URL, FILTER_NULL_ON_FAILURE);
+	
+	// sanitize field/choice URLs
+	foreach ($data['form_data'] as $field_name => $field_arr) {
+		$filtered['form_data'][$field_name] = [];
+		if (isset($field_arr['field'])) {
+			$filtered['form_data'][$field_name]['field'] = [];
+			foreach ($field_arr['field'] as $i => $url) {
+				$filtered['form_data'][$field_name]['field'][$i] = filter_var($url, FILTER_VALIDATE_URL, FILTER_NULL_ON_FAILURE);
+			}
+		}
+		if (isset($field_arr['choices'])) {
+			$filtered['form_data'][$field_name]['choices'] = [];
+			foreach ($field_arr['choices'] as $raw_value => $choice_arr) {
+				$filtered['form_data'][$field_name]['choices'][$raw_value] = [];
+				foreach ($choice_arr as $i => $url) {
+					$filtered['form_data'][$field_name]['choices'][$raw_value][$i] = filter_var($url, FILTER_VALIDATE_URL, FILTER_NULL_ON_FAILURE);
+				}
+			}
+		}
+	}
+	
+	file_put_contents("C:/vumc/log.txt", print_r($filtered, true));
+	
 	$log_id = $module->framework->log("save_values", [
-		"form-name" => $data["form_name"],
-		"form-field-value-associations" => json_encode($data["form_data"])
+		"form-name" => $filtered["form_name"],
+		"form-field-value-associations" => json_encode($filtered["form_data"])
 	]);
 	
-	$module->framework->setProjectSetting("exitModalText", $data['exit_survey']['modalText']);
-	$module->framework->setProjectSetting("exitModalVideo", $data['exit_survey']['modalVideo']);
+	$module->framework->setProjectSetting("exitModalText", $filtered['exit_survey']['modalText']);
+	$module->framework->setProjectSetting("exitModalVideo", $filtered['exit_survey']['modalVideo']);
 	
-	$data['log_id'] = $log_id;
+	$filtered['log_id'] = $log_id;
 	
-	echo json_encode(json_encode($data));
+	echo json_encode(json_encode($filtered));
 } elseif (!empty($_FILES['image'])) {
 	$uploaded_image = $_FILES['image'];
 	$form_name = $_POST['form_name'];

@@ -155,7 +155,7 @@ $(function() {
 		// create and build fields object, null where no values are associated
 		let fields = {};
 		let form_name = $("#assoc_table").attr("data-form-name");
-		if (form_name == false)
+		if (!form_name)
 			return;
 		$(".value-row .value_column").each(function(j, td) {
 			let row = $(td).parent();
@@ -193,6 +193,11 @@ $(function() {
 			}
 		};
 		
+		console.log('savedata', {
+				action: "save_changes",
+				data: JSON.stringify(data)
+			});
+		
 		$.ajax({
 			method: "POST",
 			url: "video_config_ajax.php",
@@ -202,7 +207,7 @@ $(function() {
 			},
 			dataType: "json"
 		}).done(function(msg) {
-			// console.log(JSON.parse(msg));
+			console.log(JSON.parse(msg));
 		});
 	})
 	

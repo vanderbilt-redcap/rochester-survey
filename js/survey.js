@@ -18,26 +18,6 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 var player2;
 function onYouTubeIframeAPIReady() {
-	// player = new YT.Player('videoIframe', {
-		// playerVars: {
-			// modestbranding: 1
-		// },
-		// events: {
-			// onReady: function(event) {
-				// // event.target.seekTo(0);
-			// },
-			// onStateChange: function(target, data){
-				// if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
-					// if (!Rochester.curtain.locked) {
-						// $("#curtain h5").text("Click to replay video.");
-						// $("#curtain").show();
-					// }
-				// } else {
-					// $("#curtain").hide();
-				// }
-			// }
-		// }
-	// });
 	player2 = new YT.Player('exitVideoIframe', {
 		playerVars: {
 			autoplay: 1,
@@ -47,15 +27,40 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onYouTubePlayerAPIReady() {
-	let vid_id = "";
-	let url = Rochester.values.record_id.field[0];
-	vid_id = url.split('v=')[1];
-	let ampersandPosition = vid_id.indexOf('&');
-	if (ampersandPosition != -1) {
-		vid_id = vid_id.substring(0, ampersandPosition);
+	// find first valid youtube URL and get video ID to init YT player
+	var getFirstVidId = function() {
+		// console.log('get first vid id');
+		for (var key in Rochester.values) {
+			if (Rochester.values.hasOwnProperty(key)) {
+				let entry = Rochester.values[key];
+				if (entry['field']) {
+					let field = entry['field'];
+					let array_length = field.length;
+					for (let i = 0; i < array_length; i++) {
+						let url = field[i];
+						let vid_id = Rochester.getVidIdFromUrl(url);
+						if (vid_id) {
+							if (key == 'record_id') {
+								Rochester.curtain = {
+									locked: false
+								};
+							} else {
+								Rochester.curtain = {
+									locked: true
+								};
+							}
+							// console.log('Rochester.curtain.locked', Rochester.curtain.locked);
+							return vid_id;
+						}
+					};
+				}
+			}
+		}
 	}
 	
-	console.log('playe robject replaced');
+	let vid_id = getFirstVidId();
+	// console.log(vid_id);
+	
 	player = new YT.Player('ytplayer', {
 		height: '560',
 		width: '800',
@@ -67,11 +72,15 @@ function onYouTubePlayerAPIReady() {
 			onStateChange: function(target, data){
 				if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
 					if (!Rochester.curtain.locked) {
-						$("#curtain h5").text("Click to replay video.");
+						$("#curtain h5").text("Click to play video.");
+						$("#curtain").css('height', '88%');
 						$("#curtain").show();
 					}
 				} else {
-					$("#curtain").hide();
+					if (!Rochester.curtain.locked) {
+						// console.log("showing curtain from event yt player state changed");
+						$("#curtain").hide();
+					}
 				}
 			}
 		}
@@ -93,7 +102,6 @@ $(function() {
 });
 
 Rochester.init = function() {
-	Rochester.curtain = {};
 	Rochester.signerIndex = 0;
 	Rochester.surveyTarget = $("#surveytitlelogo")[0];
 	Rochester.values = associatedValues;
@@ -110,7 +118,7 @@ Rochester.init = function() {
 	$("#pagecontainer").prepend(`
 			<div id="survey-video">
 				<div id='curtain'>
-					<h5>Select a Signer</h5>
+					<h5>No video associated with this question or answer</h5>
 				</div>
 				<div id='ytplayer'></div>
 			</div>`);
@@ -136,11 +144,10 @@ Rochester.init = function() {
 		flat: true,
 		showButtons: false,
 		move: function(color) {
-			Rochester.bgColor = color.toHexString();
 			$("body").css("background-color", color.toHexString());
 			$("html").css("background-color", color.toHexString());
 			$("#pagecontent").css("background-color", color.toHexString());
-			$("#pagecontent").css("background", color.toHexString());
+			$("#pagecontent").css("margin-top", "0px");
 		}
 	});
 	$("#spectrum_text_color").spectrum({
@@ -150,9 +157,9 @@ Rochester.init = function() {
 		move: function(color) {
 			$("#container").css("color", color.toHexString());
 			$("#container").css("border", "2px solid " + color.toHexString());
-			$("#pagecontent").css("margin-top", "none");
 			$(".fl-button").contents().addBack(".fl-button").css("color", color.toHexString());
 			$(".fl-button").contents().addBack(".fl-button").css("border-color", color.toHexString());
+			$("#pagecontent").css("margin-top", "0px");
 		}
 	});
 	
@@ -165,13 +172,17 @@ Rochester.init = function() {
 	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
 	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
 	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
-	$("body").on("click", "#questiontable tr input", Rochester.answerSelected);
+	// $("body").on("click", "#questiontable tr input", Rochester.answerSelected);
+	$("body").on("click", "#questiontable tr [class^=choice]", Rochester.answerSelected);
 	$("body").on("click", ".signer-portrait", function() {
 		Rochester.signerIndex = $(this).index();
 		let modal = $(this).closest('.modal');
 		if (modal.attr('id') == 'signerModal') {
 			modal.modal('hide');
-			$("#curtain").hide();
+			if (!Rochester.curtain.locked) {
+				// console.log("showing curtain from signer selected");
+				$("#curtain").hide();
+			}
 		}
 		if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
 			Rochester.setVideoByFieldName("record_id");
@@ -179,7 +190,7 @@ Rochester.init = function() {
 			let fieldName = $(Rochester.surveyTarget).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
 		}
-		// player.seekTo(0);
+		player.seekTo(0);
 		
 		$.ajax({
 			method: "POST",
@@ -194,17 +205,21 @@ Rochester.init = function() {
 		});
 	});
 	$("body").on("click", "#curtain", function() {
-		if ($("#curtain h5").text() !== "No video assigned for this survey question or answer.") {
+		if (!Rochester.curtain.locked) {
+			// console.log("showing curtain from event #curtain clicked");
 			$("#curtain").hide();
-			// player.playVideo();
+			player.playVideo();
 		}
 	});
 	
 	// play first video when signer select modal closes
 	$("body").on('#signerModal hidden.bs.modal', function() {
-		$("#curtain").hide();
-		// player.seekTo(0);
-		// player.playVideo();
+		if (!Rochester.curtain.locked) {
+			// console.log("showing curtain from event hidden.bs.modal");
+			$("#curtain").hide();
+			player.seekTo(0);
+			player.playVideo();
+		}
 	});
 	
 	$("#fontSizeSlider").on("change", function() {
@@ -254,6 +269,17 @@ Rochester.init = function() {
 	Rochester.openSignerModal();
 }
 
+Rochester.getVidIdFromUrl = function(url) {
+	// thanks to https://stackoverflow.com/questions/3452546/how-do-i-get-the-youtube-video-id-from-a-url
+	var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+	var match = url.match(regExp);
+	if (match && match[2].length == 11) {
+	  return match[2];
+	} else {
+	  //error
+	}
+}
+
 Rochester.isRealField = function(fieldRow) {
 	// this function returns false if questiontable row is blank descriptive, has display: none, or sq_id == "{}"
 	if (/^\s+$/.test($(fieldRow).find("td:eq(1)").html()) || $(fieldRow).css("display") == "none" || $(fieldRow).attr("sq_id") == "{}" || $(fieldRow).hasClass("surveysubmit")) {
@@ -290,22 +316,6 @@ Rochester.backClicked = function() {
 			// set video to this field's associated video
 			let fieldName = $(e).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
-			
-			// if (Rochester.useYtControls) {
-				// player.setVolume($("#ytVolume").val());
-				// console.log('yt player volume set to: ' + $("#ytVolume").val());
-				// // if ($("#ytCaptions").prop("checked")) {
-					// // player.loadModule("captions");
-					// // player.setOption("captions", "track", {"languageCode": "es"});
-				// // } else {
-					// // player.unloadModule("captions");
-				// // }
-			// }
-			// if ($("#survey-video").css('display') == 'flex') {
-				// player.playVideo();
-			// } else {
-				// player.pauseVideo();
-			// }
 			
 			$.ajax({
 				method: "POST",
@@ -350,23 +360,6 @@ Rochester.nextClicked = function() {
 		// set video to this field's associated video
 		let fieldName = $(field).attr('sq_id');
 		let vidFound = Rochester.setVideoByFieldName(fieldName);
-		
-		// if (Rochester.useYtControls) {
-			// player.setVolume($("#ytVolume").val());
-			// player.hideVideoInfo();
-			// console.log('yt player volume set to: ' + $("#ytVolume").val());
-			// // if ($("#ytCaptions").prop("checked")) {
-				// // player.loadModule("captions");
-				// // player.setOption("captions", "track", {"languageCode": "es"});
-			// // } else {
-				// // player.unloadModule("captions");
-			// // }
-		// }
-		// if ($("#survey-video").css('display') == 'flex' && vidFound) {
-			// player.playVideo();
-		// } else {
-			// player.pauseVideo();
-		// }
 		
 		// log field change on server
 		$.ajax({
@@ -430,70 +423,14 @@ Rochester.videoButtonClicked = function() {
 		html = html.replace("Hide", "Show")
 		html = html.replace("video-slash", "video")
 		$(this).html(html);
-		// player.pauseVideo();
+		player.pauseVideo();
 		$("#survey-video").css('display', 'none');
 	} else {
 		html = html.replace("Show", "Hide")
 		html = html.replace("video", "video-slash")
 		$(this).html(html);
-		// player.playVideo();
+		player.playVideo();
 		$("#survey-video").css('display', 'flex');
-	}
-}
-
-Rochester.setVideoByFieldName = function(fieldName) {
-	// set video to this field's associated video
-	// console.log('z');
-	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].field) {
-		let url = Rochester.values[fieldName].field[Rochester.signerIndex];
-		// console.log('a');
-		if (url) {
-			// console.log('b');
-			let video_id = url.split('v=')[1];
-			if (video_id) {
-				// console.log('c');
-				let ampersandPosition = video_id.indexOf('&');
-				if(ampersandPosition != -1) {
-					video_id = video_id.substring(0, ampersandPosition);
-				}
-				
-				// change video source and start from beginning
-				console.log("loading video with ID: " + video_id);
-				$("#curtain").hide();
-				$("#curtain h5").text("Click to replay video.");
-				$("#survey-video iframe").removeClass('unseen');
-				player.loadVideoById(video_id);
-				// player.seekTo(0);
-				Rochester.curtain.locked = false;
-				return true;
-			}
-		}
-	}
-	
-	Rochester.curtain.locked = true;
-	$("#survey-video iframe").addClass('unseen');
-	// player.pauseVideo();
-	$("#curtain h5").text("No video assigned for this survey question or answer.");
-	$("#curtain").show();
-}
-
-Rochester.answerSelected = function(e) {
-	let fieldName = $(this).closest("tr").attr('sq_id');
-	let choiceRawValue = $(this).attr("value");
-	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].choices && Rochester.values[fieldName].choices[choiceRawValue]) {
-		let url = Rochester.values[fieldName].choices[choiceRawValue][Rochester.signerIndex];
-		let video_id = url.split('v=')[1];
-		let ampersandPosition = video_id.indexOf('&');
-		if(ampersandPosition != -1) {
-			video_id = video_id.substring(0, ampersandPosition);
-		}
-		// $("#survey-video iframe").attr("src", vid_url);
-		player.loadVideoById(video_id);
-		// player.seekTo(0);
-		// player.playVideo();
-	} else {
-		// player.stopVideo();
-		// player.seekTo(0);
 	}
 }
 
@@ -671,7 +608,66 @@ Rochester.getExitModalHtml = function() {
 
 Rochester.exitClicked = function(event) {
 	$("#exitModal").modal('show');
-	// player.pauseVideo();
+	player.pauseVideo();
 	player2.seekTo(0);
 	player2.playVideo();
+}
+
+// player handling functions
+
+Rochester.answerSelected = function(e) {
+	let input = $(this).find('input');
+	let fieldName = $(this).closest("tr").attr('sq_id');
+	let choiceRawValue = input.attr("value") || input.attr('code');
+	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].choices && Rochester.values[fieldName].choices[choiceRawValue]) {
+		let url = Rochester.values[fieldName].choices[choiceRawValue][Rochester.signerIndex];
+		let video_id = Rochester.getVidIdFromUrl(url);
+		
+		player.loadVideoById(video_id);
+		player.seekTo(0);
+		// console.log("playing video associated with field answer choice", fieldName, choiceRawValue);
+		player.playVideo();
+	} else {
+		// player.stopVideo();
+		// player.seekTo(0);
+	}
+}
+
+Rochester.setVideoByFieldName = function(fieldName) {
+	// set video to this field's associated video
+	// console.log('z');
+	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].field) {
+		let url = Rochester.values[fieldName].field[Rochester.signerIndex];
+		// console.log('a');
+		if (url) {
+			// console.log('b');
+			let video_id = Rochester.getVidIdFromUrl(url);
+			if (video_id) {
+				// change video source and start from beginning
+				// console.log("loading video with ID: " + video_id);
+				if (!Rochester.curtain.locked) {
+					// console.log("showing curtain from setVideoByFieldName");
+					$("#curtain").hide();
+				}
+				$("#curtain h5").text("Click to play video.");
+				$("#curtain").css('height', '88%');
+				$("#survey-video iframe").removeClass('unseen');
+				player.loadVideoById(video_id);
+				player.seekTo(0);
+				Rochester.curtain.locked = false;
+				$('.fl-button').show();
+				// console.log('Rochester.curtain.locked', Rochester.curtain.locked);
+				return true;
+			}
+		}
+	}
+	
+	Rochester.curtain.locked = true;
+	$('.fl-button').hide();
+	// console.log('Rochester.curtain.locked', Rochester.curtain.locked);
+	$("#survey-video iframe").addClass('unseen');
+	player.pauseVideo();
+	$("#curtain h5").text("No video assigned for this survey question or answer.");
+	$("#curtain").show();
+	$("#curtain").css('height', '100%');
 }

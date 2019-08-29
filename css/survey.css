@@ -2,20 +2,13 @@ body {
   background-color: #FFF;
 }
 
-#pagecontent {
-  margin-top: none;
-}
-#pagecontent * {
-  background: none;
+#pagecontent table, #pagecontent td, #pagecontent tr, #pagecontent div {
+  background-color: #00000000;
 }
 
 #container {
-  margin-top: 8px;
   border: 1px solid #ccc;
-}
-
-#questiontable .labelrc {
-  padding-top: 16px;
+  background-color: #00000000;
 }
 
 #survey-video, #exit-survey-video {
@@ -50,7 +43,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 90%;
+  height: 100%;
 }
 
 #survey-options {
