@@ -27,40 +27,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onYouTubePlayerAPIReady() {
-	// // find first valid youtube URL and get video ID to init YT player
-	// var getFirstVidId = function() {
-		// // console.log('get first vid id');
-		// for (var key in Rochester.values) {
-			// if (Rochester.values.hasOwnProperty(key)) {
-				// let entry = Rochester.values[key];
-				// if (entry['field']) {
-					// let field = entry['field'];
-					// let array_length = field.length;
-					// for (let i = 0; i < array_length; i++) {
-						// let url = field[i];
-						// let vid_id = Rochester.getVidIdFromUrl(url);
-						// if (vid_id) {
-							// if (key == 'record_id') {
-								// Rochester.curtain = {
-									// locked: false
-								// };
-							// } else {
-								// Rochester.curtain = {
-									// locked: true
-								// };
-							// }
-							// // console.log('Rochester.curtain.locked', Rochester.curtain.locked);
-							// return vid_id;
-						// }
-					// };
-				// }
-			// }
-		// }
-	// }
-	
-	// let vid_id = getFirstVidId();
-	
-	// actually, just init blank video
+	// init blank video
 	let vid_id = '8tPnX7OPo0Q';
 	
 	player = new YT.Player('ytplayer', {
@@ -69,7 +36,9 @@ function onYouTubePlayerAPIReady() {
 		videoId: vid_id,
 		playerVars: {
 			modestbranding: 1,
-			playsinline: 1
+			playsinline: 1,
+			rel: 0,
+			showinfo: 0
 		},
 		events: {
 			onStateChange: function(target, data){
@@ -175,41 +144,18 @@ Rochester.init = function() {
 	$("#survey-navigation button:eq(0)").addClass("unseen");
 	
 	// register events
-	$("body").on('click touchstart', "#survey-navigation button:first-child", Rochester.backClicked);
-	$("body").on('click touchstart', "#survey-navigation button:last-child", Rochester.nextClicked);
+	$("body").on('mouseup', "#survey-navigation button:first-child", Rochester.backClicked);
+	$("body").on('mouseup', "#survey-navigation button:last-child", Rochester.nextClicked);
 	$("body").on('click touchstart', "#survey-options button.video", Rochester.videoButtonClicked);
 	$("body").on('click touchstart', "#survey-options button:last-child", Rochester.exitClicked);
+	
 	// $("body").on("click", "#questiontable tr input", Rochester.answerSelected);
 	$("body").on("click touchstart", "#questiontable tr [class^=choice]", Rochester.answerSelected);
-	$("body").on("click touchstart", ".signer-portrait", function() {
-		Rochester.signerIndex = $(this).index();
-		let modal = $(this).closest('.modal');
-		modal.modal('hide');
-		if (modal.attr('id') == 'signerModal') {
-			if (!Rochester.curtain.locked) {
-				$("#curtain").hide();
-			}
-		}
-		if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
-			Rochester.setVideoByFieldName("record_id");
-		} else {
-			let fieldName = $(Rochester.surveyTarget).attr('sq_id');
-			Rochester.setVideoByFieldName(fieldName);
-		}
-		player.seekTo(0);
-		
-		$.ajax({
-			method: "POST",
-			url: Rochester.ajaxURL,
-			data: {
-				action: "signer changed",
-				message: "user selected signer " + Rochester.signerIndex
-			},
-			dataType: "json"
-		}).done(function(msg) {
-			
-		});
-	});
+	
+	// play first video when signer select modal closes
+	$("body").on("click touchstart", ".signer-portrait", Rochester.signerButtonClicked);
+	$("body").on('#signerModal hidden.bs.modal', Rochester.signerButtonClicked); // (when closed by clicking outside of modal)
+	
 	$("body").on("click touchstart", "#curtain", function() {
 		if (!Rochester.curtain.locked) {
 			// console.log("showing curtain from event #curtain clicked");
@@ -218,15 +164,6 @@ Rochester.init = function() {
 		}
 	});
 	
-	// play first video when signer select modal closes
-	$("body").on('#signerModal hidden.bs.modal', function() {
-		if (!Rochester.curtain.locked) {
-			// console.log("showing curtain from event hidden.bs.modal");
-			$("#curtain").hide();
-			player.seekTo(0);
-			player.playVideo();
-		}
-	});
 	
 	$("#fontSizeSlider").on("change", function() {
 		let zoom = $("#fontSizeSlider").val() + "%";
@@ -510,6 +447,36 @@ Rochester.openSignerModal = function() {
 	
 	$("body").prepend(html);
 	$("#signerModal").modal('show');
+}
+
+Rochester.signerButtonClicked = function() {
+	Rochester.signerIndex = $(this).index();
+	let modal = $(this).closest('.modal');
+	modal.modal('hide');
+	if (modal.attr('id') == 'signerModal') {
+		if (!Rochester.curtain.locked) {
+			$("#curtain").hide();
+		}
+	}
+	if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
+		Rochester.setVideoByFieldName("record_id");
+	} else {
+		let fieldName = $(Rochester.surveyTarget).attr('sq_id');
+		Rochester.setVideoByFieldName(fieldName);
+	}
+	player.seekTo(0);
+	
+	$.ajax({
+		method: "POST",
+		url: Rochester.ajaxURL,
+		data: {
+			action: "signer changed",
+			message: "user selected signer " + Rochester.signerIndex
+		},
+		dataType: "json"
+	}).done(function(msg) {
+		
+	});
 }
 
 Rochester.getOptionsModalHtml = function() {
