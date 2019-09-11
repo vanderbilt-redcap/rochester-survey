@@ -60,7 +60,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		if ($result === null)
 			return null;
 		
-		$result = "var associatedValues = JSON.parse(`$result`);";
+		$result = "var associatedValues = JSON.parse('$result');";
 		
 		// $sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$instrument' order by log_id desc limit 1";
 		// $log_id = db_fetch_assoc(db_query($sql))["log_id"];
@@ -98,7 +98,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$portraits = $this->getSignerPortraits($instrument);
 		$portraitsEmbed = "var signer_portraits = false;";
 		if (!empty($portraits[$instrument])) {
-			$portraitsEmbed = "var signer_portraits = JSON.parse(`" . json_encode($portraits[$instrument]) . "`);";
+			$string = json_encode($portraits[$instrument]);
+			$string = str_replace("'", "\'", $string);
+			$portraitsEmbed = "var signer_portraits = JSON.parse('" . $string . "');";
 		}
 		// file_put_contents("C:/vumc/log.txt", print_r($portraits, true) . "\n");
 		// file_put_contents("C:/vumc/log.txt", print_r($portraitsEmbed, true), FILE_APPEND);
@@ -107,12 +109,12 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$exitModalVideo = $this->framework->getProjectSetting("exitModalVideo");
 		
 		if (!empty($exitModalText)) {
-			$exitModalText = "var exitModalText = `" . $exitModalText . "`;";
+			$exitModalText = "var exitModalText = '" . str_replace("'", "\'", $exitModalText) . "';";
 		} else {
 			$exitModalText = "var exitModalText = false;";
 		}
 		if (!empty($exitModalVideo)) {
-			$exitModalVideo = "var exitModalVideo = `" . $exitModalVideo . "`;";
+			$exitModalVideo = "var exitModalVideo = '" . str_replace("'", "\'", $exitModalVideo) . "';";
 		} else {
 			$exitModalVideo = "var exitModalVideo = false;";
 		}

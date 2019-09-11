@@ -71,6 +71,7 @@ $(function() {
 	Rochester.init();
 	Rochester.ajaxURL = "SURVEY_AJAX_URL";
 	
+	// console.log('loaded');
 	// setTimeout(function(){
 		// console.log('loading next video')
 		// player.loadVideoById('kTvHIDKLFqc')
@@ -85,19 +86,19 @@ Rochester.init = function() {
 	
 	// add video button to field labels
 	$(".fl").each(function(i, e) {
-		$(e).after(`<button type='button' class='btn btn-outline-primary fl-button'>
-				<span>Watch Question Video<span><i class='fas fa-video'></i>
-			</button>`);
+		$(e).after('<button type="button" class="btn btn-outline-primary fl-button">\
+				<span>Watch Question Video<span><i class="fas fa-video"></i>\
+			</button>');
 	});
 	
 	// add video iframe element, survey control div/button, hide most of the #pagecontent and questiontable children children
-	$("#pagecontainer").prepend(`
-			<div id="survey-video">
-				<div id='curtain'>
-					<h5>No video associated with this question or answer</h5>
-				</div>
-				<div id='ytplayer'></div>
-			</div>`);
+	$("#pagecontainer").prepend('\
+			<div id="survey-video">\
+				<div id="curtain">\
+					<h5>No video associated with this question or answer</h5>\
+				</div>\
+				<div id="ytplayer"></div>\
+			</div>');
 	
 	// <iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
 	
@@ -108,11 +109,11 @@ Rochester.init = function() {
 	$("#container").before(Rochester.getOptionsModalHtml());
 	
 	// add survey navigation buttons
-	$("#container").after(`
-			<div id="survey-navigation">
-				<button class="btn btn-primary">Back</button>
-				<button class="btn btn-primary">Next</button>
-			</div>`);
+	$("#container").after('\
+			<div id="survey-navigation">\
+				<button class="btn btn-primary">Back</button>\
+				<button class="btn btn-primary">Next</button>\
+			</div>');
 	
 	// spectrum color picker creation/initialization
 	$("#spectrum_bg_color").spectrum({
@@ -404,27 +405,27 @@ Rochester.getSignerButtons = function() {
 	let html = "";
 	for (i = 1; i <= Rochester.signerCount; i++) {
 		let img = signer_portraits[i] ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
-		html += `
-					<div class='signer-portrait close-on-select'>
-						` + img + `
-						<button type="button" class="btn btn-primary">Signer ` + i + `</button>
-					</div>`;
+		html += '\
+					<div class="signer-portrait close-on-select">\
+						' + img + '\
+						<button type="button" class="btn btn-primary">Signer ' + i + '</button>\
+					</div>';
 	}
 	return html;
 }
 
 Rochester.openSignerModal = function() {
-	let html = `
-	<div class="modal fade" id="signerModal" tabindex="-1" role="dialog" aria-labelledby="signerModalLabel" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="signerModalLabel">Choose a Signer</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body" id="signer-portraits">`;
+	let html = '\
+	<div class="modal fade" id="signerModal" tabindex="-1" role="dialog" aria-labelledby="signerModalLabel" aria-hidden="true">\
+		<div class="modal-dialog" role="document">\
+			<div class="modal-content">\
+				<div class="modal-header">\
+					<h5 class="modal-title" id="signerModalLabel">Choose a Signer</h5>\
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">\
+						<span aria-hidden="true">&times;</span>\
+					</button>\
+				</div>\
+				<div class="modal-body" id="signer-portraits">';
 	
 	// for (i = 1; i <= Rochester.signerCount; i++) {
 		// html += `
@@ -436,14 +437,14 @@ Rochester.openSignerModal = function() {
 	
 	html += Rochester.getSignerButtons();
 	
-	html += `
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>`;
+	html += '\
+				</div>\
+				<div class="modal-footer">\
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\
+				</div>\
+			</div>\
+		</div>\
+	</div>';
 	
 	$("body").prepend(html);
 	$("#signerModal").modal('show');
@@ -480,100 +481,100 @@ Rochester.signerButtonClicked = function() {
 }
 
 Rochester.getOptionsModalHtml = function() {
-	return `
-			<div id="survey-options">
-				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">
-					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>
-				</button>
-				<button type="button" class="btn btn-secondary video">
-					Hide Video<i class="fas fa-video-slash" style="margin-left: 8px"></i>
-				</button>
-				<button type="button" class="btn btn-danger">
-					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>
-				</button>
-			</div>
-			<div class="modal fade" id="optionsModal" tabindex="-1" role="dialog" aria-labelledby="optionsModalLabel" aria-hidden="true">
-				<div class="modal-dialog" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="optionsModalLabel">Survey Options</h5>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body">
-							<h5>Choose a Signer</h5>
-							<div class="row justify-content-around">
-								${Rochester.getSignerButtons()}
-							</div>
-							<h5>Adjust Colors</h5>
-							<div class="row justify-content-around">
-								<div class="col text-center">
-									<h5>Background Color</h5>
-									<input id="spectrum_bg_color">
-								</div>
-								<div class="col text-center">
-									<h5>Text Color</h5>
-									<input id="spectrum_text_color">
-								</div>
-							</div>
-							<h5>Adjust Text Size</h5>
-							<div class="row justify-content-around">
-								<button type="button" class="btn btn-outline-primary shrinkFont">Make Text Smaller</button>
-								<button type="button" class="btn btn-outline-primary growFont">Make Text Bigger</button>
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-						</div>
-					</div>
-				</div>
-			</div>
-	`;
+	return '\
+			<div id="survey-options">\
+				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">\
+					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>\
+				</button>\
+				<button type="button" class="btn btn-secondary video">\
+					Hide Video<i class="fas fa-video-slash" style="margin-left: 8px"></i>\
+				</button>\
+				<button type="button" class="btn btn-danger">\
+					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>\
+				</button>\
+			</div>\
+			<div class="modal fade" id="optionsModal" tabindex="-1" role="dialog" aria-labelledby="optionsModalLabel" aria-hidden="true">\
+				<div class="modal-dialog" role="document">\
+					<div class="modal-content">\
+						<div class="modal-header">\
+							<h5 class="modal-title" id="optionsModalLabel">Survey Options</h5>\
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">\
+								<span aria-hidden="true">&times;</span>\
+							</button>\
+						</div>\
+						<div class="modal-body">\
+							<h5>Choose a Signer</h5>\
+							<div class="row justify-content-around">\
+								${Rochester.getSignerButtons()}\
+							</div>\
+							<h5>Adjust Colors</h5>\
+							<div class="row justify-content-around">\
+								<div class="col text-center">\
+									<h5>Background Color</h5>\
+									<input id="spectrum_bg_color">\
+								</div>\
+								<div class="col text-center">\
+									<h5>Text Color</h5>\
+									<input id="spectrum_text_color">\
+								</div>\
+							</div>\
+							<h5>Adjust Text Size</h5>\
+							<div class="row justify-content-around">\
+								<button type="button" class="btn btn-outline-primary shrinkFont">Make Text Smaller</button>\
+								<button type="button" class="btn btn-outline-primary growFont">Make Text Bigger</button>\
+							</div>\
+						</div>\
+						<div class="modal-footer">\
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\
+						</div>\
+					</div>\
+				</div>\
+			</div>\
+	';
 }
 
 Rochester.getExitModalHtml = function() {
-	let modalHtml = `
-	<div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="exitModalLabel">Exit Survey?</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">`;
+	let modalHtml = '\
+	<div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">\
+		<div class="modal-dialog" role="document">\
+			<div class="modal-content">\
+				<div class="modal-header">\
+					<h5 class="modal-title" id="exitModalLabel">Exit Survey?</h5>\
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">\
+						<span aria-hidden="true">&times;</span>\
+					</button>\
+				</div>\
+				<div class="modal-body">';
 				
 	if (exitModalVideo) {
 		let video_id = exitModalVideo.split('v=')[1];
 		let ampersandPosition = video_id.indexOf('&');
-		let url = `https://www.youtube.com/embed/` + video_id;
+		let url = 'https://www.youtube.com/embed/' + video_id;
 		if(ampersandPosition != -1) {
-			url = `https://www.youtube.com/embed/` + video_id.substring(0, ampersandPosition);
+			url = 'https://www.youtube.com/embed/' + video_id.substring(0, ampersandPosition);
 		}
-		modalHtml += `
-					<div id="exit-survey-video">
-						<iframe id="exitVideoIframe" width="800" height="560" src="` + url + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-					</div>`;
+		modalHtml += '\
+					<div id="exit-survey-video">\
+						<iframe id="exitVideoIframe" width="800" height="560" src="' + url + '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\
+					</div>';
 	}
 	if (exitModalText) {
-		modalHtml += `
-					<p>` + exitModalText + `</p>`;
+		modalHtml += '\
+					<p>' + exitModalText + '</p>';
 	} else {
-		modalHtml += `
-					<p>Click 'Exit' to exit this survey or 'Cancel' to continue.</p>`;
+		modalHtml += '\
+					<p>Click Exit to exit this survey or Cancel to continue.</p>';
 	}
 	
-	modalHtml += `
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-danger" data-dismiss="modal" id="exitSurveyButton">Exit</button>
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-				</div>
-			</div>
-		</div>
-	</div>`;
+	modalHtml += '\
+				</div>\
+				<div class="modal-footer">\
+					<button type="button" class="btn btn-danger" data-dismiss="modal" id="exitSurveyButton">Exit</button>\
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>\
+				</div>\
+			</div>\
+		</div>\
+	</div>';
 	
 	return modalHtml;
 }
