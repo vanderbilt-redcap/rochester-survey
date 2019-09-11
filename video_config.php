@@ -12,7 +12,7 @@ $project = new \Project($module->framework->getProjectId());
 		</button>
 		<div class="dropdown-menu form_picker_dd" aria-labelledby="form_picker">
 			<?php
-				file_put_contents("C:/vumc/log.txt", "\$project->forms: " . print_r($project->forms, true) . "\n");
+				// file_put_contents("C:/vumc/log.txt", "\$project->forms: " . print_r($project->forms, true) . "\n");
 				foreach($project->forms as $form_name => $form) {
 					if (!empty($form["survey_id"])) {
 						echo '<a value="' . $form_name . '"class="dropdown-item" href="#">' . $form["menu"] . '</a>';

@@ -41,6 +41,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
+		// file_put_contents("C:/vumc/log.txt", "checking...\n");
+		// file_put_contents("C:/vumc/log.txt", "instrument value: $instrument\n", FILE_APPEND);
+		
 		$fbf_surveys = $this->framework->getProjectSetting("survey_name");
 		$found_this_form = false;
 		foreach($fbf_surveys as $name) {
@@ -50,18 +53,25 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			}
 		}
 		if (!$found_this_form)
-			return false;
+			return null;
 		
-		$sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$instrument' order by log_id desc limit 1";
-		$log_id = db_fetch_assoc(db_query($sql))["log_id"];
-		$result = "var associatedValues = false;";
-		if (!empty($log_id)) {
-			$sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
-			$result = db_result(db_query($sql), 0);
-			if (!empty($result)) {
-				$result = "var associatedValues = JSON.parse(`$result`);";
-			}
-		}
+		// get this instrument's associated field values
+		$result = $this->framework->getProjectSetting($instrument . "_field_associations");
+		if ($result === null)
+			return null;
+		
+		$result = "var associatedValues = JSON.parse(`$result`);";
+		
+		// $sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$instrument' order by log_id desc limit 1";
+		// $log_id = db_fetch_assoc(db_query($sql))["log_id"];
+		// $result = "var associatedValues = false;";
+		// if (!empty($log_id)) {
+			// $sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
+			// $result = db_result(db_query($sql), 0);
+			// if (!empty($result)) {
+				// $result = "var associatedValues = JSON.parse(`$result`);";
+			// }
+		// }
 		
 		// spectrum color picker inclusion
 		$spectrum_css_url = $this->getUrl("spectrum/spectrum.css");
@@ -138,13 +148,15 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			return "<p>This form is not a survey: $form_name</p>";
 		}
 		
-		$sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$form_name' order by log_id desc limit 1";
-		$log_id = db_fetch_assoc(db_query($sql))["log_id"];
-		$columns = 1;
-		if (!empty($log_id)) {
-			$sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
-			$result = db_query($sql);
-			$associations = json_decode(db_result($result, 0), true);
+		// $sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$form_name' order by log_id desc limit 1";
+		// $log_id = db_fetch_assoc(db_query($sql))["log_id"];
+		// $columns = 1;
+		$associations = $this->framework->getProjectSetting($form_name . "_field_associations");
+		if (!empty($associations)) {
+			// $sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
+			// $result = db_query($sql);
+			// $associations = json_decode(db_result($result, 0), true);
+			$associations = json_decode($associations, true);
 			foreach($associations as $field) {
 				if (!empty($field["field"])) {
 					$columns = max($columns, count($field["field"]));
@@ -156,6 +168,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				}
 			}
 		}
+		
+		// we'll want at least one value column and signer upload input
+		$columns = max(1, $columns);
 		
 		$html = '
 		<h6>Upload Signer Portraits</h6>

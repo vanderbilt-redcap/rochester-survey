@@ -38,7 +38,7 @@ $(function() {
 			data: form_data,
 			type: 'POST',
 			success: function(response) {
-				console.log(response);
+				// console.log(response);
 				group.find("img").remove();
 				group.prepend(response.html);
 				if (group.find("div.row button").length == 0 && !response.error) {
@@ -71,7 +71,7 @@ $(function() {
 			data.end_of_survey = true;
 		}
 		
-		console.log(data);
+		// console.log(data);
 		
 		$.ajax({
 			url: 'video_config_ajax.php',
@@ -79,7 +79,7 @@ $(function() {
 			data: data,
 			type: 'POST',
 			success: function(response) {
-				console.log(response);
+				// console.log(response);
 			},
 			complete: function(data) {
 				// console.log(data);
@@ -193,10 +193,10 @@ $(function() {
 			}
 		};
 		
-		console.log('savedata', {
-				action: "save_changes",
-				data: JSON.stringify(data)
-			});
+		// console.log('savedata', {
+				// action: "save_changes",
+				// data: JSON.stringify(data)
+			// });
 		
 		$.ajax({
 			method: "POST",
@@ -207,7 +207,7 @@ $(function() {
 			},
 			dataType: "json"
 		}).done(function(msg) {
-			console.log(JSON.parse(msg));
+			// console.log(JSON.parse(msg));
 		});
 	})
 	

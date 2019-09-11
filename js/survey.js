@@ -635,7 +635,7 @@ Rochester.setVideoByFieldName = function(fieldName) {
 	}
 	
 	Rochester.curtain.locked = true;
-	console.log("locking curtain");
+	// console.log("locking curtain");
 	
 	// load blank video
 	player.loadVideoById('8tPnX7OPo0Q');
