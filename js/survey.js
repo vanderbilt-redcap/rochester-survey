@@ -1,7 +1,7 @@
 // include css and bootstrap
-$('head').append('<link rel="stylesheet" type="text/css" href="CSS_URL">');
-$('head').append('<link rel="stylesheet" type="text/css" href="SPECTRUM_CSS">');
-$('head').append('<link rel="stylesheet" type="text/css" href="KEYBOARD_CSS">');
+$('head').append('<link rel="stylesheet" type="text\css" href="CSS_URL">');
+$('head').append('<link rel="stylesheet" type="text\css" href="SPECTRUM_CSS">');
+// $('head').append('<link rel="stylesheet" type="text\css" href="KEYBOARD_CSS">');
 
 $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
 $('head').append('<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/ui-lightness/jquery-ui.css" rel="stylesheet">');
@@ -42,7 +42,8 @@ function onYouTubePlayerAPIReady() {
 		},
 		events: {
 			onStateChange: function(target, data){
-				if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
+				// if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
+				if (target.data == YT.PlayerState.ENDED) {
 					if (!Rochester.curtain.locked) {
 						$("#curtain h5").text("Click to play video.");
 						// $("#curtain").css('height', '88%');
@@ -57,6 +58,7 @@ function onYouTubePlayerAPIReady() {
 			}
 		}
 	});
+	console.log('player instantiated:', player);
 }
 
 var Rochester = {

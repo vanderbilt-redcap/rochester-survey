@@ -43,9 +43,9 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: -webkit-calc(100% - 56px);
-  height: -moz-calc(100% - 56px);
-  height: calc(100% - 56px);
+  height: -webkit-calc(100%);
+  height: -moz-calc(100%);
+  height: calc(100%);
 }
 
 #survey-options {
