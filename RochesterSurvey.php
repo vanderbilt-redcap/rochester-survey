@@ -143,14 +143,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			return "<p>This form is not a survey: $form_name</p>";
 		}
 		
-		// $sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$form_name' order by log_id desc limit 1";
-		// $log_id = db_fetch_assoc(db_query($sql))["log_id"];
-		// $columns = 1;
 		$associations = $this->framework->getProjectSetting($form_name . "_field_associations");
 		if (!empty($associations)) {
-			// $sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
-			// $result = db_query($sql);
-			// $associations = json_decode(db_result($result, 0), true);
 			$associations = json_decode($associations, true);
 			foreach($associations as $field) {
 				if (!empty($field["field"])) {
@@ -167,88 +161,6 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// we'll want at least one value column and signer upload input
 		$columns = max(1, $columns);
 		
-		$html = '
-		<h6>Upload Signer Portraits</h6>
-		<div id="signer-portraits">';
-		
-		$portraits = $this->getSignerPortraits($form_name);
-		$imageElements = $portraits[$form_name];
-		
-		// create portrait upload input groups
-		for ($col = 1; $col <= $columns; $col++) {
-			$img = !empty($imageElements[$col]) ? $imageElements[$col] : "";
-			$delete_button = !empty($imageElements[$col]) ? "<button type='button' class='btn btn-outline-danger'>Delete</button>" : "";
-			$html .= "
-			<div class='image-upload signer-portrait'>
-				$img
-				<div class='row'>
-					<h6>Signer $col</h6>
-					$delete_button
-				</div>
-				<div class='input-group'>
-					<div class='custom-file'>
-						<input type='file' class='custom-file-input' id='portrait$col' aria-describedby='upload'>
-						<label class='custom-file-label text-truncate' for='portrait$col'>Choose image</label>
-					</div>
-				</div>
-			</div>";
-		}
-		
-		$exitSurveyText = $this->framework->getProjectSetting("exitModalText");
-		$exitSurveyVideo = $this->framework->getProjectSetting("exitModalVideo");
-		
-		$html .= '
-		</div>
-		<h6>Exit Survey Modal</h6>
-		<div id="exit-modal-config">
-			<div class="form-group">
-				<label for="exitModalTextInput">Text shown to participant in Exit Survey modal:</label>
-				<textarea type="text" class="form-control" id="exitModalTextInput" aria-describedby="exitModalText" rows="3" placeholder="Click `Exit` to exit this survey...">' . $exitSurveyText . '</textarea>
-			</div>
-			<div class="form-group">
-				<label for="exitVideoUrl">Video URL for accompanying video:</label>
-				<input type="text" class="form-control" id="exitVideoUrl" aria-describedby="exitModalVideo" value="' . $exitSurveyVideo . '" placeholder="http://www.youtube.com/..."></textarea>
-			</div>
-		</div>';
-		
-		// fetch end of survey image configured for this form (if there is one)
-		$img = null;
-		$delete_button = null;
-		$end_of_survey_images = $this->framework->getProjectSetting("end_of_survey_images");
-		if (!empty($end_of_survey_images)) {
-			$end_of_survey_images = json_decode($end_of_survey_images, true);
-			$edoc_id = $end_of_survey_images[$form_name];
-			if (!empty($edoc_id)) {
-				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
-				$result = db_query($sql);
-				if ($row = db_fetch_assoc($result)) {
-					$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-					$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
-					$img = "<img src='$imgSrc'>";
-					$delete_button = "<button type='button' class='btn btn-outline-danger'>Delete</button>";
-				}
-			}
-		}
-		
-		$html .= "
-		<h6>End of Survey Image/Logo</h6>
-		<div id='end-of-survey-config'>
-			<div class='image-upload logo-upload'>
-				$img
-				<div class='row'>
-					<h6>Image/Logo</h6>
-					$delete_button
-				</div>
-				<div class='input-group'>
-					<div class='custom-file'>
-						<input type='file' class='custom-file-input' id='logo-input' aria-describedby='upload'>
-						<label class='custom-file-label text-truncate' for='logo-input'>Choose image</label>
-					</div>
-				</div>
-			</div>
-		</div>
-		";
-		
 		$html .= '
 		<h6>Field and Answer Video Association</h6>
 		<p>Enter Youtube or Vimeo URLs for each field and answer.</p>
@@ -259,7 +171,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			</div>
 			<br>
 			<button class="btn btn-outline-primary" type="button" id="add_value_col">
-				Add Value Column
+				Add Signer
 			</button>
 		</div>
 		<table id="assoc_table" class="field_value" data-form-name="' . $form_name . '">
@@ -271,7 +183,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			$html .= "
 				<th class='value_column'>
 					<div>
-						<span>Value ($col)</span>";
+						<span>Signer ($col) Video URLs</span>";
 			
 			if ($col > 1) {
 				$html .= "
@@ -291,7 +203,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// $html .= "<tr><td>" . print_r($form, true) . "</td></tr>";
 		
 		foreach($form["fields"] as $field_name => $field) {
-			if (!empty($field)) {
+			if (!empty($field) and \REDCap::getRecordIdField() != $field_name) {
 				$value_col = "<input type=\"text\" class=\"form-control\" placeholder=\"Value\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\">";
 				$label_col = nl2br($project->metadata[$field_name]["element_label"]);
 				$type_col = "Descriptive";
@@ -351,6 +263,60 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$html .= "
 			</tbody>
 		</table>";
+		
+		$exitSurveyText = $this->framework->getProjectSetting("exitModalText");
+		$exitSurveyVideo = $this->framework->getProjectSetting("exitModalVideo");
+		
+		$html .= '
+		<h6>Exit Survey Modal</h6>
+		<div id="exit-modal-config">
+			<div class="form-group">
+				<label for="exitModalTextInput">Text shown to participant in Exit Survey modal:</label>
+				<textarea type="text" class="form-control" id="exitModalTextInput" aria-describedby="exitModalText" rows="3" placeholder="Click `Exit` to exit this survey...">' . $exitSurveyText . '</textarea>
+			</div>
+			<div class="form-group">
+				<label for="exitVideoUrl">Video URL for accompanying video:</label>
+				<input type="text" class="form-control" id="exitVideoUrl" aria-describedby="exitModalVideo" value="' . $exitSurveyVideo . '" placeholder="http://www.youtube.com/..."></textarea>
+			</div>
+		</div>';
+		
+		// fetch end of survey image configured for this form (if there is one)
+		$img = null;
+		$delete_button = null;
+		$end_of_survey_images = $this->framework->getProjectSetting("end_of_survey_images");
+		if (!empty($end_of_survey_images)) {
+			$end_of_survey_images = json_decode($end_of_survey_images, true);
+			$edoc_id = $end_of_survey_images[$form_name];
+			if (!empty($edoc_id)) {
+				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
+				$result = db_query($sql);
+				if ($row = db_fetch_assoc($result)) {
+					$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+					$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+					$img = "<img src='$imgSrc'>";
+					$delete_button = "<button type='button' class='btn btn-outline-danger'>Delete</button>";
+				}
+			}
+		}
+		
+		$html .= "
+		<h6>End of Survey Image/Logo</h6>
+		<div id='end-of-survey-config'>
+			<div class='image-upload logo-upload'>
+				$img
+				<div class='row'>
+					<h6>Image/Logo</h6>
+					$delete_button
+				</div>
+				<div class='input-group'>
+					<div class='custom-file'>
+						<input type='file' class='custom-file-input' id='logo-input' aria-describedby='upload'>
+						<label class='custom-file-label text-truncate' for='logo-input'>Choose image</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		";
 		
 		$html .= "
 		<button id='save_changes' class='btn btn-outline-primary' type='button'>Save Changes</button>";
