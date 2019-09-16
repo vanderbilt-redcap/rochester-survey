@@ -1,6 +1,4 @@
 // include css and bootstrap
-$('head').append('<link rel="stylesheet" type="text\css" href="CSS_URL">');
-$('head').append('<link rel="stylesheet" type="text\css" href="SPECTRUM_CSS">');
 // $('head').append('<link rel="stylesheet" type="text\css" href="KEYBOARD_CSS">');
 
 $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');

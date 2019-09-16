@@ -41,6 +41,12 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
+		?>
+		<link rel="stylesheet" type="text/css" href="<?=$this->getUrl("css/survey.css")?>">
+		<link rel="stylesheet" type="text/css" href="<?=$this->getUrl("spectrum/spectrum.css")?>">
+		<script src="<?=$this->getUrl("spectrum/spectrum.js")?>"></script>
+		<?php
+		
 		// file_put_contents("C:/vumc/log.txt", "checking...\n");
 		// file_put_contents("C:/vumc/log.txt", "instrument value: $instrument\n", FILE_APPEND);
 		
@@ -72,16 +78,6 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				// $result = "var associatedValues = JSON.parse(`$result`);";
 			// }
 		// }
-		
-		// spectrum color picker inclusion
-		$spectrum_css_url = $this->getUrl("spectrum/spectrum.css");
-		$spectrum_script = file_get_contents($this->getUrl("spectrum/spectrum.js"));
-		$injection_element1 = "
-		<!-- spectrum color picker (for Rochester survey controls) -->
-		<script type=\"text/javascript\">
-			$spectrum_script
-		</script>";
-		echo($injection_element1);
 		
 		// // on-screen keyboard library include
 		// $keyboard_css_url = $this->getUrl("keyboard/css/keyboard.min.css");
@@ -120,11 +116,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		$url1 = $this->getUrl("js/survey.js");
-		$url2 = $this->getUrl("css/survey.css");
 		$url3 = $this->getUrl("survey_ajax.php");
 		$survey_script = file_get_contents($url1);
-		$survey_script = str_replace("CSS_URL", $url2, $survey_script);
-		$survey_script = str_replace("SPECTRUM_CSS", $spectrum_css_url, $survey_script);
 		$survey_script = str_replace("KEYBOARD_CSS", $keyboard_css_url, $survey_script);
 		$survey_script = str_replace("SURVEY_AJAX_URL", $url3, $survey_script);
 		$injection_element3 = "
