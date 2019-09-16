@@ -12,12 +12,12 @@ $(function() {
 	
 	$('body').on('change', ".custom-file-input", function() {
 		// upload user image for signer portrait
-		let fileName = $(this).val().split('\\').pop();
+		var fileName = $(this).val().split('\\').pop();
 		$(this).next('.custom-file-label').addClass("selected").html(fileName);
-		let group = $(this).closest('.image-upload');
-		let input = group.find('input');
-		let file_data = $(input).prop('files')[0];
-		let form_data = new FormData();
+		var group = $(this).closest('.image-upload');
+		var input = group.find('input');
+		var file_data = $(input).prop('files')[0];
+		var form_data = new FormData();
 		
 		if (group.hasClass('signer-portrait')) {
 			form_data.append("action", "portrait_upload");
@@ -58,8 +58,8 @@ $(function() {
 	// delete portrait button
 	$("body").on("click", ".image-upload button", function() {
 		// delete portrait for this signer index
-		let group = $(this).closest('.image-upload');
-		let data = {
+		var group = $(this).closest('.image-upload');
+		var data = {
 			action: 'image_delete',
 			form_name: form_name
 		};
@@ -106,7 +106,7 @@ $(function() {
 	})
 	
 	$("body").on("click", "#add_value_col", function(i, e) {
-		let n = $("#assoc_table th").length - 1;
+		var n = $("#assoc_table th").length - 1;
 		$("#assoc_table").find("th").eq(n).after(`
 				<th class="value_column">
 					<div>
@@ -121,7 +121,7 @@ $(function() {
 		});
 		
 		// add another signer portrait upload div
-		let portraitIndex = $('.signer-portrait').length + 1;
+		var portraitIndex = $('.signer-portrait').length + 1;
 		$("#signer-portraits").append(`
 		<div class="signer-portrait">
 			<h6>Signer ` + portraitIndex + `</h6>
@@ -135,8 +135,8 @@ $(function() {
 	});
 	
 	$("body").on("click", ".remove_column", function() {
-		let th = $(this).parent().parent();
-		let i = th.index();
+		var th = $(this).parent().parent();
+		var i = th.index();
 		$("#assoc_table").find("th").eq(i).remove();
 		$("#assoc_table tr").each(function(j, e) {
 			$(e).find("td").eq(i).remove();
@@ -153,15 +153,15 @@ $(function() {
 	
 	$("body").on("click", "#save_changes", function(i, e) {
 		// create and build fields object, null where no values are associated
-		let fields = {};
-		let form_name = $("#assoc_table").attr("data-form-name");
+		var fields = {};
+		var form_name = $("#assoc_table").attr("data-form-name");
 		if (!form_name)
 			return;
 		$(".value-row .value_column").each(function(j, td) {
-			let row = $(td).parent();
-			let fieldName = row.attr("data-field-name");
-			let cellValue = $(td).find('input').val();
-			let column = $(td).index() - 3;
+			var row = $(td).parent();
+			var fieldName = row.attr("data-field-name");
+			var cellValue = $(td).find('input').val();
+			var column = $(td).index() - 3;
 			if (cellValue.length > 0) {
 				// create field entry in fields array if necessary
 				if (!fields.hasOwnProperty(fieldName)) {
@@ -173,7 +173,7 @@ $(function() {
 					}
 					fields[fieldName].field[column] = cellValue;
 				} else {
-					let rawValue = row.find(".label_column").attr("data-raw-value");
+					var rawValue = row.find(".label_column").attr("data-raw-value");
 					if (fields[fieldName].hasOwnProperty("choices") == false)
 						fields[fieldName].choices = {};
 					if (fields[fieldName].choices.hasOwnProperty(rawValue) == false)
@@ -184,7 +184,7 @@ $(function() {
 		});
 		
 		// // send to server to save on db
-		let data = {
+		var data = {
 			form_data: fields,
 			form_name: form_name,
 			exit_survey: {
@@ -215,9 +215,9 @@ $(function() {
 		if (!$("#applyToDuplicates").is(":checked")) {
 			return false;
 		}
-		let entered_value = $(this).find("input").val();
-		let target_label = $(this).parent().find(".label_column").text();
-		let target_column_index = $(this).index()
+		var entered_value = $(this).find("input").val();
+		var target_label = $(this).parent().find(".label_column").text();
+		var target_column_index = $(this).index()
 		// console.log($(this));
 		// console.log($(".value_column"));
 		$(".value_column").each(function(index, element) {

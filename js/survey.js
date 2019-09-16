@@ -25,13 +25,10 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onYouTubePlayerAPIReady() {
-	// init blank video
-	let vid_id = '8tPnX7OPo0Q';
-	
 	player = new YT.Player('ytplayer', {
 		height: '560',
 		width: '800',
-		videoId: vid_id,
+		videoId: '8tPnX7OPo0Q', // init blank video
 		playerVars: {
 			modestbranding: 1,
 			playsinline: 1,
@@ -167,7 +164,7 @@ Rochester.init = function() {
 	
 	
 	$("#fontSizeSlider").on("change", function() {
-		let zoom = $("#fontSizeSlider").val() + "%";
+		var zoom = $("#fontSizeSlider").val() + "%";
 		$("html").css("zoom", zoom);
 		$("#spectrum_color_picker").spectrum({
 			color: "#FFF",
@@ -183,7 +180,7 @@ Rochester.init = function() {
 	// allow users to load question video after selecting answers
 	$("body").on("click touchstart", ".fl-button", function(target) {
 		// set video to this field's associated video
-		let fieldName = $(Rochester.surveyTarget).attr('sq_id');
+		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
 		Rochester.setVideoByFieldName(fieldName);
 	});
 	
@@ -237,7 +234,7 @@ Rochester.openOptions = function() {
 }
 
 Rochester.endSurvey = function() {
-	let obname = $("#submit-action").prop("name");
+	var obname = $("#submit-action").prop("name");
 	if ($('#form select[name="'+obname+'"]').hasClass('rc-autocomplete') && $('#rc-ac-input_'+obname).length) {
 		$('#rc-ac-input_'+obname).trigger('blur');
 	}
@@ -248,7 +245,7 @@ Rochester.endSurvey = function() {
 }
 
 Rochester.backClicked = function() {
-	let foundNewTarget = false;
+	var foundNewTarget = false;
 	// try to find a suitable previous questiontable tbody tr to display
 	$(Rochester.surveyTarget).prevAll().each(function(i, e) {
 		if (Rochester.isRealField(e)) {
@@ -258,7 +255,7 @@ Rochester.backClicked = function() {
 			$(e).removeClass("unseen");
 			
 			// set video to this field's associated video
-			let fieldName = $(e).attr('sq_id');
+			var fieldName = $(e).attr('sq_id');
 			Rochester.setVideoByFieldName(fieldName);
 			
 			$.ajax({
@@ -295,15 +292,15 @@ Rochester.backClicked = function() {
 }
 
 Rochester.nextClicked = function() {
-	let setSurveyToField = function(field) {
+	var setSurveyToField = function(field) {
 		// hide/show field elements
 		$(Rochester.surveyTarget).addClass("unseen");
 		Rochester.surveyTarget = field;
 		$(field).removeClass("unseen");
 		
 		// set video to this field's associated video
-		let fieldName = $(field).attr('sq_id');
-		let vidFound = Rochester.setVideoByFieldName(fieldName);
+		var fieldName = $(field).attr('sq_id');
+		var vidFound = Rochester.setVideoByFieldName(fieldName);
 		
 		// log field change on server
 		$.ajax({
@@ -327,7 +324,7 @@ Rochester.nextClicked = function() {
 		$("#survey-navigation button:eq(0)").removeClass("unseen");
 		
 		$("#questiontable tbody").children().addClass("unseen");
-		let foundNewTarget = false;
+		var foundNewTarget = false;
 		$("#questiontable tbody").children().each(function(i, e) {
 			if (Rochester.isRealField(e)) {
 				
@@ -343,7 +340,7 @@ Rochester.nextClicked = function() {
 			Rochester.endSurvey();
 		}
 	} else {
-		let foundNewTarget = false;
+		var foundNewTarget = false;
 		$(Rochester.surveyTarget).nextAll().each(function(i, e) {
 			
 			if (Rochester.isRealField(e)) {
@@ -362,7 +359,7 @@ Rochester.nextClicked = function() {
 }
 
 Rochester.videoButtonClicked = function() {
-	let html = $(this).html();
+	var html = $(this).html();
 	if (html.search("Hide") != -1) {
 		html = html.replace("Hide", "Show")
 		html = html.replace("video-slash", "video")
@@ -385,9 +382,9 @@ Rochester.countSigners = function() {
 	}
 	
 	// count how many signers we have (same as columns of associations)
-	let signerCount = 1;
+	var signerCount = 1;
 	for (var fieldname in Rochester.values) {
-		let entry = Rochester.values[fieldname];
+		var entry = Rochester.values[fieldname];
 		if (entry.field) {
 			signerCount = Math.max(signerCount, entry.field.length);
 		}
@@ -402,9 +399,9 @@ Rochester.countSigners = function() {
 
 Rochester.getSignerButtons = function() {
 	// make and return html buttons
-	let html = "";
+	var html = "";
 	for (i = 1; i <= Rochester.signerCount; i++) {
-		let img = signer_portraits[i] ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
+		var img = signer_portraits[i] ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
 		html += '\
 					<div class="signer-portrait close-on-select" data-signer-index="' + (i-1) + '">\
 						' + img + '\
@@ -415,7 +412,7 @@ Rochester.getSignerButtons = function() {
 }
 
 Rochester.openSignerModal = function() {
-	let html = '\
+	var html = '\
 	<div class="modal fade" id="signerModal" tabindex="-1" role="dialog" aria-labelledby="signerModalLabel" aria-hidden="true">\
 		<div class="modal-dialog" role="document">\
 			<div class="modal-content">\
@@ -453,7 +450,7 @@ Rochester.openSignerModal = function() {
 Rochester.signerButtonClicked = function() {
 	Rochester.signerIndex = $(this).data('signer-index')
 
-	let modal = $(this).closest('.modal');
+	var modal = $(this).closest('.modal');
 	modal.modal('hide');
 }
 
@@ -462,7 +459,7 @@ Rochester.initializeSigner = function() {
 		Rochester.signerIndex = 0
 	}
 
-	let modal = $(this).closest('.modal');
+	var modal = $(this).closest('.modal');
 	if (modal.attr('id') == 'signerModal') {
 		if (!Rochester.curtain.locked) {
 			$("#curtain").hide();
@@ -471,7 +468,7 @@ Rochester.initializeSigner = function() {
 	if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
 		Rochester.setVideoByFieldName("record_id");
 	} else {
-		let fieldName = $(Rochester.surveyTarget).attr('sq_id');
+		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
 		Rochester.setVideoByFieldName(fieldName);
 	}
 	player.seekTo(0);
@@ -543,7 +540,7 @@ Rochester.getOptionsModalHtml = function() {
 }
 
 Rochester.getExitModalHtml = function() {
-	let modalHtml = '\
+	var modalHtml = '\
 	<div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">\
 		<div class="modal-dialog" role="document">\
 			<div class="modal-content">\
@@ -556,9 +553,9 @@ Rochester.getExitModalHtml = function() {
 				<div class="modal-body">';
 				
 	if (exitModalVideo) {
-		let video_id = exitModalVideo.split('v=')[1];
-		let ampersandPosition = video_id.indexOf('&');
-		let url = 'https://www.youtube.com/embed/' + video_id;
+		var video_id = exitModalVideo.split('v=')[1];
+		var ampersandPosition = video_id.indexOf('&');
+		var url = 'https://www.youtube.com/embed/' + video_id;
 		if(ampersandPosition != -1) {
 			url = 'https://www.youtube.com/embed/' + video_id.substring(0, ampersandPosition);
 		}
@@ -598,12 +595,12 @@ Rochester.exitClicked = function(event) {
 // player handling functions
 
 Rochester.answerSelected = function(e) {
-	let input = $(this).find('input');
-	let fieldName = $(this).closest("tr").attr('sq_id');
-	let choiceRawValue = input.attr("value") || input.attr('code');
+	var input = $(this).find('input');
+	var fieldName = $(this).closest("tr").attr('sq_id');
+	var choiceRawValue = input.attr("value") || input.attr('code');
 	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].choices && Rochester.values[fieldName].choices[choiceRawValue]) {
-		let url = Rochester.values[fieldName].choices[choiceRawValue][Rochester.signerIndex];
-		let video_id = Rochester.getVidIdFromUrl(url);
+		var url = Rochester.values[fieldName].choices[choiceRawValue][Rochester.signerIndex];
+		var video_id = Rochester.getVidIdFromUrl(url);
 		
 		player.loadVideoById(video_id);
 		player.seekTo(0);
@@ -619,11 +616,11 @@ Rochester.setVideoByFieldName = function(fieldName) {
 	// set video to this field's associated video
 	// console.log('z');
 	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].field) {
-		let url = Rochester.values[fieldName].field[Rochester.signerIndex];
+		var url = Rochester.values[fieldName].field[Rochester.signerIndex];
 		// console.log('a');
 		if (url) {
 			// console.log('b');
-			let video_id = Rochester.getVidIdFromUrl(url);
+			var video_id = Rochester.getVidIdFromUrl(url);
 			if (video_id) {
 				// change video source and start from beginning
 				// console.log("loading video with ID: " + video_id);
