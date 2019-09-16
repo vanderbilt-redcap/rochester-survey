@@ -2,29 +2,42 @@
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 $project = new \Project($module->framework->getProjectId());
-?>
-<div>
-	<h5>Survey Video Configuration</h5>
-	<p>Select a survey form to associate values for:</p>
-	<div class="dropdown">
-		<button class="btn btn-outline-primary dropdown-toggle" type="button" id="form_picker" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-			Survey Forms
-		</button>
-		<div class="dropdown-menu form_picker_dd" aria-labelledby="form_picker">
-			<?php
-				// file_put_contents("C:/vumc/log.txt", "\$project->forms: " . print_r($project->forms, true) . "\n");
-				foreach($project->forms as $form_name => $form) {
-					if (!empty($form["survey_id"])) {
-						echo '<a value="' . $form_name . '"class="dropdown-item" href="#">' . $form["menu"] . '</a>';
-					}
-				}
-			?>
+
+$surveys = [];
+foreach($project->forms as $form_name => $form) {
+	if (!empty($form["survey_id"])) {
+		$surveys[] = [
+			"form_name" => $form_name,
+			"form_menu" => $form["menu"]
+		];
+	}
+}
+
+if (count($surveys) == 0) {
+	echo "<p>The Rochester Survey module found 0 survey instruments for this REDCap project. Please enable surveys and add a survey instrument.</p>";
+} elseif (count($surveys) == 1) {
+	echo $module->make_field_val_association_page($surveys[0]["form_name"]);
+} else {
+	$html = "
+	<div>
+		<h5>Survey Video Configuration</h5>
+		<p>Select a survey form to associate values for:</p>
+		<div class='dropdown'>
+			<button class='btn btn-outline-primary dropdown-toggle' type='button' id='form_picker' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
+				Survey Forms
+			</button>
+			<div class='dropdown-menu form_picker_dd' aria-labelledby='form_picker'>";
+	foreach($surveys as $survey) {
+		$html .= '<a value="' . $survey["form_name"] . '"class="dropdown-item" href="#">' . $survey["form_menu"] . '</a>';
+	}
+	$html .= "
+			</div>
 		</div>
-	</div>
-	<div id="form_assocs">
-	</div>
-</div>
-<?php
+		<div id='form_assocs'>
+		</div>
+	</div>";
+	echo $html;
+}
 
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
 
