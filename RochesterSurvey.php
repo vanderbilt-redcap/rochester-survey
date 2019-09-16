@@ -196,15 +196,29 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 					</div>
 				</th>";
 		}
-		$html .= '
+		$html .= "
 			</thead>
-		<tbody id="field_value_assoc">';
-		
-		// $html .= "<tr><td>" . print_r($form, true) . "</td></tr>";
+		<tbody id='field_value_assoc'>
+			<tr class='value-row'>
+				<td class='type_column'>Signer</td>
+				<td class='var_column'>N/A</td>
+				<td class='label_column'>URL for signer's preview video</td>
+				<td class='value_column'>
+					<input type='text' class='form-control' value='' placeholder='http://youtu.be/abc123' aria-label='Associated value' aria-describedby='basic-addon1'>
+				</td>
+			</tr>
+			<tr class='value-row'>
+				<td class='type_column'>Survey Instructions</td>
+				<td class='var_column'>N/A</td>
+				<td class='label_column'>Optional URL for video to play with survey instructions</td>
+				<td class='value_column'>
+					<input type='text' class='form-control' value='' placeholder='URL' aria-label='Associated value' aria-describedby='basic-addon1'>
+				</td>
+			</tr>";
 		
 		foreach($form["fields"] as $field_name => $field) {
 			if (!empty($field) and \REDCap::getRecordIdField() != $field_name) {
-				$value_col = "<input type=\"text\" class=\"form-control\" placeholder=\"Value\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\">";
+				$value_col = "<input type=\"text\" class=\"form-control\" placeholder=\"URL\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\">";
 				$label_col = nl2br($project->metadata[$field_name]["element_label"]);
 				$type_col = "Descriptive";
 				if ($project->metadata[$field_name]["element_preceding_header"] == "Form Status") {
@@ -222,7 +236,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 					$input_value = $value_col;
 					if (!empty($associations[$field_name]["field"][$col- 1])) {
 						$temp_value = $associations[$field_name]["field"][$col - 1];
-						$input_value = "<input type='text' class='form-control' value='$temp_value' placeholder='Value' aria-label='Associated value' aria-describedby='basic-addon1'>";
+						$input_value = "<input type='text' class='form-control' value='$temp_value' placeholder='URL' aria-label='Associated value' aria-describedby='basic-addon1'>";
 					}
 					$html .= "
 					<td class='value_column'>$input_value</td>";
@@ -247,7 +261,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 					$input_value = $value_col;
 					if (!empty($associations[$field_name]["choices"][$raw_value][$col- 1])) {
 						$temp_value = $associations[$field_name]["choices"][$raw_value][$col - 1];
-						$input_value = "<input type='text' class='form-control' value='$temp_value' placeholder='Value' aria-label='Associated value' aria-describedby='basic-addon1'>";
+						$input_value = "<input type='text' class='form-control' value='$temp_value' placeholder='URL' aria-label='Associated value' aria-describedby='basic-addon1'>";
 					}
 					$html .= "
 					<td class='value_column'>$input_value</td>";
