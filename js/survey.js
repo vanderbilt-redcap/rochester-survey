@@ -155,7 +155,7 @@ Rochester.init = function() {
 	
 	// play first video when signer select modal closes
 	$("body").on("click touchstart", ".signer-portrait", Rochester.signerButtonClicked);
-	$("body").on('#signerModal hidden.bs.modal', Rochester.signerButtonClicked); // (when closed by clicking outside of modal)
+	$("body").on('#signerModal hidden.bs.modal', Rochester.initializeSigner); // (when closed by clicking outside of modal)
 	
 	$("body").on("click touchstart", "#curtain", function() {
 		if (!Rochester.curtain.locked) {
@@ -406,7 +406,7 @@ Rochester.getSignerButtons = function() {
 	for (i = 1; i <= Rochester.signerCount; i++) {
 		let img = signer_portraits[i] ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
 		html += '\
-					<div class="signer-portrait close-on-select">\
+					<div class="signer-portrait close-on-select" data-signer-index="' + (i-1) + '">\
 						' + img + '\
 						<button type="button" class="btn btn-primary">Signer ' + i + '</button>\
 					</div>';
@@ -451,9 +451,18 @@ Rochester.openSignerModal = function() {
 }
 
 Rochester.signerButtonClicked = function() {
-	Rochester.signerIndex = $(this).index();
+	Rochester.signerIndex = $(this).data('signer-index')
+
 	let modal = $(this).closest('.modal');
 	modal.modal('hide');
+}
+
+Rochester.initializeSigner = function() {	
+	if(Rochester.signerIndex === undefined){
+		Rochester.signerIndex = 0
+	}
+
+	let modal = $(this).closest('.modal');
 	if (modal.attr('id') == 'signerModal') {
 		if (!Rochester.curtain.locked) {
 			$("#curtain").hide();
