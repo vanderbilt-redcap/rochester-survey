@@ -154,7 +154,7 @@ Rochester.init = function() {
 	$("body").on("click touchstart", "#questiontable tr [class^=choice]", Rochester.answerSelected);
 	
 	// play first video when signer select modal closes
-	$("body").on("click touchstart", ".signer-portrait", Rochester.signerButtonClicked);
+	$("body").on("click", ".signer-portrait", Rochester.signerButtonClicked);
 	$("body").on('#signerModal hidden.bs.modal', Rochester.initializeSigner); // (when closed by clicking outside of modal)
 	
 	$("body").on("click touchstart", "#curtain", function() {
