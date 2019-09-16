@@ -106,6 +106,10 @@ body {
   cursor: pointer;
 }
 
+.modal-content {
+  max-width: 97%;
+}
+
 #optionsModal .modal-body {
   display: flex;
   align-items: center;
