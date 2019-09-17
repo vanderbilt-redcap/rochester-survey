@@ -465,8 +465,21 @@ Rochester.initializeSigner = function() {
 			$("#curtain").hide();
 		}
 	}
-	if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
-		Rochester.setVideoByFieldName("record_id");
+	console.log('1');
+	var instructionsVideoUrl = Rochester.values['instructions_urls'][Rochester.signerIndex]
+	if (Rochester.surveyTarget == $("#surveytitlelogo")[0] && instructionsVideoUrl) {
+		// Rochester.setVideoByFieldName("record_id");
+		// if instructions url configured, show that video
+		var vid_id = Rochester.getVidIdFromUrl(instructionsVideoUrl);
+		if (vid_id) {
+			if (!Rochester.curtain.locked) {
+				$("#curtain").hide();
+			}
+			$("#curtain h5").text("Click to play video.");
+			player.loadVideoById(vid_id);
+			player.seekTo(0);
+			Rochester.curtain.locked = false;
+		}
 	} else {
 		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
 		Rochester.setVideoByFieldName(fieldName);
