@@ -4,22 +4,17 @@ namespace Vanderbilt\RochesterSurvey;
 class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 	function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
 		$form_name = $instrument;
-		// file_put_contents("C:/vumc/log.txt", "here");
 		
 		// fetch end of survey image configured for this form (if there is one)
 		$img = null;
-		$end_of_survey_images = $this->framework->getProjectSetting("end_of_survey_images");
-		if (!empty($end_of_survey_images)) {
-			$end_of_survey_images = json_decode($end_of_survey_images, true);
-			$edoc_id = $end_of_survey_images[$form_name];
-			if (!empty($edoc_id)) {
-				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
-				$result = db_query($sql);
-				if ($row = db_fetch_assoc($result)) {
-					$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-					$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
-					$img = "<img src='$imgSrc'>";
-				}
+		$edoc_id = $this->framework->getProjectSetting("endOfSurveyImage");
+		if (!empty($edoc_id)) {
+			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
+			$result = db_query($sql);
+			if ($row = db_fetch_assoc($result)) {
+				$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+				$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+				$img = "<img src='$imgSrc'>";
 			}
 		}
 		
@@ -46,74 +41,11 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<link rel="stylesheet" type="text/css" href="<?=$this->getUrl("spectrum/spectrum.css")?>">
 		<script src="<?=$this->getUrl("spectrum/spectrum.js")?>"></script>
 		<?php
-		
-		// file_put_contents("C:/vumc/log.txt", "checking...\n");
-		// file_put_contents("C:/vumc/log.txt", "instrument value: $instrument\n", FILE_APPEND);
-		
-		$fbf_surveys = $this->framework->getProjectSetting("survey_name");
-		$found_this_form = false;
-		foreach($fbf_surveys as $name) {
-			if ($instrument === $name) {
-				$found_this_form = true;
-				break;
-			}
-		}
-		if (!$found_this_form)
-			return null;
-		
 		// get this instrument's associated field values
-		$result = $this->framework->getProjectSetting($instrument . "_field_associations");
+		$result = $this->framework->getProjectSetting($instrument);
 		if ($result === null)
 			return null;
-		
-		$result = "var associatedValues = JSON.parse('$result');";
-		
-		// $sql = "select log_id from redcap_external_modules_log_parameters where name='form-name' and value='$instrument' order by log_id desc limit 1";
-		// $log_id = db_fetch_assoc(db_query($sql))["log_id"];
-		// $result = "var associatedValues = false;";
-		// if (!empty($log_id)) {
-			// $sql = "select value from redcap_external_modules_log_parameters where name='form-field-value-associations' and log_id=$log_id";
-			// $result = db_result(db_query($sql), 0);
-			// if (!empty($result)) {
-				// $result = "var associatedValues = JSON.parse(`$result`);";
-			// }
-		// }
-		
-		// // on-screen keyboard library include
-		// $keyboard_css_url = $this->getUrl("keyboard/css/keyboard.min.css");
-		// $keyboard_script = file_get_contents($this->getUrl("keyboard/js/jquery.keyboard.js"));
-		// $keyboard_ext_script = file_get_contents($this->getUrl("keyboard/js/jquery.keyboard.extension-all.js"));
-		// $injection_element2 = "
-		// <!-- on-screen keyboard library -->
-		// <script type=\"text/javascript\">
-			// $keyboard_script
-			// $keyboard_ext_script
-		// </script>";
-		// echo($injection_element2);
-		
-		$portraits = $this->getSignerPortraits($instrument);
-		$portraitsEmbed = "var signer_portraits = false;";
-		if (!empty($portraits[$instrument])) {
-			$string = json_encode($portraits[$instrument]);
-			$string = str_replace("'", "\'", $string);
-			$portraitsEmbed = "var signer_portraits = JSON.parse('" . $string . "');";
-		}
-		// file_put_contents("C:/vumc/log.txt", print_r($portraits, true) . "\n");
-		// file_put_contents("C:/vumc/log.txt", print_r($portraitsEmbed, true), FILE_APPEND);
-		
-		$exitModalText = $this->framework->getProjectSetting("exitModalText");
-		$exitModalVideo = $this->framework->getProjectSetting("exitModalVideo");
-		
-		if (!empty($exitModalText)) {
-			$exitModalText = "var exitModalText = '" . str_replace("'", "\'", $exitModalText) . "';";
-		} else {
-			$exitModalText = "var exitModalText = false;";
-		}
-		if (!empty($exitModalVideo)) {
-			$exitModalVideo = "var exitModalVideo = '" . str_replace("'", "\'", $exitModalVideo) . "';";
-		} else {
-			$exitModalVideo = "var exitModalVideo = false;";
-		}
+		$result = "var associatedValues = JSON.parse(`$result`);";
 		
 		$url1 = $this->getUrl("js/survey.js");
 		$url3 = $this->getUrl("survey_ajax.php");
@@ -124,9 +56,6 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<!-- Rochester survey interface module -->
 		<script type=\"text/javascript\">
 			$result
-			$portraitsEmbed
-			$exitModalText
-			$exitModalVideo
 			$survey_script
 		</script>";
 		
@@ -143,9 +72,13 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			return "<p>This form is not a survey: $form_name</p>";
 		}
 		
-		$associations = $this->framework->getProjectSetting($form_name . "_field_associations");
-		if (!empty($associations)) {
-			$associations = json_decode($associations, true);
+		$settings = $this->framework->getProjectSetting($form_name);
+		if (!empty($settings)) {
+			$settings = json_decode($settings, true);
+			$associations = $settings['fields'];
+			$columns = 1;
+			$columns = max($columns, count($settings["signer_urls"]));
+			$columns = max($columns, count($settings["instructions_urls"]));
 			foreach($associations as $field) {
 				if (!empty($field["field"])) {
 					$columns = max($columns, count($field["field"]));
@@ -158,12 +91,15 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			}
 		}
 		
+		
 		// we'll want at least one value column and signer upload input
 		$columns = max(1, $columns);
 		
 		$html .= '
+		<h5>Survey Instrument Configuration</h5>
+		
 		<h6>Field and Answer Video Association</h6>
-		<p>Enter Youtube or Vimeo URLs for each field and answer.</p>
+		<p>Enter Youtube video URLs for each field and answer.</p>
 		<div id="table-controls">
 			<div class="custom-control custom-switch">
 				<input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
@@ -174,6 +110,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				Add Signer
 			</button>
 		</div>
+		
 		<table id="assoc_table" class="field_value" data-form-name="' . $form_name . '">
 			<thead>
 				<th class="type_column">Type</th>
@@ -199,22 +136,33 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$html .= "
 			</thead>
 		<tbody id='field_value_assoc'>
-			<tr class='value-row'>
+			<tr class='value-row signer-previews'>
 				<td class='type_column'>Signer</td>
 				<td class='var_column'>N/A</td>
-				<td class='label_column'>URL for signer's preview video</td>
+				<td class='label_column'>URL for this signer's preview video</td>";
+		
+		for ($col = 1; $col <= $columns; $col++) {
+			$value = $settings['signer_urls'][$col - 1];
+			$html .= "
 				<td class='value_column'>
-					<input type='text' class='form-control' value='' placeholder='http://youtu.be/abc123' aria-label='Associated value' aria-describedby='basic-addon1'>
-				</td>
+					<input type='text' class='form-control' value='$value' placeholder='http://youtu.be/abc123' aria-label='Associated value' aria-describedby='basic-addon1'>
+				</td>";
+		}
+		
+		$html .= "
 			</tr>
-			<tr class='value-row'>
+			<tr class='value-row instructions-urls'>
 				<td class='type_column'>Survey Instructions</td>
 				<td class='var_column'>N/A</td>
-				<td class='label_column'>Optional URL for video to play with survey instructions</td>
+				<td class='label_column'>URL for the video that will show when the participant is shown the survey instructions</td>";
+		
+		for ($col = 1; $col <= $columns; $col++) {
+			$value = $settings['instructions_urls'][$col - 1];
+			$html .= "
 				<td class='value_column'>
-					<input type='text' class='form-control' value='' placeholder='URL' aria-label='Associated value' aria-describedby='basic-addon1'>
-				</td>
-			</tr>";
+					<input type='text' class='form-control' value='$value' placeholder='URL' aria-label='Associated value' aria-describedby='basic-addon1'>
+				</td>";
+		}
 		
 		foreach($form["fields"] as $field_name => $field) {
 			if (!empty($field) and \REDCap::getRecordIdField() != $field_name) {
@@ -278,8 +226,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			</tbody>
 		</table>";
 		
-		$exitSurveyText = $this->framework->getProjectSetting("exitModalText");
-		$exitSurveyVideo = $this->framework->getProjectSetting("exitModalVideo");
+		$exitSurveyText = $settings['exitModalText'];
+		$exitSurveyVideo = $settings['exitModalVideo'];
 		
 		$html .= '
 		<h6>Exit Survey Modal</h6>
@@ -297,19 +245,15 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// fetch end of survey image configured for this form (if there is one)
 		$img = null;
 		$delete_button = null;
-		$end_of_survey_images = $this->framework->getProjectSetting("end_of_survey_images");
-		if (!empty($end_of_survey_images)) {
-			$end_of_survey_images = json_decode($end_of_survey_images, true);
-			$edoc_id = $end_of_survey_images[$form_name];
-			if (!empty($edoc_id)) {
-				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
-				$result = db_query($sql);
-				if ($row = db_fetch_assoc($result)) {
-					$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-					$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
-					$img = "<img src='$imgSrc'>";
-					$delete_button = "<button type='button' class='btn btn-outline-danger'>Delete</button>";
-				}
+		$edoc_id = $settings['endOfSurveyImage'];
+		if (!empty($edoc_id)) {
+			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
+			$result = db_query($sql);
+			if ($row = db_fetch_assoc($result)) {
+				$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
+				$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+				$img = "<img src='$imgSrc'>";
+				$delete_button = "<button type='button' class='btn btn-outline-danger'>Delete</button>";
 			}
 		}
 		

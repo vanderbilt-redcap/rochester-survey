@@ -27,7 +27,7 @@ $(function() {
 		}
 		
 		form_data.append("image", file_data);
-		form_data.append("form_name", form_name);
+		form_data.append("form_name", $("#assoc_table").attr('data-form-name'));
 		
 		$.ajax({
 			url: 'video_config_ajax.php',
@@ -61,7 +61,7 @@ $(function() {
 		var group = $(this).closest('.image-upload');
 		var data = {
 			action: 'image_delete',
-			form_name: form_name
+			form_name: $("#assoc_table").attr('data-form-name')
 		};
 		
 		if (group.hasClass('signer-portrait')) {
@@ -154,49 +154,56 @@ $(function() {
 	$("body").on("click", "#save_changes", function(i, e) {
 		// create and build fields object, null where no values are associated
 		var fields = {};
-		var form_name = $("#assoc_table").attr("data-form-name");
+		var signerPreviews = [];
+		var instructionsURLs = [];
+		form_name = $("#assoc_table").attr("data-form-name");
 		if (!form_name)
 			return;
 		$(".value-row .value_column").each(function(j, td) {
 			var row = $(td).parent();
-			var fieldName = row.attr("data-field-name");
-			var cellValue = $(td).find('input').val();
 			var column = $(td).index() - 3;
-			if (cellValue.length > 0) {
-				// create field entry in fields array if necessary
-				if (!fields.hasOwnProperty(fieldName)) {
-					fields[fieldName] = {};
-				}
-				if (row.find(".type_column").text().search("Field") >= 0) {
-					if (!fields[fieldName].hasOwnProperty("field")) {
-						fields[fieldName].field = [];
+			if (row.hasClass('signer-previews') && $(td).find('input').val()) {
+				// we're dealing with a signer preview URL
+				signerPreviews[column] = $(td).find('input').val();
+			} else if (row.hasClass('instructions-urls') && $(td).find('input').val()) {
+				// we're dealing with a signer preview URL
+				instructionsURLs[column] = $(td).find('input').val();
+			} else {
+				var fieldName = row.attr("data-field-name");
+				var cellValue = $(td).find('input').val();
+				if (cellValue.length > 0) {
+					// create field entry in fields array if necessary
+					if (!fields.hasOwnProperty(fieldName)) {
+						fields[fieldName] = {};
 					}
-					fields[fieldName].field[column] = cellValue;
-				} else {
-					var rawValue = row.find(".label_column").attr("data-raw-value");
-					if (fields[fieldName].hasOwnProperty("choices") == false)
-						fields[fieldName].choices = {};
-					if (fields[fieldName].choices.hasOwnProperty(rawValue) == false)
-						fields[fieldName].choices[rawValue] = [];
-					fields[fieldName].choices[rawValue][column] = cellValue;
+					if (row.find(".type_column").text().search("Field") >= 0) {
+						if (!fields[fieldName].hasOwnProperty("field")) {
+							fields[fieldName].field = [];
+						}
+						fields[fieldName].field[column] = cellValue;
+					} else {
+						var rawValue = row.find(".label_column").attr("data-raw-value");
+						if (fields[fieldName].hasOwnProperty("choices") == false)
+							fields[fieldName].choices = {};
+						if (fields[fieldName].choices.hasOwnProperty(rawValue) == false)
+							fields[fieldName].choices[rawValue] = [];
+						fields[fieldName].choices[rawValue][column] = cellValue;
+					}
 				}
 			}
 		});
 		
 		// // send to server to save on db
 		var data = {
-			form_data: fields,
 			form_name: form_name,
-			exit_survey: {
-				modalText: $("#exitModalTextInput").val(),
-				modalVideo: $("#exitVideoUrl").val(),
-			}
+			instructions_urls: instructionsURLs,
+			signer_urls: signerPreviews,
+			fields: fields,
+			exitModalText: $("#exitModalTextInput").val(),
+			exitModalVideo: $("#exitVideoUrl").val(),
 		};
 		
-		// console.log('savedata', {
-				// action: "save_changes",
-				// data: JSON.stringify(data)
-			// });
+		console.log('sending data:', data);
 		
 		$.ajax({
 			method: "POST",
@@ -206,8 +213,8 @@ $(function() {
 				data: JSON.stringify(data)
 			},
 			dataType: "json"
-		}).done(function(msg) {
-			// console.log(JSON.parse(msg));
+		}).always(function(response) {
+			simpleDialog(response.msg);
 		});
 	})
 	

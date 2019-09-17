@@ -1,6 +1,6 @@
 <?php
 
-// file_put_contents("C:/vumc/log.txt", print_r($_POST
+require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 
 /////////////
 // from: https://stackoverflow.com/questions/15188033/human-readable-file-size
@@ -57,53 +57,67 @@ if ($action == 'get_form_config') {
 	$html = $module->make_field_val_association_page($_POST['form_name']);
 	echo $html;
 } elseif ($action == 'save_changes') {
+	$project = new \Project($module->framework->getProjectId());
 	$data = json_decode($_POST['data'], true);
 	$filtered = [
-		"form_data" => [],
-		"exit_survey" => []
+		"signer_urls" => [],
+		"instructions_urls" => [],
+		"fields" => []
 	];
+	$filtered['form_name'] = filter_var($data['form_name'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+	$survey_display_name = $project->forms[$filtered["form_name"]]["menu"];
+	
+	// if user cleared all values from survey config, delete settings in module
+	if (empty($data['instructions_urls']) and
+		empty($data['signer_urls']) and
+		empty($data['fields']) and
+		empty($data['exitModalText']) and
+		empty($data['exitModalVideo'])) {
+			$module->framework->removeProjectSetting($data['form_name']);
+			exit('{
+				"msg": "Removed all survey settings for ' . print_r($survey_display_name, true) . '"
+			}');
+	}
 	
 	// sanitize JSON -- starting with non-url fields
-	$filtered['form_name'] = filter_var($data['form_name'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
-	$filtered['exit_survey']['modalText'] = filter_var($data['exit_survey']['modalText'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
-	$filtered['exit_survey']['modalVideo'] = filter_var($data['exit_survey']['modalVideo'], FILTER_VALIDATE_URL, FILTER_NULL_ON_FAILURE);
+	$filtered['exitModalText'] = filter_var($data['exitModalText'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+	$filtered['exitModalVideo'] = filter_var($data['exitModalVideo'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+	
+	// sanitize instructions urls
+	foreach($data['instructions_urls'] as $i => $url) {
+		$filtered['instructions_urls'][$i] = filter_var($url, FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+	}
+	// sanitize signer urls
+	foreach($data['signer_urls'] as $i => $url) {
+		$filtered['signer_urls'][$i] = filter_var($url, FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+	}
 	
 	// sanitize field/choice URLs
-	foreach ($data['form_data'] as $field_name => $field_arr) {
-		$filtered['form_data'][$field_name] = [];
+	foreach ($data['fields'] as $field_name => $field_arr) {
+		$filtered['fields'][$field_name] = [];
 		if (isset($field_arr['field'])) {
-			$filtered['form_data'][$field_name]['field'] = [];
+			$filtered['fields'][$field_name]['field'] = [];
 			foreach ($field_arr['field'] as $i => $url) {
-				$filtered['form_data'][$field_name]['field'][$i] = filter_var($url, FILTER_VALIDATE_URL, FILTER_NULL_ON_FAILURE);
+				$filtered['fields'][$field_name]['field'][$i] = filter_var($url, FILTER_VALIDATE_URL, FILTER_NULL_ON_FAILURE);
 			}
 		}
 		if (isset($field_arr['choices'])) {
-			$filtered['form_data'][$field_name]['choices'] = [];
+			$filtered['fields'][$field_name]['choices'] = [];
 			foreach ($field_arr['choices'] as $raw_value => $choice_arr) {
-				$filtered['form_data'][$field_name]['choices'][$raw_value] = [];
+				$filtered['fields'][$field_name]['choices'][$raw_value] = [];
 				foreach ($choice_arr as $i => $url) {
-					$filtered['form_data'][$field_name]['choices'][$raw_value][$i] = filter_var($url, FILTER_VALIDATE_URL, FILTER_NULL_ON_FAILURE);
+					$filtered['fields'][$field_name]['choices'][$raw_value][$i] = filter_var($url, FILTER_VALIDATE_URL, FILTER_NULL_ON_FAILURE);
 				}
 			}
 		}
 	}
 	
-	$settingName = $filtered["form_name"] . "_field_associations";
-	$module->framework->setProjectSetting($settingName, json_encode($filtered["form_data"]));
+	$module->framework->setProjectSetting($filtered["form_name"], json_encode($filtered));
+	$settings = $module->framework->getProjectSetting($filtered["form_name"]);
 	
-	// file_put_contents("C:/vumc/log.txt", print_r($filtered, true));
-	
-	// $log_id = $module->framework->log("save_values", [
-		// "form-name" => $filtered["form_name"],
-		// "form-field-value-associations" => json_encode($filtered["form_data"])
-	// ]);
-	
-	$module->framework->setProjectSetting("exitModalText", $filtered['exit_survey']['modalText']);
-	$module->framework->setProjectSetting("exitModalVideo", $filtered['exit_survey']['modalVideo']);
-	
-	// $filtered['log_id'] = $log_id;
-	
-	// echo json_encode(json_encode($filtered));
+	exit('{
+		"msg": "Saved settings for ' . print_r($survey_display_name, true) . '"
+	}');
 } elseif (!empty($_FILES['image'])) {
 	$uploaded_image = $_FILES['image'];
 	$form_name = $_POST['form_name'];
@@ -155,65 +169,31 @@ if ($action == 'get_form_config') {
 		"notes" => "REDCap wasn't able to retrieve the image from the database."
 	];
 	
-	if ($action == 'portrait_upload') {
-		$portraits = $module->framework->getProjectSetting("portraits");
-		if (empty($portraits)) {
-			$portraits = [];
+	if ($action == 'logo_upload') {
+		// get settings or make new settings array
+		$settings = $module->framework->getProjectSetting($form_name);
+		if (empty($settings)) {
+			$settings = [];
 		} else {
-			$portraits = json_decode($portraits, true);
-		}
-		if (empty($portraits[$form_name])) {
-			$portraits[$form_name] = [];
-		}
-		
-		// determine which portrait index
-		preg_match("/(\d+)/", $_POST['portrait_index'], $matches);
-		$index = intval($matches[0]);
-		
-		// delete old edoc if edoc_id in storage
-		if (!empty($portraits[$form_name][$index])) {
-			$old_edoc_id = $portraits[$form_name][$index];
-			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
-			$result = db_query($sql);
-			while ($row = db_fetch_assoc($result)) {
-				unlink(EDOC_PATH . $row["stored_name"]);
+			$settings = json_decode($settings, true);
+			
+			// delete old image
+			$old_edoc_id = $settings['endOfSurveyImage'];
+			if (!empty($old_edoc_id)) {
+				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
+				$result = db_query($sql);
+				while ($row = db_fetch_assoc($result)) {
+					unlink(EDOC_PATH . $row["stored_name"]);
+				}
 			}
 		}
 		
 		// save file
 		$new_edoc_id = $module->framework->saveFile($file['tmp_name']);
-		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$new_edoc_id";
-		$result = db_query($sql);
-		while ($row = db_fetch_assoc($result)) {
-			$uri = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-			$iconSrc = "data: {$row["mime_type"]};base64,$uri";
-			$imgElement = "<img src='$iconSrc' class='portrait-image'>";
-			$portraits[$form_name][$index] = $new_edoc_id;
-			$module->framework->setProjectSetting("portraits", json_encode($portraits));
-			$jsonArray = [
-				"success" => true,
-				"html" => $imgElement
-			];
-		}
-	} elseif ($action == 'logo_upload') {
-		$end_of_survey_images = $module->framework->getProjectSetting("end_of_survey_images");
-		if (empty($end_of_survey_images)) {
-			$end_of_survey_images = [];
-		} else {
-			$end_of_survey_images = json_decode($end_of_survey_images, true);
-		}
+		$settings['endOfSurveyImage'] = $new_edoc_id;
+		$module->framework->setProjectSetting($form_name, json_encode($settings));
 		
-		$old_edoc_id = $end_of_survey_images[$form_name];
-		if (!empty($old_edoc_id)) {
-			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
-			$result = db_query($sql);
-			while ($row = db_fetch_assoc($result)) {
-				unlink(EDOC_PATH . $row["stored_name"]);
-			}
-		}
-		
-		// save file
-		$new_edoc_id = $module->framework->saveFile($file['tmp_name']);
+		// send back image
 		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$new_edoc_id";
 		$result = db_query($sql);
 		while ($row = db_fetch_assoc($result)) {
@@ -221,7 +201,6 @@ if ($action == 'get_form_config') {
 			$iconSrc = "data: {$row["mime_type"]};base64,$uri";
 			$imgElement = "<img src='$iconSrc' class='logo-image'>";
 			$end_of_survey_images[$form_name] = $new_edoc_id;
-			$module->framework->setProjectSetting("end_of_survey_images", json_encode($end_of_survey_images));
 			$jsonArray = [
 				"success" => true,
 				"html" => $imgElement

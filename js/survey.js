@@ -376,15 +376,15 @@ Rochester.videoButtonClicked = function() {
 }
 
 Rochester.countSigners = function() {
-	if (!Rochester.values) {
+	if (!Rochester.values.fields) {
 		Rochester.signerCount = 0;
 		return false;
 	}
 	
 	// count how many signers we have (same as columns of associations)
 	var signerCount = 1;
-	for (var fieldname in Rochester.values) {
-		var entry = Rochester.values[fieldname];
+	for (var fieldname in Rochester.values.fields) {
+		var entry = Rochester.values.fields[fieldname];
 		if (entry.field) {
 			signerCount = Math.max(signerCount, entry.field.length);
 		}
@@ -598,8 +598,8 @@ Rochester.answerSelected = function(e) {
 	var input = $(this).find('input');
 	var fieldName = $(this).closest("tr").attr('sq_id');
 	var choiceRawValue = input.attr("value") || input.attr('code');
-	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].choices && Rochester.values[fieldName].choices[choiceRawValue]) {
-		var url = Rochester.values[fieldName].choices[choiceRawValue][Rochester.signerIndex];
+	if (Rochester.values && Rochester.values.fields && Rochester.values.fields[fieldName] && Rochester.values.fields[fieldName].choices && Rochester.values.fields[fieldName].choices[choiceRawValue]) {
+		var url = Rochester.values.fields[fieldName].choices[choiceRawValue][Rochester.signerIndex];
 		var video_id = Rochester.getVidIdFromUrl(url);
 		
 		player.loadVideoById(video_id);
@@ -615,8 +615,8 @@ Rochester.answerSelected = function(e) {
 Rochester.setVideoByFieldName = function(fieldName) {
 	// set video to this field's associated video
 	// console.log('z');
-	if (Rochester.values && Rochester.values[fieldName] && Rochester.values[fieldName].field) {
-		var url = Rochester.values[fieldName].field[Rochester.signerIndex];
+	if (Rochester.values && Rochester.values.fields && Rochester.values.fields[fieldName] && Rochester.values.fields[fieldName].field) {
+		var url = Rochester.values.fields[fieldName].field[Rochester.signerIndex];
 		// console.log('a');
 		if (url) {
 			// console.log('b');
