@@ -25,9 +25,7 @@ function onYouTubeIframeAPIReady() {
 	else{
 		$('#exit-survey-video').hide()
 	}
-}
 
-function onYouTubePlayerAPIReady() {
 	player = new YT.Player('ytplayer', {
 		height: '560',
 		width: '800',
