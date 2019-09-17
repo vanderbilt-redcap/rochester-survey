@@ -11,6 +11,14 @@ body {
   background-color: #00000000;
 }
 
+#questiontable td {
+  /*
+  	The bottom border is not necessary since we only show one field at a time.
+  	We remove it since does not respect the text color like other borders.
+  */
+  border-bottom: none;
+}
+
 #survey-video, #exit-survey-video {
   display: flex;
   align-items: center;
@@ -104,6 +112,10 @@ body {
   border-radius: 50%;
   background: #4CAF50;
   cursor: pointer;
+}
+
+.modal-content {
+  max-width: 96.5%;
 }
 
 #optionsModal .modal-body {
