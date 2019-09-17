@@ -4,13 +4,6 @@
 $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
 $('head').append('<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/ui-lightness/jquery-ui.css" rel="stylesheet">');
 
-  // Load the IFrame Player API code asynchronously.
-var tag = document.createElement('script');
-tag.id = 'survey-video-script';
-tag.src = 'https://www.youtube.com/iframe_api';
-var firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
   // Replace the 'videoIframe' element with an <iframe> and
   // YouTube player after the API code downloads.
 var player;
@@ -684,3 +677,10 @@ Rochester.setVideoByFieldName = function(fieldName) {
 	$("#curtain h5").text("No video assigned for this survey question or answer.");
 	$("#curtain").show();
 }
+
+// Load the IFrame Player API code asynchronously.
+var tag = document.createElement('script');
+tag.id = 'survey-video-script';
+tag.src = 'https://www.youtube.com/iframe_api';
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
