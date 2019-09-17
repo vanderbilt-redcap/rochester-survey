@@ -177,18 +177,18 @@ Rochester.init = function() {
 	// register events
 	$("body").on('mouseup', "#survey-navigation button:first-child", Rochester.backClicked);
 	$("body").on('mouseup', "#survey-navigation button:last-child", Rochester.nextClicked);
-	$("body").on('click touchstart', "#survey-options button.video", Rochester.videoButtonClicked);
-	$("body").on('click touchstart', "#survey-options button:last-child", Rochester.exitClicked);
+	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
+	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
 	// $("body").on('click', "div.signer-preview *", Rochester.signerPreviewClicked);
 	
 	// $("body").on("click", "#questiontable tr input", Rochester.answerSelected);
-	$("body").on("click touchstart", "#questiontable tr [class^=choice]", Rochester.answerSelected);
+	$("body").on("click", "#questiontable tr [class^=choice]", Rochester.answerSelected);
 	
 	// play first video when signer select modal closes
 	$("body").on("click", ".signer-portrait", Rochester.signerButtonClicked);
 	$("body").on('#signerModal hidden.bs.modal', Rochester.initializeSigner); // (when closed by clicking outside of modal)
 	
-	$("body").on("click touchstart", "#curtain", function() {
+	$("body").on("click", "#curtain", function() {
 		if (!Rochester.curtain.locked) {
 			$("#curtain").hide();
 			player.playVideo();
@@ -211,7 +211,7 @@ Rochester.init = function() {
 	});
 	
 	// allow users to load question video after selecting answers
-	$("body").on("click touchstart", ".fl-button", function(target) {
+	$("body").on("click", ".fl-button", function(target) {
 		// set video to this field's associated video
 		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
 		Rochester.setVideoByFieldName(fieldName);
@@ -221,18 +221,18 @@ Rochester.init = function() {
 	// $("body").on('change', '#ytCaptions, #ytVolume', function() {Rochester.useYtControls = true});
 	
 	// exit survey modal Exit button
-	$("body").on("click touchstart", "#exitSurveyButton", function() {
+	$("body").on("click", "#exitSurveyButton", function() {
 		dataEntrySubmit(document.getElementById('submit-action'));
 	});
 	
 	// font resize buttons available in Survey Options modal
 	$("#changeFont").hide();
 	var optionsModal = $('#optionsModal')
-	$("body").on("click touchstart", ".shrinkFont", function() {
+	$("body").on("click", ".shrinkFont", function() {
 		$(".decreaseFont").trigger("click");
 		optionsModal.modal('hide')
 	});
-	$("body").on("click touchstart", ".growFont", function() {
+	$("body").on("click", ".growFont", function() {
 		$(".increaseFont").trigger("click");
 		optionsModal.modal('hide')
 	});

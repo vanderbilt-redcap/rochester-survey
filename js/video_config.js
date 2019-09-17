@@ -5,7 +5,7 @@ $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath
 var form_name = "";
 
 $(function() {
-	$('body').on('click touchstart', ".custom-file-input", function() {
+	$('body').on('click', ".custom-file-input", function() {
 		// upload user image for signer portrait
 		$(this).val('')
 	});
