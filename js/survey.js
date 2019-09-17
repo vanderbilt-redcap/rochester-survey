@@ -37,6 +37,12 @@ function onYouTubePlayerAPIReady() {
 		},
 		events: {
 			onStateChange: function(target, data){
+				/*
+					Only hiding the video on stop seems to be a good compromise.
+					It hides suggestions during most use cases.
+					It unfortunately also hides controls on the platforms with larger screens (an issue for very short videos).
+					However, power users still have the option of pausing a video and accessing controls
+				*/
 				// if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
 				if (target.data == YT.PlayerState.ENDED) {
 					if (!Rochester.curtain.locked) {
