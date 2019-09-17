@@ -48,9 +48,6 @@ $(function() {
 				if (response.error) {
 					group.find("button").remove();
 				}
-			},
-			complete: function(data) {
-				// console.log(data);
 			}
 		});
 	});
@@ -203,7 +200,7 @@ $(function() {
 			exitModalVideo: $("#exitVideoUrl").val(),
 		};
 		
-		console.log('sending data:', data);
+		// console.log('sending data:', data);
 		
 		$.ajax({
 			method: "POST",
@@ -225,12 +222,8 @@ $(function() {
 		var entered_value = $(this).find("input").val();
 		var target_label = $(this).parent().find(".label_column").text();
 		var target_column_index = $(this).index()
-		// console.log($(this));
-		// console.log($(".value_column"));
 		$(".value_column").each(function(index, element) {
-			// console.log($(element).index());
 			if ($(element).parent().find(".label_column").text() == target_label && $(element).index() === target_column_index) {
-				// console.log($(element));
 				$(element).find("input").val(entered_value);
 			}
 		});

@@ -114,6 +114,16 @@ body {
   cursor: pointer;
 }
 
+div.signer-preview {
+  padding: 8px 8px 2px 8px;
+  margin-bottom: 12px;
+}
+
+.blueHighlight {
+  border: 1px solid #007bff;
+  border-radius: 2px;
+}
+
 #optionsModal .modal-body {
   display: flex;
   align-items: center;
