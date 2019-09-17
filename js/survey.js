@@ -227,11 +227,14 @@ Rochester.init = function() {
 	
 	// font resize buttons available in Survey Options modal
 	$("#changeFont").hide();
+	var optionsModal = $('#optionsModal')
 	$("body").on("click touchstart", ".shrinkFont", function() {
 		$(".decreaseFont").trigger("click");
+		optionsModal.modal('hide')
 	});
 	$("body").on("click touchstart", ".growFont", function() {
 		$(".increaseFont").trigger("click");
+		optionsModal.modal('hide')
 	});
 	
 	// add on-screen keyboards to textareas
