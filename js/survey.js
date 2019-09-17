@@ -2,7 +2,6 @@
 // $('head').append('<link rel="stylesheet" type="text\css" href="KEYBOARD_CSS">');
 
 $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
-$('head').append('<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/ui-lightness/jquery-ui.css" rel="stylesheet">');
 
   // Replace the 'videoIframe' element with an <iframe> and
   // YouTube player after the API code downloads.
