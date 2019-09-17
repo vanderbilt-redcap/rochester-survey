@@ -599,7 +599,7 @@ Rochester.getExitModalHtml = function() {
 				</div>\
 				<div class="modal-footer">\
 					<button type="button" class="btn btn-danger" data-dismiss="modal" id="exitSurveyButton">Exit</button>\
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>\
+					<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="Rochester.resetExitVideo()">Cancel</button>\
 				</div>\
 			</div>\
 		</div>\
@@ -613,8 +613,14 @@ Rochester.exitClicked = function(event) {
 	player.pauseVideo();
 
 	if(player2){
-		player2.seekTo(0);
 		player2.playVideo();
+	}
+}
+
+Rochester.resetExitVideo = function() {
+	if(player2){
+		player2.pauseVideo();
+		player2.seekTo(0);
 	}
 }
 
