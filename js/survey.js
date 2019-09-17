@@ -98,6 +98,19 @@ function onYouTubeIframeAPIReady() {
 var Rochester = {
 	curtain: {
 		locked: false
+	},
+	updateBackgroundColor: function(color) {
+		$("body").css("background-color", color);
+		$("html").css("background-color", color);
+		$("#pagecontent").css("background-color", color);
+		$("#pagecontent").css("margin-top", "0px");
+	},
+	updateTextColor: function(color) {
+		$("#container").css("color", color);
+		$("#container").css("border", "2px solid " + color);
+		$(".fl-button").contents().addBack(".fl-button").css("color", color);
+		$(".fl-button").contents().addBack(".fl-button").css("border-color", color);
+		$("#pagecontent").css("margin-top", "0px");
 	}
 };
 
@@ -164,22 +177,25 @@ Rochester.init = function() {
 	$("#spectrum_bg_color").spectrum(Object.assign({
 		color: $("body").css("background-color"),
 		move: function(color) {
-			$("body").css("background-color", color.toHexString());
-			$("html").css("background-color", color.toHexString());
-			$("#pagecontent").css("background-color", color.toHexString());
-			$("#pagecontent").css("margin-top", "0px");
+			Rochester.updateBackgroundColor(color.toHexString())
 		}
 	}, sharedSpectrumOptions));
 	$("#spectrum_text_color").spectrum(Object.assign({
 		color: $("#container").css("color"),
 		move: function(color) {
-			$("#container").css("color", color.toHexString());
-			$("#container").css("border", "2px solid " + color.toHexString());
-			$(".fl-button").contents().addBack(".fl-button").css("color", color.toHexString());
-			$(".fl-button").contents().addBack(".fl-button").css("border-color", color.toHexString());
-			$("#pagecontent").css("margin-top", "0px");
+			Rochester.updateTextColor(color.toHexString())
 		}
 	}, sharedSpectrumOptions));
+	$("#optionsModal button.resetColors").click(function() {
+		var defaultBgColor = 'white'
+		var defaultTextColor = 'rgb(33, 37, 41)'
+		
+		$("#spectrum_bg_color").spectrum("set", defaultBgColor)
+		$("#spectrum_text_color").spectrum("set", defaultTextColor)
+
+		Rochester.updateBackgroundColor(defaultBgColor)
+		Rochester.updateTextColor(defaultTextColor)
+	});
 	
 	// hide most of #pagecontent (except surveytitlelogo and instructions)
 	$("#pagecontent form").addClass("unseen");
@@ -618,13 +634,16 @@ Rochester.getOptionsModalHtml = function() {
 							</div>\
 							<h5>Adjust Colors</h5>\
 							<div class="row justify-content-around">\
-								<div class="text-center">\
+								<div class="col-12 text-center">\
 									<h5>Background Color</h5>\
 									<input id="spectrum_bg_color">\
 								</div>\
-								<div class="text-center">\
+								<div class="col-12 text-center">\
 									<h5>Text Color</h5>\
 									<input id="spectrum_text_color">\
+								</div>\
+								<div class="col-12 text-center">\
+									<button type="button" class="btn btn-outline-primary resetColors" style="margin-top: 20px; margin-bottom: 10px">Reset Colors</button>\
 								</div>\
 							</div>\
 							<h5>Adjust Text Size</h5>\
