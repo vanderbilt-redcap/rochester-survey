@@ -16,12 +16,22 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 var player2;
 function onYouTubeIframeAPIReady() {
-	player2 = new YT.Player('exitVideoIframe', {
-		playerVars: {
-			autoplay: 1,
-			modestbranding: 1
-		}
-	});
+	var exitModalVideo = Rochester.values['exitModalVideo'];
+	var video_id = Rochester.getVidIdFromUrl(exitModalVideo);
+	if(video_id){
+		player2 = new YT.Player('exitVideoIframe', {
+			videoId: video_id,
+			playerVars: {
+				modestbranding: 1,
+				playsinline: 1,
+				rel: 0,
+				showinfo: 0
+			}
+		});
+	}
+	else{
+		$('#exit-survey-video').hide()
+	}
 }
 
 function onYouTubePlayerAPIReady() {
@@ -571,17 +581,11 @@ Rochester.getExitModalHtml = function() {
 						<span aria-hidden="true">&times;</span>\
 					</button>\
 				</div>\
-				<div class="modal-body">';
-	
-	var exitModalVideo = Rochester.values['exitModalVideo'];
-	var video_id = Rochester.getVidIdFromUrl(exitModalVideo);
-	if (video_id) {
-		var url = 'https://www.youtube.com/embed/' + video_id;
-		modalHtml += '\
+				<div class="modal-body">\
 					<div id="exit-survey-video">\
-						<iframe id="exitVideoIframe" width="800" height="560" src="' + url + '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\
+						<div id="exitVideoIframe"></div>\
 					</div>';
-	}
+	
 	var exitModalText = Rochester.values['exitModalText'];
 	if (exitModalText) {
 		modalHtml += '\
@@ -607,8 +611,11 @@ Rochester.getExitModalHtml = function() {
 Rochester.exitClicked = function(event) {
 	$("#exitModal").modal('show');
 	player.pauseVideo();
-	player2.seekTo(0);
-	player2.playVideo();
+
+	if(player2){
+		player2.seekTo(0);
+		player2.playVideo();
+	}
 }
 
 // player handling functions
