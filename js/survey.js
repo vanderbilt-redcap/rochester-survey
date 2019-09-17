@@ -41,7 +41,10 @@ function onYouTubePlayerAPIReady() {
 					Only hiding the video on stop seems to be a good compromise.
 					It hides suggestions during most use cases.
 					It unfortunately also hides controls on the platforms with larger screens (an issue for very short videos).
-					However, power users still have the option of pausing a video and accessing controls
+					However, power users still have the option of pausing a video and accessing controls.
+					We tried limiting the height of the curtain to hide everything except controls,
+					but the controls are laid out differently on different devices
+					which added some complexity that we weren't sure was worthwhile.
 				*/
 				// if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
 				if (target.data == YT.PlayerState.ENDED) {
