@@ -7,7 +7,12 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		// fetch end of survey image configured for this form (if there is one)
 		$img = null;
-		$edoc_id = $this->framework->getProjectSetting("endOfSurveyImage");
+		$settings = $this->framework->getProjectSetting($instrument);
+		if (empty($settings))
+			return;
+		
+		$settings = json_decode($settings, true);
+		$edoc_id = $settings['endOfSurveyImage'];
 		if (!empty($edoc_id)) {
 			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
 			$result = db_query($sql);

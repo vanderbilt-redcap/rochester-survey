@@ -397,18 +397,18 @@ Rochester.countSigners = function() {
 	Rochester.signerCount = signerCount;
 }
 
-Rochester.getSignerButtons = function() {
+Rochester.getSignerVideos = function() {
 	// make and return html buttons
-	var html = "";
-	for (i = 1; i <= Rochester.signerCount; i++) {
-		var img = signer_portraits[i] ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
-		html += '\
-					<div class="signer-portrait close-on-select" data-signer-index="' + (i-1) + '">\
-						' + img + '\
-						<button type="button" class="btn btn-primary">Signer ' + i + '</button>\
-					</div>';
-	}
-	return html;
+	// var html = "";
+	// for (i = 1; i <= Rochester.signerCount; i++) {
+		// var img = signer_portraits[i] ? signer_portraits[i] : "<i class=\"fas fa-portrait\"></i>";
+		// html += '\
+					// <div class="signer-portrait close-on-select" data-signer-index="' + (i-1) + '">\
+						// ' + img + '\
+						// <button type="button" class="btn btn-primary">Signer ' + i + '</button>\
+					// </div>';
+	// }
+	// return html;
 }
 
 Rochester.openSignerModal = function() {
@@ -432,7 +432,7 @@ Rochester.openSignerModal = function() {
 					// </div>`;
 	// }
 	
-	html += Rochester.getSignerButtons();
+	// html += Rochester.getSignerButtons();
 	
 	html += '\
 				</div>\
@@ -511,7 +511,6 @@ Rochester.getOptionsModalHtml = function() {
 						<div class="modal-body">\
 							<h5>Choose a Signer</h5>\
 							<div class="row justify-content-around">\
-								${Rochester.getSignerButtons()}\
 							</div>\
 							<h5>Adjust Colors</h5>\
 							<div class="row justify-content-around">\
@@ -551,19 +550,17 @@ Rochester.getExitModalHtml = function() {
 					</button>\
 				</div>\
 				<div class="modal-body">';
-				
-	if (exitModalVideo) {
-		var video_id = exitModalVideo.split('v=')[1];
-		var ampersandPosition = video_id.indexOf('&');
+	
+	var exitModalVideo = Rochester.values['exitModalVideo'];
+	var video_id = Rochester.getVidIdFromUrl(exitModalVideo);
+	if (video_id) {
 		var url = 'https://www.youtube.com/embed/' + video_id;
-		if(ampersandPosition != -1) {
-			url = 'https://www.youtube.com/embed/' + video_id.substring(0, ampersandPosition);
-		}
 		modalHtml += '\
 					<div id="exit-survey-video">\
 						<iframe id="exitVideoIframe" width="800" height="560" src="' + url + '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\
 					</div>';
 	}
+	var exitModalText = Rochester.values['exitModalText'];
 	if (exitModalText) {
 		modalHtml += '\
 					<p>' + exitModalText + '</p>';
