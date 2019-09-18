@@ -252,7 +252,6 @@ Rochester.init = function() {
 		}
 	});
 	
-	
 	$("#fontSizeSlider").on("change", function() {
 		var zoom = $("#fontSizeSlider").val() + "%";
 		$("html").css("zoom", zoom);
@@ -583,7 +582,7 @@ Rochester.initializeSigner = function() {
 Rochester.getOptionsModalHtml = function() {
 	var html = '\
 			<div id="survey-options">\
-				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">\
+				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal" onclick="player.pauseVideo()">\
 					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>\
 				</button>\
 				<button type="button" class="btn btn-secondary video">\
