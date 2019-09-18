@@ -406,7 +406,8 @@ Rochester.nextClicked = function() {
 			
 		});
 	}
-	
+
+	var elementsToCheck
 	if (Rochester.surveyTarget == $("#surveytitlelogo")[0]) {
 		// handle case where we're not showing survey contents yet, just survey instructions (e.g., after initialization)
 		$("#surveytitlelogo").addClass("unseen");
@@ -415,37 +416,26 @@ Rochester.nextClicked = function() {
 		$("#survey-navigation button:eq(0)").removeClass("unseen");
 		
 		$("#questiontable tbody").children().addClass("unseen");
-		var foundNewTarget = false;
-		$("#questiontable tbody").children().each(function(i, e) {
-			if (Rochester.isRealField(e)) {
-				
-				setSurveyToField(e);
-				
-				foundNewTarget = true;
-				return false;
-			}
-		});
-		
-		// couldn't find any more real fields
-		if (!foundNewTarget) {
-			Rochester.endSurvey();
-		}
+
+		elementsToCheck = $("#questiontable tbody").children()
 	} else {
-		var foundNewTarget = false;
-		$(Rochester.surveyTarget).nextAll().each(function(i, e) {
+		elementsToCheck = $(Rochester.surveyTarget).nextAll()
+	}
+
+	var foundNewTarget = false;
+	elementsToCheck.each(function(i, e) {
+		if (Rochester.isRealField(e)) {
 			
-			if (Rochester.isRealField(e)) {
-				
-				setSurveyToField(e);
-				
-				foundNewTarget = true;
-				return false;
-			}
-		});
-		
-		if (!foundNewTarget) {
-			Rochester.endSurvey();
+			setSurveyToField(e);
+			
+			foundNewTarget = true;
+			return false;
 		}
+	});
+
+	// couldn't find any more real fields
+	if (!foundNewTarget) {
+		Rochester.endSurvey();
 	}
 }
 
