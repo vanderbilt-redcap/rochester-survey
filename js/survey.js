@@ -24,36 +24,49 @@ function onYouTubeIframeAPIReady() {
 	else{
 		$('#exit-survey-video').hide()
 	}
-
+	
+	// determine video IDs for signer preview videos
+	Rochester.signerPlayers = [];
+	var previewUrls = Rochester.values['signer_urls']
 	for (i = 0; i < Rochester.signerCount; i++) {
-		Rochester.signerPlayers[i] = new YT.Player('signer-preview-' + (i + 1), {
-			playerVars: {
-				modestbranding: 1,
-				rel: 0,
-				showinfo: 0
-			},
-			events: {
-				onStateChange: function(target, data){
-					if (target.data == YT.PlayerState.PLAYING || target.data == YT.PlayerState.BUFFERING) {
-						// stop all other signer preview videos
-						Rochester.signerPlayers.forEach(function(preview, i) {
-							Rochester.signerIndex = i;
-							if (target.target != preview) {
-								preview.pauseVideo();
-							}
-						})
-						
-						// highlight player's parent div
-						var previewDiv = $(target.target.a.parentNode);
-						$("div.signer-preview").removeClass('blueHighlight');
-						previewDiv.addClass('blueHighlight');
-						
-						// enable and move Select button
-						$($("button#signer-select").attr("disabled", false).detach()).insertAfter(previewDiv);
+		if (!previewUrls[i]) {
+			// find first signer vid since a preview video was not configured
+			previewUrls[i] = Rochester.findFirstSignerVid(i);
+		}
+	}
+	for (i = 0; i < Rochester.signerCount; i++) {
+		var vid_id = Rochester.getVidIdFromUrl(previewUrls[i]);
+		if (vid_id) {
+			Rochester.signerPlayers[i] = new YT.Player('signer-preview-' + i, {
+				videoId: vid_id,
+				playerVars: {
+					modestbranding: 1,
+					rel: 0,
+					showinfo: 0
+				},
+				events: {
+					onStateChange: function(target, data){
+						if (target.data == YT.PlayerState.PLAYING || target.data == YT.PlayerState.BUFFERING) {
+							// stop all other signer preview videos
+							Rochester.signerPlayers.forEach(function(preview, i) {
+								Rochester.signerIndex = i;
+								if (target.target != preview) {
+									preview.pauseVideo();
+								}
+							})
+							
+							// highlight player's parent div
+							var previewDiv = $(target.target.a.parentNode);
+							$("div.signer-preview").removeClass('blueHighlight');
+							previewDiv.addClass('blueHighlight');
+							
+							// enable and move Select button
+							$($("button#signer-select").attr("disabled", false).detach()).insertAfter(previewDiv);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 	
 	player = new YT.Player('ytplayer', {
@@ -206,14 +219,18 @@ Rochester.init = function() {
 	$("body").on('mouseup', "#survey-navigation button:last-child", Rochester.nextClicked);
 	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
 	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
-	// $("body").on('click', "div.signer-preview *", Rochester.signerPreviewClicked);
 	
 	// $("body").on("click", "#questiontable tr input", Rochester.answerSelected);
 	$("body").on("click", "#questiontable tr [class^=choice]", Rochester.answerSelected);
 	
 	// play first video when signer select modal closes
 	$("body").on("click", ".signer-portrait", Rochester.signerButtonClicked);
-	$("body").on('#signerModal hidden.bs.modal', Rochester.initializeSigner); // (when closed by clicking outside of modal)
+	$("body").on('#signerModal hidden.bs.modal', function() { 		// (when closed by clicking outside of modal)
+		Rochester.initializeSigner();
+		
+		// move signer preview videos to options modal now
+		$($("div.signer-preview").detach()).appendTo("#optionsModal div.modal-body div:first");
+	});
 	
 	$("body").on("click", "#curtain", function() {
 		if (!Rochester.curtain.locked) {
@@ -290,10 +307,6 @@ Rochester.isRealField = function(fieldRow) {
 		return false;
 	}
 	return true;
-}
-
-Rochester.openOptions = function() {
-	// $("body").append(``);
 }
 
 Rochester.endSurvey = function() {
@@ -474,33 +487,6 @@ Rochester.findFirstSignerVid = function(signerIndex) {
 	}
 }
 
-Rochester.getSignerVideos = function() {
-	// make videos for each signer -- pick the preview video assigned -- if one wasn't assigned, use first signer video we can find
-	Rochester.signerPlayers = [];
-	var previewUrls = Rochester.values['signer_urls']
-	var html = "";
-	for (i = 0; i < Rochester.signerCount; i++) {
-		if (!previewUrls[i]) {
-			// find first signer vid
-			previewUrls[i] = Rochester.findFirstSignerVid(i);
-		}
-		var video_id = Rochester.getVidIdFromUrl(previewUrls[i]);
-		if (video_id) {
-			var i1 = i + 1;
-			var divName = "signer-preview-" + i1;
-			var url = 'http://www.youtube.com/embed/' + video_id + '?enablejsapi=1&rel=0';
-			html += '\
-					<div class="signer-preview">\
-						<iframe id="' + divName + '" width="400" height="300" src="' + url + '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\
-					</div>';
-		}
-	}
-	// add select button
-	html += "\
-					<button type='button' class='btn btn-primary' disabled=true id='signer-select' data-dismiss='modal'>Select</button>";
-	return html;
-}
-
 Rochester.openSignerModal = function() {
 	var html = '\
 	<div class="modal fade" id="signerModal" tabindex="-1" role="dialog" aria-labelledby="signerModalLabel" aria-hidden="true">\
@@ -514,15 +500,16 @@ Rochester.openSignerModal = function() {
 				</div>\
 				<div class="modal-body" id="signer-portraits">';
 	
-	// for (i = 1; i <= Rochester.signerCount; i++) {
-		// html += `
-					// <div class='signer-portrait close-on-select'>
-						// ` + signer_portraits[i] + `
-						// <button type="button" class="btn btn-primary">Signer ` + i + `</button>
-					// </div>`;
-	// }
+	for (i = 0; i < Rochester.signerCount; i++) {
+			html += '\
+					<div class="signer-preview">\
+						<div id="signer-preview-' + i + '"></div>\
+					</div>';
+	}
 	
-	html += Rochester.getSignerVideos();
+	// add select button
+	html += "\
+					<button type='button' class='btn btn-primary' disabled=true id='signer-select' data-dismiss='modal'>Select</button>";
 	
 	html += '\
 				</div>\
