@@ -102,14 +102,14 @@ $(function() {
 		$("#assoc_table").find("th").eq(n).after(`
 				<th class="value_column">
 					<div>
-						<span>Value (${n - 1})</span>
+						<span>Signer (${n - 1}) Video URLs</span>
 						<button class="btn btn-outline-secondary remove_column">
 							Remove
 						</button>
 					</div>
 				</th>`);
 		$("#assoc_table").find("tr").each(function(i, e) {
-			$(this).find("td").eq(n).after("<td class=\"value_column\"><input type=\"text\" class=\"form-control\" placeholder=\"Value\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\"></td>");
+			$(this).find("td").eq(n).after("<td class=\"value_column\"><input type=\"text\" class=\"form-control\" placeholder=\"URL\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\"></td>");
 		});
 		
 		// add another signer portrait upload div
@@ -136,7 +136,7 @@ $(function() {
 		
 		// rename value columns (e.g., value (3) might turn to value (2))
 		$("#assoc_table th.value_column span").each(function(i, e) {
-			$(e).text("Value (" + (i + 1) + ")");
+			$(e).text("Signer (" + (i + 1) + ") Video URLs");
 		});
 		
 		// remove signer portrait upload div
