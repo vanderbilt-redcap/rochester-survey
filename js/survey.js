@@ -215,8 +215,8 @@ Rochester.init = function() {
 	$("#survey-navigation button:eq(0)").addClass("unseen");
 	
 	// register events
-	$("body").on('mouseup', "#survey-navigation button:first-child", Rochester.backClicked);
-	$("body").on('mouseup', "#survey-navigation button:last-child", Rochester.nextClicked);
+	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
+	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
 	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
 	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
 	
