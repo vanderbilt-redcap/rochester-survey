@@ -55,7 +55,6 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$url1 = $this->getUrl("js/survey.js");
 		$url3 = $this->getUrl("survey_ajax.php");
 		$survey_script = file_get_contents($url1);
-		$survey_script = str_replace("KEYBOARD_CSS", $keyboard_css_url, $survey_script);
 		$survey_script = str_replace("SURVEY_AJAX_URL", $url3, $survey_script);
 		$injection_element3 = "
 		<!-- Rochester survey interface module -->
