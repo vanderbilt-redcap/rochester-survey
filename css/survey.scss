@@ -33,7 +33,12 @@ body {
 	border-bottom: none;
 }
 
-#survey-video, #exit-survey-video {
+div.signer-preview {
+	padding: 8px 8px 2px 8px;
+	margin-bottom: 12px;
+}
+
+#survey-video, #exit-survey-video, div.signer-preview {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -132,11 +137,6 @@ body {
   cursor: pointer;
 }
 
-div.signer-preview {
-	padding: 8px 8px 2px 8px;
-	margin-bottom: 12px;
-}
-
 .blueHighlight {
 	border: 1px solid #007bff;
 	border-radius: 2px;
@@ -182,28 +182,28 @@ div.signer-preview {
 	}
 }
 
-#signerModal .modal-body {
-	display: flex;
-	align-items: center;
-	flex-direction: column;
-	div.signer-portrait {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 16px;
-		i {
-			font-size: 200px;
-		}
-		img {
-			max-width: 300px;
-			max-height: 100%;
-		}
-		button {
-			width: 100%;
-			margin-top: 8px;
-		}
-	}
-}
+// #signerModal .modal-body {
+	// display: flex;
+	// align-items: center;
+	// flex-direction: column;
+	// div.signer-portrait {
+		// display: flex;
+		// flex-direction: column;
+		// align-items: center;
+		// padding: 16px;
+		// i {
+			// font-size: 200px;
+		// }
+		// img {
+			// max-width: 300px;
+			// max-height: 100%;
+		// }
+		// button {
+			// width: 100%;
+			// margin-top: 8px;
+		// }
+	// }
+// }
 
 .fl-button {
 	i {
@@ -223,7 +223,7 @@ div.signer-preview {
 	background: none !important;
 }
 
-#exitModal.modal-body {
+#exitModal div.modal-body, #signerModal div.modal-body {
     position: relative;
     overflow-y: auto;
     max-height: 400px;
