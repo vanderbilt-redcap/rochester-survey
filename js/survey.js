@@ -116,7 +116,7 @@ function onYouTubeIframeAPIReady() {
 	});
 }
 
-var Rochester = {
+$.extend(Rochester, {
 	curtain: {
 		locked: false
 	},
@@ -133,19 +133,17 @@ var Rochester = {
 		$(".fl-button").contents().addBack(".fl-button").css("border-color", color);
 		$("#pagecontent").css("margin-top", "0px");
 	}
-};
+});
 
 // load dashboard content
 $(function() {
 	$('body').css('display', 'block');
 	Rochester.init();
-	Rochester.ajaxURL = "SURVEY_AJAX_URL";
 });
 
 Rochester.init = function() {
 	Rochester.signerIndex = 0;
 	Rochester.surveyTarget = $("#surveytitlelogo")[0];
-	Rochester.values = associatedValues;
 	Rochester.countSigners();
 	
 	// add video button to field labels

@@ -47,23 +47,19 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<script src="<?=$this->getUrl("spectrum/spectrum.js")?>"></script>
 		<?php
 		// get this instrument's associated field values
-		$result = $this->framework->getProjectSetting($instrument);
-		if ($result === null)
+		$associatedValues = $this->framework->getProjectSetting($instrument);
+		if ($associatedValues === null)
 			return null;
-		$result = "var associatedValues = JSON.parse(`$result`);";
 		
-		$url1 = $this->getUrl("js/survey.js");
-		$url3 = $this->getUrl("survey_ajax.php");
-		$survey_script = file_get_contents($url1);
-		$survey_script = str_replace("SURVEY_AJAX_URL", $url3, $survey_script);
-		$injection_element3 = "
-		<!-- Rochester survey interface module -->
-		<script type=\"text/javascript\">
-			$result
-			$survey_script
-		</script>";
-		
-		echo($injection_element3);
+		?>
+		<script>
+			var Rochester = {
+				ajaxURL: <?=json_encode($this->getUrl("survey_ajax.php"))?>,
+				values: <?=$associatedValues?>
+			}
+		</script>
+		<script src="<?=$this->getUrl("js/survey.js")?>"></script>
+		<?php
 	}
 	
 	function make_field_val_association_page($form_name) {
