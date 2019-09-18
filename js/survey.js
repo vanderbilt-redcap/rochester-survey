@@ -501,19 +501,6 @@ Rochester.getSignerVideos = function() {
 	return html;
 }
 
-// Rochester.signerPreviewClicked = function(previewDiv) {
-	// // highlight clicked preview, move button to below video and enable it, stop all other preview videos
-	// console.log('preview', previewDiv);
-	// Rochester.signerPlayers.forEach(function(i, player) {
-		// if (i != previewIndex) {
-			// player.stopVideo();
-		// } else {
-			// targetPreview = $(".signer-preview-" + (previewIndex + 1));
-			// targetPreview.addClass("blueHighlight");
-		// }
-	// });
-// }
-
 Rochester.openSignerModal = function() {
 	var html = '\
 	<div class="modal fade" id="signerModal" tabindex="-1" role="dialog" aria-labelledby="signerModalLabel" aria-hidden="true">\
