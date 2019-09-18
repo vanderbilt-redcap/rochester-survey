@@ -533,13 +533,6 @@ Rochester.openSignerModal = function() {
 	$("#signerModal").modal('show');
 }
 
-Rochester.signerButtonClicked = function() {
-	Rochester.signerIndex = $(this).data('signer-index')
-
-	var modal = $(this).closest('.modal');
-	modal.modal('hide');
-}
-
 Rochester.initializeSigner = function() {	
 	if(Rochester.signerIndex === undefined){
 		Rochester.signerIndex = 0
