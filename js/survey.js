@@ -193,13 +193,13 @@ Rochester.init = function() {
 			["#600","#783f04","#7f6000","#274e13","#0c343d","#073763","#20124d","#4c1130"]
 		]
 	}
-	$("#spectrum_bg_color").spectrum(Object.assign({
+	$("#spectrum_bg_color").spectrum($.extend({
 		color: $("body").css("background-color"),
 		move: function(color) {
 			Rochester.updateBackgroundColor(color.toHexString())
 		}
 	}, sharedSpectrumOptions));
-	$("#spectrum_text_color").spectrum(Object.assign({
+	$("#spectrum_text_color").spectrum($.extend({
 		color: $("#container").css("color"),
 		move: function(color) {
 			Rochester.updateTextColor(color.toHexString())
