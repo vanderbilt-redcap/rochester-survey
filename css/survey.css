@@ -19,27 +19,39 @@ body {
   border-bottom: none;
 }
 
-div.signer-preview {
-  padding: 8px 8px 2px 8px;
+.signer-previews {
+  width: 100%;
+  text-align: center;
+}
+.signer-previews .signer-preview {
   margin-bottom: 12px;
+  padding: 8px;
+}
+.signer-previews button {
+  margin: 12px auto;
 }
 
-#survey-video, #exit-survey-video, div.signer-preview, #optionsModal div.modal-body div:first {
+#optionsModal .modal-body {
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  padding-bottom: 56.25%;
-  /* 16:9 */
-  padding-top: 25px;
-  height: 0;
+  flex-direction: column;
+  justify-content: space-around;
 }
-#survey-video iframe, #exit-survey-video iframe, div.signer-preview iframe, #optionsModal div.modal-body div:first iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
+#optionsModal .modal-body div.row {
+  margin-bottom: 20px;
   width: 100%;
-  height: 100%;
+  padding: 12px;
+  border: 1px solid #007eff33;
+  border-radius: 5px;
+}
+#optionsModal .modal-body div.row div.col {
+  width: 100%;
+}
+#optionsModal .modal-body div.row i {
+  font-size: 200px;
+}
+#optionsModal .modal-body .sp-container {
+  border: 0;
 }
 
 #curtain {
@@ -124,43 +136,6 @@ div.signer-preview {
   border-radius: 2px;
 }
 
-#optionsModal .modal-body {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: space-around;
-}
-#optionsModal .modal-body div.row {
-  margin-bottom: 20px;
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #007eff33;
-  border-radius: 5px;
-}
-#optionsModal .modal-body div.row div.col {
-  width: 100%;
-}
-#optionsModal .modal-body div.row i {
-  font-size: 200px;
-}
-#optionsModal .modal-body div.signer-portrait {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px;
-}
-#optionsModal .modal-body div.signer-portrait button {
-  width: 100%;
-  margin-top: 8px;
-}
-#optionsModal .modal-body div.signer-portrait img {
-  max-width: 300px;
-  max-height: 100%;
-}
-#optionsModal .modal-body .sp-container {
-  border: 0;
-}
-
 .fl-button i {
   margin-left: 12px;
   padding: 4px;
@@ -177,11 +152,20 @@ div.signer-preview {
   background: none !important;
 }
 
-#exitModal div.modal-body, #signerModal div.modal-body, #optionsModal div.modal-body div:first {
+.video-container {
   position: relative;
-  overflow-y: auto;
-  max-height: 400px;
-  padding: 15px;
+  padding-bottom: 56.25%;
+  padding-top: 30px;
+  height: 0;
+  overflow: hidden;
+}
+
+.video-container iframe, .video-container object, .video-container embed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 @media (min-width: 768px) {
