@@ -53,10 +53,12 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		?>
 		<script>
-			var Rochester = {
-				ajaxURL: <?=json_encode($this->getUrl("survey_ajax.php"))?>,
-				values: <?=$associatedValues?>
-			}
+			var Rochester = <?=json_encode([
+				'ajaxURL' => $this->getUrl("survey_ajax.php"),
+				'isInitialLoad' => $_SERVER['REQUEST_METHOD'] === 'GET'
+			])?>
+
+			Rochester.values = <?=$associatedValues?>;
 		</script>
 		<script src="<?=$this->getUrl("js/survey.js")?>"></script>
 		<?php

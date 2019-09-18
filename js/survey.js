@@ -294,8 +294,10 @@ Rochester.init = function() {
 		// $(e).keyboard({});
 	// });
 	
-	// prompt user to select a signer
-	Rochester.openSignerModal();
+	if(Rochester.isInitialLoad){
+		// prompt user to select a signer
+		Rochester.openSignerModal();
+	}
 }
 
 Rochester.getVidIdFromUrl = function(url) {
