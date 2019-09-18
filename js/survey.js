@@ -332,7 +332,11 @@ Rochester.endSurvey = function() {
 	// Change form action URL to force it to end the survey
 	$('#form').prop('action', $('#form').prop('action')+'&__endsurvey=1' );
 	// Submit the survey
-	dataEntrySubmit(document.getElementById('submit-action'));
+	Rochester.clickNextOrSubmitButton()
+}
+
+Rochester.clickNextOrSubmitButton = function() {
+	$('button[name=submit-btn-saverecord]').click()
 }
 
 Rochester.backClicked = function() {
@@ -435,7 +439,7 @@ Rochester.nextClicked = function() {
 
 	// couldn't find any more real fields
 	if (!foundNewTarget) {
-		Rochester.endSurvey();
+		Rochester.clickNextOrSubmitButton()
 	}
 }
 
