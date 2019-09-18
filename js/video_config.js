@@ -5,11 +5,6 @@ $('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath
 var form_name = "";
 
 $(function() {
-	$('body').on('click', ".custom-file-input", function() {
-		// upload user image for signer portrait
-		$(this).val('')
-	});
-	
 	$('body').on('change', ".custom-file-input", function() {
 		// upload user image for signer portrait
 		var fileName = $(this).val().split('\\').pop();
