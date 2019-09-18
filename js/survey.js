@@ -263,11 +263,7 @@ Rochester.init = function() {
 	
 	// yt player controls listen
 	// $("body").on('change', '#ytCaptions, #ytVolume', function() {Rochester.useYtControls = true});
-	
-	// exit survey modal Exit button
-	$("body").on("click", "#exitSurveyButton", function() {
-		dataEntrySubmit(document.getElementById('submit-action'));
-	});
+
 	
 	// font resize buttons available in Survey Options modal
 	$("#changeFont").hide();
@@ -310,6 +306,8 @@ Rochester.isRealField = function(fieldRow) {
 }
 
 Rochester.endSurvey = function() {
+	$('body').hide() // Poor man's loading indicator
+
 	var obname = $("#submit-action").prop("name");
 	if ($('#form select[name="'+obname+'"]').hasClass('rc-autocomplete') && $('#rc-ac-input_'+obname).length) {
 		$('#rc-ac-input_'+obname).trigger('blur');
@@ -663,7 +661,7 @@ Rochester.getExitModalHtml = function() {
 	modalHtml += '\
 				</div>\
 				<div class="modal-footer">\
-					<button type="button" class="btn btn-danger" data-dismiss="modal" id="exitSurveyButton">Exit</button>\
+					<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="Rochester.endSurvey()">Exit</button>\
 					<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="Rochester.resetExitVideo()">Cancel</button>\
 				</div>\
 			</div>\
