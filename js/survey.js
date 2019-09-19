@@ -853,10 +853,25 @@ Rochester.setVideoAnchor = function(enabled) {
 	}
 	if (enabled && !video.hasClass('anchored')) {
 		video.addClass('anchored');
+		
+		// adjust placeholder div height
 		var videoHeight = $("#survey-video iframe").height();
 		$("#stickyVideoPlaceholder").css('height', videoHeight);
+		
+		// if window wider than 800px, set left and right
+		var width = $(window).width();
+		if (width > 800) {
+			var offset = (width - 800)/2;
+			video.css('left', offset + 'px');
+			video.css('right', offset + 'px');
+		}
+		
 	} else if (!enabled && video.hasClass('anchored')) {
 		video.removeClass('anchored');
+		
+		// reset in case they were adjusted
+		video.css('left', '0px');
+		video.css('right', '0px');
 		$("#stickyVideoPlaceholder").css('height', 0);
 	}
 }
