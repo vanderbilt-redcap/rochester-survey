@@ -171,10 +171,11 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				$value_col = "<input type=\"text\" class=\"form-control\" placeholder=\"URL\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\">";
 				$label_col = nl2br($project->metadata[$field_name]["element_label"]);
 				$type_col = "Descriptive";
+				$fieldType = $project->metadata[$field_name]["element_type"];
 				if ($project->metadata[$field_name]["element_preceding_header"] == "Form Status") {
 					continue;
 				} else {
-					$type_col = "Field (" . $project->metadata[$field_name]["element_type"] . ")";
+					$type_col = "Field ($fieldType)";
 				}
 				$html .= "
 				<tr class='value-row' data-field-name='$field_name'>
@@ -195,8 +196,10 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				$html .= '
 				</tr>';
 				$type_col = "Answer";
-				// preg_match_all("/\,\s*?(.+)\s*?(?:\\n|$)/mgU", $project->metadata[$field_name]["element_enum"], $matches);
-				if (!empty($project->metadata[$field_name]["element_enum"])) {
+				
+				$isApplicableFieldType = array_search($fieldType, ["radio", "checkbox", "yesno", "truefalse"]) === false ? false : true;
+				
+				if (!empty($project->metadata[$field_name]["element_enum"]) and $isApplicableFieldType) {
 					$labels = explode("\\n", $project->metadata[$field_name]["element_enum"]);
 					foreach($labels as $label) {
 						$raw_value = trim(explode(",", $label)[0]);
@@ -207,17 +210,17 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 					<td class='var_column'>[$field_name][$raw_value]</td>
 					<td class='label_column' data-raw-value='$raw_value'>$label</td>";
 				
-				for ($col = 1; $col <= $columns; $col++) {
-					$input_value = $value_col;
-					if (!empty($associations[$field_name]["choices"][$raw_value][$col- 1])) {
-						$temp_value = $associations[$field_name]["choices"][$raw_value][$col - 1];
-						$input_value = "<input type='text' class='form-control' value='$temp_value' placeholder='URL' aria-label='Associated value' aria-describedby='basic-addon1'>";
-					}
-					$html .= "
+						for ($col = 1; $col <= $columns; $col++) {
+							$input_value = $value_col;
+							if (!empty($associations[$field_name]["choices"][$raw_value][$col- 1])) {
+								$temp_value = $associations[$field_name]["choices"][$raw_value][$col - 1];
+								$input_value = "<input type='text' class='form-control' value='$temp_value' placeholder='URL' aria-label='Associated value' aria-describedby='basic-addon1'>";
+							}
+								$html .= "
 					<td class='value_column'>$input_value</td>";
-				}
+						}
 				
-				$html .= "
+						$html .= "
 				</tr>";
 					}
 				}
