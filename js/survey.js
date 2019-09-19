@@ -217,7 +217,7 @@ Rochester.init = function() {
 	
 	// hide most of #pagecontent (except surveytitlelogo and instructions)
 	$("#pagecontent form").addClass("unseen");
-	Rochester.hideBackButtonIfAppropriate();
+	$("#survey-navigation button:eq(0)").addClass("unseen");
 	
 	// register events
 	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
@@ -406,47 +406,10 @@ Rochester.backClicked = function() {
 	
 	// if we can't find one, unseen the form and surveytarget, show survey instructions, hide back button
 	if (!foundNewTarget) {
-		var surveyTitleLogo = $("#surveytitlelogo")[0];
-		if(Rochester.surveyTarget === surveyTitleLogo){
-			if (Rochester.hasPreviousPage()) {
-				Rochester.getPreviousPageButton().click();
-			}
-		}
-		else{
-			// hide
-			$(Rochester.surveyTarget).addClass("unseen");
-			$("#pagecontent form").addClass("unseen");
-			Rochester.hideBackButtonIfAppropriate();
-			
-			// show
-			Rochester.surveyTarget = surveyTitleLogo;
-			$("#surveytitlelogo").removeClass("unseen");
-			$("#surveyinstructions").removeClass("unseen");
-			
-			// no field name supplied, will default to showing instructions video (if possible)
-			Rochester.setVideo();;
-		}
-	}
-}
-
-Rochester.getPreviousPageButton = function() {
-	return $('button[name=submit-btn-saveprevpage]');
-}
-
-Rochester.hasPreviousPage = function() {
-	return Rochester.getPreviousPageButton().length === 1;
-}
-
-Rochester.hideBackButtonIfAppropriate = function() {
-	if (!Rochester.hasPreviousPage()) {
+		// hide
+		$(Rochester.surveyTarget).addClass("unseen");
+		$("#pagecontent form").addClass("unseen");
 		$("#survey-navigation button:eq(0)").addClass("unseen");
-		
-		// show
-		Rochester.surveyTarget = $("#surveytitlelogo")[0];
-		$("#surveytitlelogo").removeClass("unseen");
-		$("#surveyinstructions").removeClass("unseen");
-		
-		Rochester.setVideoByFieldName("record_id");
 		
 		// show
 		Rochester.surveyTarget = $("#surveytitlelogo")[0];
