@@ -10,6 +10,12 @@ body {
   border: 1px solid #ccc;
   background-color: #00000000;
 }
+@media (max-width: 820px) {
+  #container {
+    border-left: none;
+    border-right: none;
+  }
+}
 
 #questiontable td {
   /*

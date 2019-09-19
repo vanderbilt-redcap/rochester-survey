@@ -144,7 +144,7 @@ $.extend(Rochester, {
 	},
 	updateTextColor: function(color) {
 		$("#container").css("color", color);
-		$("#container").css("border", "2px solid " + color);
+		$("#container").css("border-color", color);
 		$(".fl-button").contents().addBack(".fl-button").css("color", color);
 		$(".fl-button").contents().addBack(".fl-button").css("border-color", color);
 		$("#pagecontent").css("margin-top", "0px");
