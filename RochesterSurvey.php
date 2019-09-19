@@ -286,40 +286,4 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		return $html;
 	}
-	
-	function getSignerPortraits($form_name) {
-		// get portraits info from module settings
-		$portraits = json_decode($this->framework->getProjectSetting("portraits"), true);
-		foreach ($portraits as $name => $set) {
-			if ($name !== $form_name)
-				unset($portraits[$name]);
-		}
-		$edoc_ids = [];
-		foreach ($portraits[$form_name] as $portraitIndex => $edoc_id) {
-			if (!empty($edoc_id)) {
-				$edoc_ids[] = $edoc_id;
-			}
-		}
-		
-		if (!empty($edoc_ids)) {
-			$edoc_ids = "(" . implode($edoc_ids, ", ") . ")";
-			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id in $edoc_ids";
-			$result = db_query($sql);
-			while ($row = db_fetch_assoc($result)) {
-				foreach ($portraits[$form_name] as $portraitIndex => $edoc_id) {
-					if ($edoc_id == $row["doc_id"]) {
-						$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-						$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
-						$portraits[$form_name][$portraitIndex] = "<img src='$imgSrc'>";
-					}
-				}
-			}
-		}
-		
-		if (empty($portraits)) {
-			return false;
-		}
-		
-		return $portraits;
-	}
 }
