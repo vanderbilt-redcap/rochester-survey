@@ -204,7 +204,7 @@ Rochester.init = function() {
 		showButtons: false,
 		showPaletteOnly: true,
 		palette: [
-			["#000","rgb(33, 37, 41)","#666","#999","#ccc","#eee","#f3f3f3","#fff"],
+			["#000","#444","#666","#999","#ccc","#eee","#f3f3f3","#fff"],
 			["#f00","#f90","#ff0","#0f0","#0ff","#00f","#90f","#f0f"],
 			["#f4cccc","#fce5cd","#fff2cc","#d9ead3","#d0e0e3","#cfe2f3","#d9d2e9","#ead1dc"],
 			["#ea9999","#f9cb9c","#ffe599","#b6d7a8","#a2c4c9","#9fc5e8","#b4a7d6","#d5a6bd"],
@@ -228,7 +228,7 @@ Rochester.init = function() {
 	}, sharedSpectrumOptions));
 	$("#optionsModal button.resetColors").click(function() {
 		var defaultBgColor = 'white'
-		var defaultTextColor = 'rgb(33, 37, 41)'
+		var defaultTextColor = 'black'
 		
 		$("#spectrum_bg_color").spectrum("set", defaultBgColor)
 		$("#spectrum_text_color").spectrum("set", defaultTextColor)
@@ -244,7 +244,6 @@ Rochester.init = function() {
 	// ---------------- register events
 	// stickify the survey video in portrait
 	$(window).on('resize orientationchange scroll', function() {
-		console.log('sticky...');
 		var w = $(window).width();
 		var h = $(window).height();
 		var y = window.scrollY;
