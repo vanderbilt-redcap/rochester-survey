@@ -7,10 +7,10 @@ var player;
 var player2;
 function onYouTubeIframeAPIReady() {
 	var exitModalVideo = Rochester.values['exitModalVideo'];
-	var video_id = Rochester.getVidIdFromUrl(exitModalVideo);
-	if(video_id){
+	var videoId = Rochester.getVideoIdFromUrl(exitModalVideo);
+	if(videoId){
 		player2 = new YT.Player('exitVideoIframe', {
-			videoId: video_id,
+			videoId: videoId,
 			playerVars: {
 				modestbranding: 1,
 				playsinline: 1,
@@ -29,15 +29,15 @@ function onYouTubeIframeAPIReady() {
 	var previewUrls = Rochester.values['signer_urls']
 	for (i = 0; i < Rochester.signerCount; i++) {
 		if (!previewUrls[i]) {
-			// find first signer vid since a preview video was not configured
-			previewUrls[i] = Rochester.findFirstSignerVid(i);
+			// find first signer video since a preview video was not configured
+			previewUrls[i] = Rochester.findFirstSignerVideo(i);
 		}
 	}
 	for (i = 0; i < Rochester.signerCount; i++) {
-		var vid_id = Rochester.getVidIdFromUrl(previewUrls[i]);
-		if (vid_id) {
+		var videoId = Rochester.getVideoIdFromUrl(previewUrls[i]);
+		if (videoId) {
 			var playerSettings = {
-				videoId: vid_id,
+				videoId: videoId,
 				playerVars: {
 					modestbranding: 1,
 					rel: 0,
@@ -141,8 +141,9 @@ $(function() {
 	Rochester.init();
 });
 
+// utility and initialization
+
 Rochester.init = function() {
-	Rochester.signerIndex = 0;
 	Rochester.surveyTarget = $("#surveytitlelogo")[0];
 	Rochester.countSigners();
 	
@@ -161,8 +162,6 @@ Rochester.init = function() {
 				</div>\
 				<div id="ytplayer"></div>\
 			</div>');
-	
-	// <iframe id="videoIframe" width="800" height="560" src="` + first_vid_url + "?enablejsapi=1&rel=0&start=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en" + `" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen</iframe>
 	
 	// add exit survey iframe video too
 	$("body").append(Rochester.getExitModalHtml());
@@ -226,24 +225,20 @@ Rochester.init = function() {
 	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
 	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
 	
-	// $("body").on("click", "#questiontable tr input", Rochester.answerSelected);
-	$("body").on("click", "#questiontable tr [class^=choice]", Rochester.answerSelected);
+	/* the following event triggers when an answer is selected from these field types:
+			Multiple Choice - Radio Buttons (Single Answer)
+			Checkboxes (Multiple Answers)
+			Yes - No
+			True - False
+	*/
+	$("body").on("click", "#questiontable tr [class^=choice]", function() {
+		var fieldName = $(this).closest("tr").attr("sq_id");
+		var rawAnswerValue = $(this).find("input").attr("value") || $(this).find("input").attr("code");
+		Rochester.setVideo(fieldName, rawAnswerValue);
+	});
 	
-	// signer selection:
-	$("body").on("click", "button.signer-select", function() {
-		// find which signer preview is selected, set Rochester.signerIndex, reload video
-		Rochester.signerIndex = $(".blueHighlight iframe").attr("data-signer-index");
-		$("button.signer-select").hide();
-	});
-	$("body").on('#optionsModal hidden.bs.modal', function() { 		// (when closed by clicking outside of select a signer modal)
-		// silence preview videos and hide select button
-		Rochester.signerPlayers.forEach(function(playerInstance, i) {playerInstance.pauseVideo();});
-		Rochester.optionsPlayers.forEach(function(playerInstance, i) {playerInstance.pauseVideo();});
-		$("button.signer-select").hide();
-	});
-	$("body").on('#signerModal hidden.bs.modal', function() { 		// (when closed by clicking outside of select a signer modal)
-		Rochester.initializeSigner();
-	});
+	// triggers on all modals that get closed
+	$("body").on('hidden.bs.modal', Rochester.onModalClose);
 	
 	$("body").on("click", "#curtain", function() {
 		if (!Rochester.curtain.locked) {
@@ -270,7 +265,7 @@ Rochester.init = function() {
 	$("body").on("click", ".fl-button", function(target) {
 		// set video to this field's associated video
 		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
-		Rochester.setVideoByFieldName(fieldName);
+		Rochester.setVideo(fieldName);
 	});
 	
 	// yt player controls listen
@@ -300,7 +295,29 @@ Rochester.init = function() {
 	}
 }
 
-Rochester.getVidIdFromUrl = function(url) {
+Rochester.countSigners = function() {
+	if (!Rochester.values.fields) {
+		Rochester.signerCount = 0;
+		return false;
+	}
+	
+	// count how many signers we have (same as columns of associations)
+	var signerCount = 1;
+	for (var fieldname in Rochester.values.fields) {
+		var entry = Rochester.values.fields[fieldname];
+		if (entry.field) {
+			signerCount = Math.max(signerCount, entry.field.length);
+		}
+		if (entry.choices) {
+			for (var rawValue in entry.choices) {
+				signerCount = Math.max(signerCount, entry.choices[rawValue].length);
+			}
+		}
+	}
+	Rochester.signerCount = signerCount;
+}
+
+Rochester.getVideoIdFromUrl = function(url) {
 	// thanks to https://stackoverflow.com/questions/3452546/how-do-i-get-the-youtube-video-id-from-a-url
 	var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
 	var match = url.match(regExp);
@@ -319,22 +336,42 @@ Rochester.isRealField = function(fieldRow) {
 	return true;
 }
 
-Rochester.endSurvey = function() {
-	$('body').hide() // Poor man's loading indicator
-
-	var obname = $("#submit-action").prop("name");
-	if ($('#form select[name="'+obname+'"]').hasClass('rc-autocomplete') && $('#rc-ac-input_'+obname).length) {
-		$('#rc-ac-input_'+obname).trigger('blur');
-	}
-	// Change form action URL to force it to end the survey
-	$('#form').prop('action', $('#form').prop('action')+'&__endsurvey=1' );
-	// Submit the survey
-	Rochester.clickNextOrSubmitButton()
-}
-
 Rochester.clickNextOrSubmitButton = function() {
 	$('button[name=submit-btn-saverecord]').click()
 }
+
+Rochester.videoButtonClicked = function() {
+	var html = $(this).html();
+	if (html.search("Hide") != -1) {
+		html = html.replace("Hide", "Show")
+		html = html.replace("video-slash", "video")
+		$(this).html(html);
+		player.pauseVideo();
+		$("#survey-video").css('display', 'none');
+	} else {
+		html = html.replace("Show", "Hide")
+		html = html.replace("video", "video-slash")
+		$(this).html(html);
+		player.playVideo();
+		$("#survey-video").css('display', 'flex');
+	}
+}
+
+Rochester.findFirstSignerVideo = function(signerIndex) {
+	for (var fieldname in Rochester.values.fields) {
+		var entry = Rochester.values.fields[fieldname];
+		if (entry.field[signerIndex]) {
+			return entry.field[signerIndex];
+		}
+		for (var rawValue in entry.choices) {
+			if (entry.choices[rawValue][signerIndex]) {
+				return entry.choices[rawValue][signerIndex];
+			}
+		}
+	}
+}
+
+// survey navigation
 
 Rochester.backClicked = function() {
 	var foundNewTarget = false;
@@ -348,7 +385,7 @@ Rochester.backClicked = function() {
 			
 			// set video to this field's associated video
 			var fieldName = $(e).attr('sq_id');
-			Rochester.setVideoByFieldName(fieldName);
+			Rochester.setVideo(fieldName);
 			
 			$.ajax({
 				method: "POST",
@@ -379,7 +416,8 @@ Rochester.backClicked = function() {
 		$("#surveytitlelogo").removeClass("unseen");
 		$("#surveyinstructions").removeClass("unseen");
 		
-		Rochester.setVideoByFieldName("record_id");
+		// no field name supplied, will default to showing instructions video (if possible)
+		Rochester.setVideo();
 	}
 }
 
@@ -392,7 +430,7 @@ Rochester.nextClicked = function() {
 		
 		// set video to this field's associated video
 		var fieldName = $(field).attr('sq_id');
-		var vidFound = Rochester.setVideoByFieldName(fieldName);
+		var videoFound = Rochester.setVideo(fieldName);
 		
 		// log field change on server
 		$.ajax({
@@ -440,58 +478,7 @@ Rochester.nextClicked = function() {
 	}
 }
 
-Rochester.videoButtonClicked = function() {
-	var html = $(this).html();
-	if (html.search("Hide") != -1) {
-		html = html.replace("Hide", "Show")
-		html = html.replace("video-slash", "video")
-		$(this).html(html);
-		player.pauseVideo();
-		$("#survey-video").css('display', 'none');
-	} else {
-		html = html.replace("Show", "Hide")
-		html = html.replace("video", "video-slash")
-		$(this).html(html);
-		player.playVideo();
-		$("#survey-video").css('display', 'flex');
-	}
-}
-
-Rochester.countSigners = function() {
-	if (!Rochester.values.fields) {
-		Rochester.signerCount = 0;
-		return false;
-	}
-	
-	// count how many signers we have (same as columns of associations)
-	var signerCount = 1;
-	for (var fieldname in Rochester.values.fields) {
-		var entry = Rochester.values.fields[fieldname];
-		if (entry.field) {
-			signerCount = Math.max(signerCount, entry.field.length);
-		}
-		if (entry.choices) {
-			for (var rawValue in entry.choices) {
-				signerCount = Math.max(signerCount, entry.choices[rawValue].length);
-			}
-		}
-	}
-	Rochester.signerCount = signerCount;
-}
-
-Rochester.findFirstSignerVid = function(signerIndex) {
-	for (var fieldname in Rochester.values.fields) {
-		var entry = Rochester.values.fields[fieldname];
-		if (entry.field[signerIndex]) {
-			return entry.field[signerIndex];
-		}
-		for (var rawValue in entry.choices) {
-			if (entry.choices[rawValue][signerIndex]) {
-				return entry.choices[rawValue][signerIndex];
-			}
-		}
-	}
-}
+// modals
 
 Rochester.openSignerModal = function() {
 	var html = '\
@@ -532,55 +519,6 @@ Rochester.openSignerModal = function() {
 	$("#signerModal").modal('show');
 }
 
-Rochester.initializeSigner = function() {	
-	if(Rochester.signerIndex === undefined){
-		Rochester.signerIndex = 0
-	}
-	
-	// stop all signer preview videos
-	Rochester.signerPlayers.forEach(function(player, i) {
-		player.stopVideo();
-	});
-
-	var modal = $(this).closest('.modal');
-	if (modal.attr('id') == 'signerModal') {
-		if (!Rochester.curtain.locked) {
-			$("#curtain").hide();
-		}
-	}
-	var instructionsVideoUrl = Rochester.values['instructions_urls'][Rochester.signerIndex]
-	if (Rochester.surveyTarget == $("#surveytitlelogo")[0] && instructionsVideoUrl) {
-		// Rochester.setVideoByFieldName("record_id");
-		// if instructions url configured, show that video
-		var vid_id = Rochester.getVidIdFromUrl(instructionsVideoUrl);
-		if (vid_id) {
-			if (!Rochester.curtain.locked) {
-				$("#curtain").hide();
-			}
-			$("#curtain h5").text("Click to play video.");
-			player.loadVideoById(vid_id);
-			player.seekTo(0);
-			Rochester.curtain.locked = false;
-		}
-	} else {
-		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
-		Rochester.setVideoByFieldName(fieldName);
-	}
-	player.seekTo(0);
-	
-	$.ajax({
-		method: "POST",
-		url: Rochester.ajaxURL,
-		data: {
-			action: "signer changed",
-			message: "user selected signer " + Rochester.signerIndex
-		},
-		dataType: "json"
-	}).done(function(msg) {
-		
-	});
-}
-
 Rochester.getOptionsModalHtml = function() {
 	var html = '\
 			<div id="survey-options">\
@@ -617,7 +555,7 @@ Rochester.getOptionsModalHtml = function() {
 	
 	// add select button
 	html += "\
-								<button type='button' style='display: none' class='btn btn-primary' class='signer-select' data-dismiss='modal'>Select</button>";
+								<button type='button' style='display: none' class='btn btn-primary signer-select' data-dismiss='modal'>Select</button>";
 	
 	html += '\
 							</div>\
@@ -689,13 +627,48 @@ Rochester.getExitModalHtml = function() {
 	return modalHtml;
 }
 
-Rochester.exitClicked = function(event) {
-	$("#exitModal").modal('show');
-	player.pauseVideo();
-
-	if(player2){
-		player2.playVideo();
+Rochester.onModalClose = function() {
+	// pause preview videos
+	Rochester.signerPlayers.forEach(function(player) {
+		player.pauseVideo();
+	});
+	Rochester.optionsPlayers.forEach(function(player) {
+		player.pauseVideo();
+	});
+	
+	// determine signer index and set survey video (if necessary)
+	var oldSignerIndex = Rochester.signerIndex
+	var newSignerIndex = $(".blueHighlight iframe").attr('data-signer-index');
+	
+	if (typeof newSignerIndex === 'undefined' && typeof oldSignerIndex === 'undefined') {
+		// this only happens when they close the initial pick a signer modal
+		newSignerIndex = 0;
 	}
+	
+	if (typeof newSignerIndex !== 'undefined' && oldSignerIndex != newSignerIndex) {
+		Rochester.signerIndex = newSignerIndex;
+		var fieldName;
+		if (Rochester.surveyTarget != $("#surveytitlelogo")[0]) {
+			fieldName = $(Rochester.surveyTarget).attr('sq_id');
+		}			
+		// will set player to play video assigned for survey instructions or field visible, whichever is needed
+		Rochester.setVideo(fieldName);
+		
+		// log signer change
+		$.ajax({
+			method: "POST",
+			url: Rochester.ajaxURL,
+			data: {
+				action: "signer changed",
+				message: "user selected signer " + Rochester.signerIndex
+			},
+			dataType: "json"
+		})
+	}
+	
+	// clean up
+	$(".signer-previews div").removeClass('blueHighlight');
+	$(".signer-select").hide();
 }
 
 Rochester.resetExitVideo = function() {
@@ -705,56 +678,58 @@ Rochester.resetExitVideo = function() {
 	}
 }
 
-// player handling functions
+Rochester.exitClicked = function(event) {
+	$("#exitModal").modal('show');
+	player.pauseVideo();
 
-Rochester.answerSelected = function(e) {
-	var input = $(this).find('input');
-	var fieldName = $(this).closest("tr").attr('sq_id');
-	var choiceRawValue = input.attr("value") || input.attr('code');
-	if (Rochester.values && Rochester.values.fields && Rochester.values.fields[fieldName] && Rochester.values.fields[fieldName].choices && Rochester.values.fields[fieldName].choices[choiceRawValue]) {
-		var url = Rochester.values.fields[fieldName].choices[choiceRawValue][Rochester.signerIndex];
-		var video_id = Rochester.getVidIdFromUrl(url);
-		
-		player.loadVideoById(video_id);
-		player.seekTo(0);
-		// console.log("playing video associated with field answer choice", fieldName, choiceRawValue);
-		player.playVideo();
-	} else {
-		// player.stopVideo();
-		// player.seekTo(0);
+	if(player2){
+		player2.playVideo();
 	}
 }
 
-Rochester.setVideoByFieldName = function(fieldName) {
-	// set video to this field's associated video
-	if (Rochester.values && Rochester.values.fields && Rochester.values.fields[fieldName] && Rochester.values.fields[fieldName].field) {
-		var url = Rochester.values.fields[fieldName].field[Rochester.signerIndex];
-		if (url) {
-			var video_id = Rochester.getVidIdFromUrl(url);
-			if (video_id) {
-				// change video source and start from beginning
-				if (!Rochester.curtain.locked) {
-					$("#curtain").hide();
-				}
-				$("#curtain h5").text("Click to play video.");
-				player.loadVideoById(video_id);
-				player.seekTo(0);
-				Rochester.curtain.locked = false;
-				$('.fl-button').show();
-				return true;
-			}
-		}
+Rochester.endSurvey = function() {
+	$('body').hide() // Poor man's loading indicator
+
+	var obname = $("#submit-action").prop("name");
+	if ($('#form select[name="'+obname+'"]').hasClass('rc-autocomplete') && $('#rc-ac-input_'+obname).length) {
+		$('#rc-ac-input_'+obname).trigger('blur');
+	}
+	// Change form action URL to force it to end the survey
+	$('#form').prop('action', $('#form').prop('action')+'&__endsurvey=1' );
+	// Submit the survey
+	Rochester.clickNextOrSubmitButton()
+}
+
+// survey video player
+
+Rochester.setVideo = function(fieldName, rawAnswerValue) {
+	// get videoId from stored url depending if we're setting based on answer choice, field name (question), or survey instructions (which is not a field)
+	var url;
+	if (fieldName && rawAnswerValue) {
+		url = Rochester.values.fields[fieldName].choices[rawAnswerValue][Rochester.signerIndex];
+	} else if (fieldName) {
+		url = Rochester.values.fields[fieldName].field[Rochester.signerIndex];
+	} else {
+		url = Rochester.values.instructions_urls[Rochester.signerIndex];
 	}
 	
-	Rochester.curtain.locked = true;
+	// get video ID
+	var videoId;
+	if (url)
+		videoId = Rochester.getVideoIdFromUrl(url);
 	
-	// load blank video
-	player.loadVideoById('8tPnX7OPo0Q');
-	player.pauseVideo();
-	
-	$('.fl-button').hide();
-	$("#curtain h5").text("No video assigned for this survey question or answer.");
-	$("#curtain").show();
+	// set video and/or curtain
+	if (!videoId) {
+		Rochester.curtain.locked = true;
+		$("#curtain h5").text("There is no video for this part of the survey.");
+		$("#curtain").show();
+		player.loadVideoById('8tPnX7OPo0Q'); // blank video
+	} else {
+		Rochester.curtain.locked = false;
+		$("#curtain h5").text("Click to play video.");
+		$("#curtain").hide();
+		player.loadVideoById(videoId);
+	}
 }
 
 // Load the IFrame Player API code asynchronously.
