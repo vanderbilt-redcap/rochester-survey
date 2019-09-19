@@ -242,8 +242,9 @@ Rochester.init = function() {
 	Rochester.hideBackButtonIfAppropriate();
 	
 	// ---------------- register events
-	// survey video
-	$(window).scroll(function() {
+	// stickify the survey video in portrait
+	$(window).on('resize orientationchange scroll', function() {
+		console.log('sticky...');
 		var w = $(window).width();
 		var h = $(window).height();
 		var y = window.scrollY;
@@ -252,7 +253,7 @@ Rochester.init = function() {
 			Rochester.setVideoAnchor(true);
 			video.css('top', y + "px");
 		}
-		if (y == 0) {
+		if (h <= w || y == 0) {
 			Rochester.setVideoAnchor(false);
 		}
 	});
