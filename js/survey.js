@@ -1,6 +1,3 @@
-// include css and bootstrap
-$('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
-
   // Replace the 'videoIframe' element with an <iframe> and
   // YouTube player after the API code downloads.
 var player;
@@ -505,8 +502,37 @@ Rochester.hideBackButtonIfAppropriate = function() {
 	}
 }
 
+Rochester.hasCurrentFieldBeenAnswered = function() {
+	var answered = false;
+	$(Rochester.surveyTarget).find('input, select, textarea').each(function(index, element){
+		element = $(element);
+		var type = element.attr('type');
+		if($.inArray(type, ['radio', 'checkbox']) !== -1){
+			if(!element.is(':checked')){
+				return;
+			}
+		}
+		else if(!element.val()){
+			return
+		}
+		
+		answered = true;
+	})
+
+	return answered;
+}
+
 Rochester.nextClicked = function() {
 	Rochester.setVideoAnchor(false);
+	if(
+		$(Rochester.surveyTarget).find('.requiredlabel').length === 1
+		&&
+		!Rochester.hasCurrentFieldBeenAnswered()
+	){
+		simpleDialog('You must answer the current question before continuing.')
+		return
+	}
+	
 	var setSurveyToField = function(field) {
 		// hide/show field elements
 		$(Rochester.surveyTarget).addClass("unseen");
@@ -829,11 +855,9 @@ Rochester.setVideoAnchor = function(enabled) {
 		video.addClass('anchored');
 		var videoHeight = $("#survey-video iframe").height();
 		$("#stickyVideoPlaceholder").css('height', videoHeight);
-		console.log('anchored survey video', videoHeight);
 	} else if (!enabled && video.hasClass('anchored')) {
 		video.removeClass('anchored');
 		$("#stickyVideoPlaceholder").css('height', 0);
-		console.log('removed survey video anchor');
 	}
 }
 
