@@ -144,6 +144,11 @@ $(function() {
 // utility and initialization
 
 Rochester.init = function() {
+	if($('button[name=submit-btn-saverecord]:contains("Next Page")').length === 1){
+		simpleDialog("Multiple pages are not currently supported by the <b>Rochester Survey</b> module. Please edit this survey's settings and change <b>Question Display Format</b> to <b>All on one page</b>.")
+		return
+	}
+
 	Rochester.surveyTarget = $("#surveytitlelogo")[0];
 	Rochester.countSigners();
 	
