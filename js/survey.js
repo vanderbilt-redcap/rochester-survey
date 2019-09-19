@@ -11,6 +11,11 @@ function onYouTubeIframeAPIReady() {
 	if(videoId){
 		player2 = new YT.Player('exitVideoIframe', {
 			videoId: videoId,
+			events: {
+				onReady: function(target) {
+					Rochester.playersReady.player2 = true;
+				}
+			},
 			playerVars: {
 				modestbranding: 1,
 				playsinline: 1,
@@ -44,6 +49,16 @@ function onYouTubeIframeAPIReady() {
 					showinfo: 0
 				},
 				events: {
+					onReady: function(target) {
+						var i = $(target.target.getIframe()).parent().index();
+						if (!Rochester.playersReady.previews)
+							Rochester.playersReady.previews = [];
+						if (typeof Rochester.playersReady.previews[i] === 'undefined') {
+							Rochester.playersReady.previews[i] = 0
+						} else if (Rochester.playersReady.previews[i] === 0) {
+							Rochester.playersReady.previews[i] = true
+						}
+					},
 					onStateChange: function(target, data){
 						if (target.data == YT.PlayerState.PLAYING || target.data == YT.PlayerState.BUFFERING) {
 							// stop all other signer preview videos
@@ -88,6 +103,9 @@ function onYouTubeIframeAPIReady() {
 			showinfo: 0
 		},
 		events: {
+			onReady: function(target) {
+				Rochester.playersReady.player = true;
+			},
 			onStateChange: function(target, data) {
 				/*
 					Only hiding the video on stop seems to be a good compromise.
@@ -117,6 +135,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 $.extend(Rochester, {
+	playersReady: {},
 	curtain: {
 		locked: false
 	},
@@ -294,6 +313,11 @@ Rochester.init = function() {
 		// $(e).keyboard({});
 	// });
 	
+	$("body").on("hide.bs.modal", function(event) {
+		if (!Rochester.playersAreReady())
+			event.preventDefault();
+	});
+	
 	// Open the signer model regardless for now.
 	// We may want to change this if we add support preserving settings when navigating between surveys.
 	// if(Rochester.isInitialLoad){
@@ -376,6 +400,20 @@ Rochester.findFirstSignerVideo = function(signerIndex) {
 			}
 		}
 	}
+}
+
+Rochester.playersAreReady = function() {
+	if (!Rochester.playersReady)
+		return false;
+	if (!Rochester.playersReady.previews)
+		return false;
+	if (!(Rochester.playersReady.player && Rochester.playersReady.player2))
+		return false;
+	for (i = 0; i < Rochester.signerCount; i++) {
+		if (!Rochester.playersReady.previews[i])
+			return false;
+	}
+	return true;
 }
 
 // survey navigation
