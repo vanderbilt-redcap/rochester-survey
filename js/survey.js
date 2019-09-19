@@ -773,11 +773,14 @@ Rochester.setVideo = function(fieldName, rawAnswerValue) {
 	// get videoId from stored url depending if we're setting based on answer choice, field name (question), or survey instructions (which is not a field)
 	var url;
 	if (fieldName && rawAnswerValue) {
-		url = Rochester.values.fields[fieldName].choices[rawAnswerValue][Rochester.signerIndex];
+		if (Rochester.values.fields[fieldName] && Rochester.values.fields[fieldName].choices[rawAnswerValue])
+			url = Rochester.values.fields[fieldName].choices[rawAnswerValue][Rochester.signerIndex];
 	} else if (fieldName) {
+		if (Rochester.values.fields[fieldName])
 		url = Rochester.values.fields[fieldName].field[Rochester.signerIndex];
 	} else {
-		url = Rochester.values.instructions_urls[Rochester.signerIndex];
+		if (Rochester.values.instructions_urls[Rochester.signerIndex])
+			url = Rochester.values.instructions_urls[Rochester.signerIndex];
 	}
 	
 	// get video ID
