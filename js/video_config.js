@@ -1,6 +1,5 @@
-// include css and bootstrap
+// include css
 $('head').append('<link rel="stylesheet" type="text/css" href="CSS_URL">');
-$('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
 
 var form_name = "";
 
