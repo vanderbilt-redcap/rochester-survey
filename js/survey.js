@@ -1,6 +1,3 @@
-// include css and bootstrap
-$('head').append('<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">');
-
   // Replace the 'videoIframe' element with an <iframe> and
   // YouTube player after the API code downloads.
 var player;
