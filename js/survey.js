@@ -488,7 +488,36 @@ Rochester.hideBackButtonIfAppropriate = function() {
 	}
 }
 
+Rochester.hasCurrentFieldBeenAnswered = function() {
+	var answered = false;
+	$(Rochester.surveyTarget).find('input, select, textarea').each(function(index, element){
+		element = $(element);
+		var type = element.attr('type');
+		if($.inArray(type, ['radio', 'checkbox']) !== -1){
+			if(!element.is(':checked')){
+				return;
+			}
+		}
+		else if(!element.val()){
+			return
+		}
+		
+		answered = true;
+	})
+
+	return answered;
+}
+
 Rochester.nextClicked = function() {
+	if(
+		$(Rochester.surveyTarget).find('.requiredlabel').length === 1
+		&&
+		!Rochester.hasCurrentFieldBeenAnswered()
+	){
+		simpleDialog('You must answer the current question before continuing.')
+		return
+	}
+
 	var setSurveyToField = function(field) {
 		// hide/show field elements
 		$(Rochester.surveyTarget).addClass("unseen");
