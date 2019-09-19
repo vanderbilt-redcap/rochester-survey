@@ -25,7 +25,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		echo "
 		<script type='text/javascript'>
-			$('#pagecontent > div:first > div:eq(0)').append(`<br/><br/>$img`);
+			$('#pagecontent > div:first > div:eq(0)').append('<br/><br/>$img');
 			$('#pagecontent > div:first > div:eq(0) img').css('max-width', '100%');
 		</script>";
 	}
@@ -239,7 +239,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<div id="exit-modal-config">
 			<div class="form-group">
 				<label for="exitModalTextInput">Text shown to participant in Exit Survey modal:</label>
-				<textarea type="text" class="form-control" id="exitModalTextInput" aria-describedby="exitModalText" rows="3" placeholder="Click `Exit` to exit this survey...">' . $exitSurveyText . '</textarea>
+				<textarea type="text" class="form-control" id="exitModalTextInput" aria-describedby="exitModalText" rows="3" placeholder="Click \'Exit\' to exit this survey...">' . $exitSurveyText . '</textarea>
 			</div>
 			<div class="form-group">
 				<label for="exitVideoUrl">Video URL for accompanying video:</label>

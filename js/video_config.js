@@ -99,31 +99,31 @@ $(function() {
 	
 	$("body").on("click", "#add_value_col", function(i, e) {
 		var n = $("#assoc_table th").length - 1;
-		$("#assoc_table").find("th").eq(n).after(`
-				<th class="value_column">
-					<div>
-						<span>Signer (${n - 1}) Video URLs</span>
-						<button class="btn btn-outline-secondary remove_column">
-							Remove
-						</button>
-					</div>
-				</th>`);
+		$("#assoc_table").find("th").eq(n).after("\
+				<th class='value_column'>\
+					<div>\
+						<span>Signer (" + (n - 1) + ") Video URLs</span>\
+						<button class='btn btn-outline-secondary remove_column'>\
+							Remove\
+						</button>\
+					</div>\
+				</th>");
 		$("#assoc_table").find("tr").each(function(i, e) {
 			$(this).find("td").eq(n).after("<td class=\"value_column\"><input type=\"text\" class=\"form-control\" placeholder=\"URL\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\"></td>");
 		});
 		
 		// add another signer portrait upload div
 		var portraitIndex = $('.signer-portrait').length + 1;
-		$("#signer-portraits").append(`
-		<div class="signer-portrait">
-			<h6>Signer ` + portraitIndex + `</h6>
-			<div class="input-group">
-				<div class="custom-file">
-					<input type="file" class="custom-file-input" id="portrait${portraitIndex}" aria-describedby="upload">
-					<label class="custom-file-label text-truncate" for="portrait${portraitIndex}">Choose image</label>
-				</div>
-			</div>
-		</div>`);
+		$("#signer-portraits").append("\
+		<div class='signer-portrait'>\
+			<h6>Signer " + portraitIndex + "</h6>\
+			<div class='input-group'>\
+				<div class='custom-file'>\
+					<input type='file' class='custom-file-input' id='portrait" + portraitIndex + "' aria-describedby='upload'>\
+					<label class='custom-file-label text-truncate' for='portrait" + portraitIndex + "'>Choose image</label>\
+				</div>\
+			</div>\
+		</div>");
 	});
 	
 	$("body").on("click", ".remove_column", function() {
