@@ -308,17 +308,21 @@ Rochester.init = function() {
 	
 	// yt player controls listen
 	// $("body").on('change', '#ytCaptions, #ytVolume', function() {Rochester.useYtControls = true});
+	var updateExampleTextFontSize = function(){
+		var fontSize = $($('.labelrc')[0]).css('font-size');
+		$('#optionsModal .font-size-example').css('font-size', fontSize);
+	}
 	
 	// font resize buttons available in Survey Options modal
 	$("#changeFont").hide();
 	var optionsModal = $('#optionsModal')
 	$("body").on("click", ".shrinkFont", function() {
 		$(".decreaseFont").trigger("click");
-		optionsModal.modal('hide')
+		updateExampleTextFontSize();
 	});
 	$("body").on("click", ".growFont", function() {
 		$(".increaseFont").trigger("click");
-		optionsModal.modal('hide')
+		updateExampleTextFontSize();
 	});
 	
 	// add on-screen keyboards to textareas
@@ -686,8 +690,13 @@ Rochester.getOptionsModalHtml = function() {
 							</div>\
 							<h5>Adjust Text Size</h5>\
 							<div class="row justify-content-around">\
-								<button type="button" class="btn btn-outline-primary shrinkFont">Make Text Smaller</button>\
-								<button type="button" class="btn btn-outline-primary growFont">Make Text Bigger</button>\
+								<div class="col-12 text-center">\
+									<button type="button" class="btn btn-outline-primary shrinkFont">Smaller</button>\
+									<button type="button" class="btn btn-outline-primary growFont">Larger</button>\
+								</div>\
+								<div class="col-12 text-center font-size-example" style="margin-top: 12px">\
+									<b>Example Text</b>\
+								</div>\
 							</div>\
 						</div>\
 						<div class="modal-footer">\
