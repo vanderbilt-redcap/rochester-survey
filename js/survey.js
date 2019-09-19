@@ -144,6 +144,11 @@ $(function() {
 // utility and initialization
 
 Rochester.init = function() {
+	if($('button[name=submit-btn-saverecord]:contains("Next Page")').length === 1){
+		simpleDialog("Multiple pages are not currently supported by the <b>Rochester Survey</b> module. Please edit this survey's settings and change <b>Question Display Format</b> to <b>All on one page</b>.")
+		return
+	}
+
 	Rochester.surveyTarget = $("#surveytitlelogo")[0];
 	Rochester.countSigners();
 	
@@ -289,10 +294,12 @@ Rochester.init = function() {
 		// $(e).keyboard({});
 	// });
 	
-	if(Rochester.isInitialLoad){
+	// Open the signer model regardless for now.
+	// We may want to change this if we add support preserving settings when navigating between surveys.
+	// if(Rochester.isInitialLoad){
 		// prompt user to select a signer
 		Rochester.openSignerModal();
-	}
+	// }
 }
 
 Rochester.countSigners = function() {
