@@ -19,13 +19,13 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			if ($row = db_fetch_assoc($result)) {
 				$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
 				$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
-				$img = "<img src='$imgSrc'>";
+				$img = "<img src=\'$imgSrc\'>";
 			}
 		}
 		
 		echo "
 		<script type='text/javascript'>
-			$('#pagecontent > div:first > div:eq(0)').append('<br/><br/>$img');
+			$('#pagecontent > div:first > div:eq(0)').append('<br/><br/>" . $img . "');
 			$('#pagecontent > div:first > div:eq(0) img').css('max-width', '100%');
 		</script>";
 	}
@@ -250,7 +250,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// fetch end of survey image configured for this form (if there is one)
 		$img = null;
 		$delete_button = null;
-		$edoc_id = $settings['endOfSurveyImage'];
+		$edoc_id = (int) $settings['endOfSurveyImage'];
 		if (!empty($edoc_id)) {
 			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
 			$result = db_query($sql);

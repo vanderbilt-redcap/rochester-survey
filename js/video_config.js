@@ -47,7 +47,7 @@ $(function() {
 		});
 	});
 	
-	// delete portrait button
+	// delete image button
 	$("body").on("click", ".image-upload button", function() {
 		// delete portrait for this signer index
 		var group = $(this).closest('.image-upload');
@@ -112,18 +112,18 @@ $(function() {
 			$(this).find("td").eq(n).after("<td class=\"value_column\"><input type=\"text\" class=\"form-control\" placeholder=\"URL\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\"></td>");
 		});
 		
-		// add another signer portrait upload div
-		var portraitIndex = $('.signer-portrait').length + 1;
-		$("#signer-portraits").append("\
-		<div class='signer-portrait'>\
-			<h6>Signer " + portraitIndex + "</h6>\
-			<div class='input-group'>\
-				<div class='custom-file'>\
-					<input type='file' class='custom-file-input' id='portrait" + portraitIndex + "' aria-describedby='upload'>\
-					<label class='custom-file-label text-truncate' for='portrait" + portraitIndex + "'>Choose image</label>\
-				</div>\
-			</div>\
-		</div>");
+		// // add another signer portrait upload div
+		// var portraitIndex = $('.signer-portrait').length + 1;
+		// $("#signer-portraits").append("\
+		// <div class='signer-portrait'>\
+			// <h6>Signer " + portraitIndex + "</h6>\
+			// <div class='input-group'>\
+				// <div class='custom-file'>\
+					// <input type='file' class='custom-file-input' id='portrait" + portraitIndex + "' aria-describedby='upload'>\
+					// <label class='custom-file-label text-truncate' for='portrait" + portraitIndex + "'>Choose image</label>\
+				// </div>\
+			// </div>\
+		// </div>");
 	});
 	
 	$("body").on("click", ".remove_column", function() {
