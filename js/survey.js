@@ -294,10 +294,12 @@ Rochester.init = function() {
 		// $(e).keyboard({});
 	// });
 	
-	if(Rochester.isInitialLoad){
+	// Open the signer model regardless for now.
+	// We may want to change this if we add support preserving settings when navigating between surveys.
+	// if(Rochester.isInitialLoad){
 		// prompt user to select a signer
 		Rochester.openSignerModal();
-	}
+	// }
 }
 
 Rochester.countSigners = function() {
