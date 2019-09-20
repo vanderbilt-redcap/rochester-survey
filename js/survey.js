@@ -127,6 +127,10 @@ $.extend(Rochester, {
 		$("html").css("background-color", color);
 		$("#pagecontent").css("background-color", color);
 		$("#pagecontent").css("margin-top", "0px");
+
+		Rochester.log('background color changed', {
+			color: color
+		});
 	},
 	updateTextColor: function(color) {
 		$("#container").css("color", color);
@@ -134,6 +138,10 @@ $.extend(Rochester, {
 		$(".fl-button").contents().addBack(".fl-button").css("color", color);
 		$(".fl-button").contents().addBack(".fl-button").css("border-color", color);
 		$("#pagecontent").css("margin-top", "0px");
+
+		Rochester.log('text color changed', {
+			color: color
+		});
 	}
 });
 
@@ -290,6 +298,9 @@ Rochester.init = function() {
 	var updateExampleTextFontSize = function(){
 		var fontSize = $($('.labelrc')[0]).css('font-size');
 		$('#optionsModal .font-size-example').css('font-size', fontSize);
+		Rochester.log('font size changed', {
+			size: fontSize
+		});
 	}
 	
 	// font resize buttons available in Survey Options modal
@@ -375,19 +386,24 @@ Rochester.clickNextOrSubmitButton = function() {
 
 Rochester.videoButtonClicked = function() {
 	var html = $(this).html();
+	var logMessage;
 	if (html.search("Hide") != -1) {
 		html = html.replace("Hide", "Show")
 		html = html.replace("video-slash", "video")
 		$(this).html(html);
 		player.pauseVideo();
 		$("#survey-video").css('display', 'none');
+		logMessage = 'hidden';
 	} else {
 		html = html.replace("Show", "Hide")
 		html = html.replace("video", "video-slash")
 		$(this).html(html);
 		player.playVideo();
 		$("#survey-video").css('display', 'flex');
+		logMessage = 'shown';
 	}
+
+	Rochester.log('video ' + logMessage);
 }
 
 Rochester.findFirstSignerVideo = function(signerIndex) {
@@ -474,6 +490,8 @@ Rochester.backClicked = function() {
 			
 			// no field name supplied, will default to showing instructions video (if possible)
 			Rochester.setVideo();
+
+			Rochester.log('field changed back to survey instructions');
 		}
 	}
 }
@@ -770,6 +788,7 @@ Rochester.onModalClose = function() {
 	if (typeof newSignerIndex === 'undefined' && typeof oldSignerIndex === 'undefined') {
 		// this only happens when they close the initial pick a signer modal
 		newSignerIndex = 0;
+		Rochester.log('defaulting to first signer');
 	}
 	
 	if (typeof newSignerIndex !== 'undefined' && oldSignerIndex != newSignerIndex) {
@@ -781,7 +800,7 @@ Rochester.onModalClose = function() {
 		// will set player to play video assigned for survey instructions or field visible, whichever is needed
 		Rochester.setVideo(fieldName);
 		
-		Rochester.log('signer changed', {
+		Rochester.log('signer selected', {
 			signerIndex: Rochester.signerIndex
 		})
 	}
@@ -805,6 +824,8 @@ Rochester.exitClicked = function(event) {
 	if(player2){
 		player2.playVideo();
 	}
+
+	Rochester.log('exit dialog displayed');
 }
 
 Rochester.endSurvey = function() {

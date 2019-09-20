@@ -3,6 +3,8 @@ namespace Vanderbilt\RochesterSurvey;
 
 class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 	function redcap_survey_complete($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
+		$this->log('survey completed');
+
 		$form_name = $instrument;
 		
 		// fetch end of survey image configured for this form (if there is one)
@@ -41,6 +43,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
+		$this->log('page loaded');
 		?>
 		<link rel="stylesheet" type="text/css" href="<?=$this->getUrl("css/survey.css")?>">
 		<link rel="stylesheet" type="text/css" href="<?=$this->getUrl("spectrum/spectrum.css")?>">
