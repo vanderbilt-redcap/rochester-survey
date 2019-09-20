@@ -32,6 +32,7 @@ body {
 .signer-previews .signer-preview {
   margin-bottom: 12px;
   padding: 8px;
+  pointer-events: none;
 }
 .signer-previews button {
   margin: 12px auto;

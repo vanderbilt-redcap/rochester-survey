@@ -49,6 +49,7 @@ Rochester.initializePlayers = function() {
 				playerVars: {
 					modestbranding: 1,
 					rel: 0,
+					controls: 0,
 					showinfo: 0
 				},
 				events: {
@@ -63,30 +64,9 @@ Rochester.initializePlayers = function() {
 						}
 					},
 					onStateChange: function(target, data){
-						if (target.data == YT.PlayerState.PLAYING || target.data == YT.PlayerState.BUFFERING) {
-							// stop all other signer preview videos
-							Rochester.signerPlayers.forEach(function(playerInstance, i) {
-								if (target.target != playerInstance) {
-									playerInstance.pauseVideo();
-								}
-							})
-							Rochester.optionsPlayers.forEach(function(playerInstance, i) {
-								if (target.target != playerInstance) {
-									playerInstance.pauseVideo();
-								}
-							})
+						// if (target.data == YT.PlayerState.PLAYING || target.data == YT.PlayerState.BUFFERING) {
 							
-							$(".signer-previews div").removeClass('blueHighlight');
-							
-							// highlight player's parent div
-							var previewDiv = $(target.target.a.parentNode);
-							previewDiv.addClass('blueHighlight');
-							
-							// enable and move Select button
-							var button = previewDiv.parent().find('button');
-							button.show();
-							$(button.detach()).insertAfter(previewDiv);
-						}
+						// }
 					}
 				}
 			};
@@ -128,7 +108,6 @@ Rochester.initializePlayers = function() {
 					}
 				} else {
 					if (!Rochester.curtain.locked) {
-						// console.log("showing curtain from event yt player state changed");
 						$("#curtain").hide();
 					}
 				}
@@ -267,6 +246,11 @@ Rochester.init = function() {
 		var fieldName = $(this).closest("tr").attr("sq_id");
 		var rawAnswerValue = $(this).find("input").attr("value") || $(this).find("input").attr("code");
 		Rochester.setVideo(fieldName, rawAnswerValue);
+	});
+	
+	$('body').on('click', '.video-container', function() {
+		if ($(this).find('.signer-preview').length > 0)
+			Rochester.signerPreviewClicked(this)
 	});
 	
 	// triggers on all modals that get closed
@@ -619,7 +603,7 @@ Rochester.openSignerModal = function() {
 	
 	// add select button
 	html += "\
-						<button type='button' style='display: none' class='btn btn-primary signer-select' data-dismiss='modal'>Select</button>";
+						<button type='button' style='display: none' class='btn btn-primary signer-select' data-dismiss='modal'>Select this signer</button>";
 	
 	html += '\
 					</div>\
@@ -668,7 +652,7 @@ Rochester.getOptionsModalHtml = function() {
 	
 	// add select button
 	html += "\
-								<button type='button' style='display: none' class='btn btn-primary signer-select' data-dismiss='modal'>Select</button>";
+								<button type='button' style='display: none' class='btn btn-primary signer-select' data-dismiss='modal'>Select this signer</button>";
 	
 	html += '\
 							</div>\
@@ -705,6 +689,38 @@ Rochester.getOptionsModalHtml = function() {
 			</div>\
 	';
 	return html;
+}
+
+Rochester.signerPreviewClicked = function(container) {
+	// stop all other signer preview videos
+	var iframeId = $(container).find('iframe.signer-preview').attr('id');
+	if (iframeId)
+		var thisPlayer = YT.get(iframeId)
+	if (!thisPlayer)
+		return false
+	
+	// play this video, pause others
+	function handleAllPlayers(playerInstance) {
+		Rochester.lastPlayerInstance = playerInstance
+		var state = playerInstance.getPlayerState()
+		if (thisPlayer === playerInstance) {
+			playerInstance.playVideo();
+		} else if (state == 1 || state == 3) {	// if video playing or buffering
+			playerInstance.pauseVideo();
+		}
+	}
+	Rochester.signerPlayers.forEach(handleAllPlayers)
+	Rochester.optionsPlayers.forEach(handleAllPlayers)
+	
+	$(".signer-previews div").removeClass('blueHighlight');
+	
+	// highlight player's parent div
+	$(container).addClass('blueHighlight');
+	
+	// enable and move Select button
+	var button = $(container).parent().find('button');
+	button.show();
+	$(button.detach()).insertAfter($(container));	
 }
 
 Rochester.getExitModalHtml = function() {
@@ -854,7 +870,6 @@ Rochester.setVideo = function(fieldName, rawAnswerValue) {
 }
 
 Rochester.setVideoAnchor = function() {
-	console.log(event.type);
 	var video = $("#survey-video");
 	var w = $(window).width();
 	var h = $(window).height();
