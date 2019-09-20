@@ -106,7 +106,6 @@ table.field_value tfoot td {
   padding: 20px 0px;
 }
 #signer-portraits .image-upload, #end-of-survey-config .image-upload {
-  max-width: 25%;
   margin-right: 20px;
   padding: 8px;
   border: 1px solid #007adf;

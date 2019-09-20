@@ -29,7 +29,7 @@ $(function() {
 			data: form_data,
 			type: 'POST',
 			success: function(response) {
-				// console.log(response);
+				console.log(response);
 				group.find("img").remove();
 				group.prepend(response.html);
 				if (group.find("div.row button").length == 0 && !response.error) {
