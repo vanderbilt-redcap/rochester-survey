@@ -401,8 +401,9 @@ Rochester.findFirstSignerVideo = function(signerIndex) {
 
 Rochester.playersAreReady = function() {
 	var url = Rochester.values['exitModalVideo'];
-	if (url)
-		var videoId = Rochester.getVideoIdFromUrl(exitModalVideo);
+	if (url) {
+		var videoId = Rochester.getVideoIdFromUrl(url);
+	}
 	if (!Rochester.playersReady)
 		return false;
 	if (!Rochester.playersReady.previews)
