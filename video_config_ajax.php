@@ -148,25 +148,23 @@ if ($action == 'get_form_config') {
 	
 	exit(json_encode($jsonArray));
 } elseif ($action == 'image_delete') {
-	$portrait = $_POST['portrait'];
 	$end_of_survey = $_POST['end_of_survey'];
 	$form_name = $_POST['form_name'];
 	
-	if ($portrait) {
-		// change module setting 'portraits' json
-		$portraits = json_decode($module->framework->getProjectSetting("portraits"), true);
-		$old_edoc_id = $portraits[$form_name][$_POST['index']];
-		$portraits[$form_name][$_POST['index']] = null;
-		$module->framework->setProjectSetting("portraits", json_encode($portraits));
-	} elseif ($end_of_survey) {
-		// change module setting 'end_of_survey_images' json
-		$end_of_survey_images = json_decode($module->framework->getProjectSetting("end_of_survey_images"), true);
-		$old_edoc_id = $end_of_survey_images[$form_name];
-		$end_of_survey_images[$form_name] = null;
-		$module->framework->setProjectSetting("end_of_survey_images", json_encode($end_of_survey_images));
+	// get settings or make new settings array
+	$settings = $module->framework->getProjectSetting($form_name);
+	if (empty($settings)) {
+		return;
+	} else {
+		$settings = json_decode($settings, true);
 	}
+	
+	// remove edoc from settings
+	$old_edoc_id = $settings['endOfSurveyImage'];
+	$settings['endOfSurveyImage'] = null;
+	$module->framework->setProjectSetting($form_name, json_encode($settings));
 		
-	// remove old edoc
+	// remove old edoc file
 	$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
 	$result = db_query($sql);
 	while ($row = db_fetch_assoc($result)) {
