@@ -200,9 +200,13 @@ $(function() {
 				action: "save_changes",
 				data: JSON.stringify(data)
 			},
-			dataType: "json"
-		}).always(function(response) {
-			simpleDialog(response.msg);
+			dataType: "json",
+			success: function(request){
+				simpleDialog(request.msg);
+			},
+			error: function(){
+				simpleDialog("An error occurred while saving settings.  If you were automatically logged out of REDCap, you can save your changes by logging back in using another browser tab/window then clicking save again here.");
+			}
 		});
 	})
 	
