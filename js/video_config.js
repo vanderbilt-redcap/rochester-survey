@@ -195,7 +195,7 @@ $(function() {
 		
 		$.ajax({
 			method: "POST",
-			url: Rochester.configAjaxUrl,
+			url: Rochester.saveConfigUrl,
 			data: {
 				action: "save_changes",
 				data: JSON.stringify(data)

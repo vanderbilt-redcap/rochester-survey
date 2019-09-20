@@ -42,7 +42,8 @@ if (count($surveys) == 0) {
 ?>
 <script>
 	var Rochester = {
-		configAjaxUrl: <?=json_encode($module->getUrl("video_config_ajax.php"))?>
+		configAjaxUrl: <?=json_encode($module->getUrl("video_config_ajax.php"))?>,
+		saveConfigUrl: <?=json_encode($module->getUrl("save_config.php"))?>
 	}
 </script>
 
