@@ -443,17 +443,10 @@ Rochester.backClicked = function() {
 			var fieldName = $(e).attr('sq_id');
 			Rochester.setVideo(fieldName);
 			
-			$.ajax({
-				method: "POST",
-				url: Rochester.ajaxURL,
-				data: {
-					action: "field changed",
-					message: "user navigated backwards to field '" + fieldName + "'"
-				},
-				dataType: "json"
-			}).done(function(msg) {
-				
-			});
+			Rochester.log('field changed', {
+				fieldName: fieldName,
+				direction: 'backward'
+			})
 			
 			foundNewTarget = true;
 			return false;
@@ -540,18 +533,10 @@ Rochester.nextClicked = function() {
 		var fieldName = $(field).attr('sq_id');
 		var videoFound = Rochester.setVideo(fieldName);
 		
-		// log field change on server
-		$.ajax({
-			method: "POST",
-			url: Rochester.ajaxURL,
-			data: {
-				action: "field changed",
-				message: "user navigated forward to field '" + fieldName + "'"
-			},
-			dataType: "json"
-		}).done(function(msg) {
-			
-		});
+		Rochester.log('field changed', {
+			fieldName: fieldName,
+			direction: 'forward'
+		})
 	}
 
 	var elementsToCheck
@@ -796,15 +781,8 @@ Rochester.onModalClose = function() {
 		// will set player to play video assigned for survey instructions or field visible, whichever is needed
 		Rochester.setVideo(fieldName);
 		
-		// log signer change
-		$.ajax({
-			method: "POST",
-			url: Rochester.ajaxURL,
-			data: {
-				action: "signer changed",
-				message: "user selected signer " + Rochester.signerIndex
-			},
-			dataType: "json"
+		Rochester.log('signer changed', {
+			signerIndex: Rochester.signerIndex
 		})
 	}
 	
@@ -913,6 +891,10 @@ Rochester.setVideoAnchor = function() {
 		video.css('right', '0px');
 		video.css('padding-bottom', '56.25%');
 	}
+}
+
+Rochester.log = function(message, parameters) {
+	Rochester.module.log(message, parameters)
 }
 
 // Load the IFrame Player API code asynchronously.

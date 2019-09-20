@@ -51,6 +51,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		if ($associatedValues === null)
 			return null;
 		
+		$this->initializeJavascriptModuleObject();
+
 		?>
 		<script>
 			var Rochester = <?=json_encode([
@@ -59,6 +61,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			])?>
 
 			Rochester.values = <?=$associatedValues?>;
+			Rochester.module = <?=$this->framework->getJavascriptModuleObjectName()?>;
 		</script>
 		<script src="<?=$this->getUrl("js/survey.js")?>"></script>
 		<?php
