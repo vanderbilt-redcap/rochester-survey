@@ -40,24 +40,14 @@ if (count($surveys) == 0) {
 }
 
 ?>
-<link rel="stylesheet" type="text/css" href="<?=$module->getUrl("css/video_config.css")?>">
 <script>
 	var Rochester = {
 		configAjaxUrl: <?=json_encode($module->getUrl("video_config_ajax.php"))?>
 	}
 </script>
+
+<link rel="stylesheet" type="text/css" href="<?=$module->getUrl("css/video_config.css")?>">
+<script src="<?=$module->getUrl("js/video_config.js")?>"></script>
 <?php
 
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
-
-// add our video config js file
-$survey_script = file_get_contents($module->getUrl("js/video_config.js"));
-$survey_script = str_replace("video_config_ajax.php", $module->getUrl("video_config_ajax.php"), $survey_script);
-$injection_element = "
-<!-- video_config for rochester survey module -->
-<script type=\"text/javascript\">
-	$survey_script
-</script>";
-
-echo($injection_element);
-?>
