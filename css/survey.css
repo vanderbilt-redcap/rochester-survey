@@ -35,7 +35,9 @@ body {
   pointer-events: none;
 }
 .signer-previews button {
-  margin: 12px auto;
+  position: relative;
+  bottom: 95px;
+  margin-bottom: -95px;
 }
 
 #optionsModal .modal-body {
