@@ -41,6 +41,11 @@ if (count($surveys) == 0) {
 
 ?>
 <link rel="stylesheet" type="text/css" href="<?=$module->getUrl("css/video_config.css")?>">
+<script>
+	var Rochester = {
+		configAjaxUrl: <?=json_encode($module->getUrl("video_config_ajax.php"))?>
+	}
+</script>
 <?php
 
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';

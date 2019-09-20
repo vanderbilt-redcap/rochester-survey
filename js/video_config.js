@@ -21,7 +21,7 @@ $(function() {
 		form_data.append("form_name", $("#assoc_table").attr('data-form-name'));
 		
 		$.ajax({
-			url: 'video_config_ajax.php',
+			url: Rochester.configAjaxUrl,
 			dataType: 'json',
 			cache: false,
 			contentType: false,
@@ -62,7 +62,7 @@ $(function() {
 		// console.log(data);
 		
 		$.ajax({
-			url: 'video_config_ajax.php',
+			url: Rochester.configAjaxUrl,
 			dataType: 'json',
 			data: data,
 			type: 'POST',
@@ -81,7 +81,7 @@ $(function() {
 		form_name = $(this).attr("value");
 		$.ajax({
 			method: "POST",
-			url: "video_config_ajax.php",
+			url: Rochester.configAjaxUrl,
 			data: {
 				action: "get_form_config",
 				form_name: $(this).attr("value")
@@ -195,7 +195,7 @@ $(function() {
 		
 		$.ajax({
 			method: "POST",
-			url: "video_config_ajax.php",
+			url: Rochester.configAjaxUrl,
 			data: {
 				action: "save_changes",
 				data: JSON.stringify(data)
