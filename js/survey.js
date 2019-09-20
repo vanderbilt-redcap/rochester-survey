@@ -416,11 +416,16 @@ Rochester.findFirstSignerVideo = function(signerIndex) {
 }
 
 Rochester.playersAreReady = function() {
+	var url = Rochester.values['exitModalVideo'];
+	if (url)
+		var videoId = Rochester.getVideoIdFromUrl(exitModalVideo);
 	if (!Rochester.playersReady)
 		return false;
 	if (!Rochester.playersReady.previews)
 		return false;
-	if (!(Rochester.playersReady.player && Rochester.playersReady.player2))
+	if (!Rochester.playersReady.player)
+		return false;
+	if (videoId && !Rochester.playersReady.player2)
 		return false;
 	for (i = 0; i < Rochester.signerCount; i++) {
 		if (!Rochester.playersReady.previews[i])
