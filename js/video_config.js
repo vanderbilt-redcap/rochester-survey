@@ -1,6 +1,3 @@
-// include css
-$('head').append('<link rel="stylesheet" type="text/css" href="CSS_URL">');
-
 var form_name = "";
 
 $(function() {
