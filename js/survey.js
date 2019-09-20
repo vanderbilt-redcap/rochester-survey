@@ -2,7 +2,13 @@
   // YouTube player after the API code downloads.
 var player;
 var player2;
-function onYouTubeIframeAPIReady() {
+Rochester.initializePlayers = function() {
+	// The following is safer than onYouTubeIframeAPIReady() since defining global methods can conflict with other modules (like the Analytics module).
+	if(!window.YT || !YT.loaded){
+		setTimeout(Rochester.initializePlayers, 50)
+		return
+	}
+
 	var exitModalVideo = Rochester.values['exitModalVideo'];
 	var videoId = Rochester.getVideoIdFromUrl(exitModalVideo);
 	if(videoId){
@@ -329,6 +335,8 @@ Rochester.init = function() {
 		// prompt user to select a signer
 		Rochester.openSignerModal();
 	// }
+
+	Rochester.initializePlayers();
 }
 
 Rochester.countSigners = function() {
