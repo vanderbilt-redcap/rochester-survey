@@ -243,19 +243,7 @@ Rochester.init = function() {
 	
 	// ---------------- register events
 	// stickify the survey video in portrait
-	$(window).on('resize orientationchange scroll', function() {
-		var w = $(window).width();
-		var h = $(window).height();
-		var y = window.scrollY;
-		var video = $("#survey-video");
-		if (h > w && y > 0) {
-			Rochester.setVideoAnchor(true);
-			video.css('top', y + "px");
-		}
-		if (h <= w || y == 0) {
-			Rochester.setVideoAnchor(false);
-		}
-	});
+	$(window).on('resize orientationchange scroll', Rochester.setVideoAnchor);
 	
 	// nav, watch question video, exit survey
 	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
@@ -436,7 +424,7 @@ Rochester.playersAreReady = function() {
 // survey navigation
 
 Rochester.backClicked = function() {
-	Rochester.setVideoAnchor(false);
+	Rochester.setVideoAnchor();
 	var foundNewTarget = false;
 	// try to find a suitable previous questiontable tbody tr to display
 	$(Rochester.surveyTarget).prevAll().each(function(i, e) {
@@ -527,7 +515,7 @@ Rochester.hasCurrentFieldBeenAnswered = function() {
 }
 
 Rochester.nextClicked = function() {
-	Rochester.setVideoAnchor(false);
+	Rochester.setVideoAnchor();
 	if(
 		$(Rochester.surveyTarget).find('.requiredlabel').length === 1
 		&&
@@ -852,33 +840,42 @@ Rochester.setVideo = function(fieldName, rawAnswerValue) {
 	}
 }
 
-Rochester.setVideoAnchor = function(enabled) {
+Rochester.setVideoAnchor = function() {
+	console.log(event.type);
 	var video = $("#survey-video");
-	if (!enabled) {
-		video.css('top', 0);
-	}
-	if (enabled && !video.hasClass('anchored')) {
+	var w = $(window).width();
+	var h = $(window).height();
+	var y = window.scrollY;
+	if (h > w && y > 0) {
+		// Rochester.setVideoAnchor(true);
+		video.css('top', y + "px");
 		video.addClass('anchored');
 		
 		// adjust placeholder div height
-		var videoHeight = $("#survey-video iframe").height();
+		var videoHeight = Math.min(480, $("#survey-video iframe").height());
 		$("#stickyVideoPlaceholder").css('height', videoHeight);
 		
-		// if window wider than 800px, set left and right
-		var width = $(window).width();
-		if (width > 800) {
-			var offset = (width - 800)/2;
+		if (w > 800) {
+			var offset = (w - 800)/2;
 			video.css('left', offset + 'px');
 			video.css('right', offset + 'px');
+			video.css('padding-bottom', '450px');
+		} else {
+			video.css('left', '0px');
+			video.css('right', '0px');
+			video.css('padding-bottom', '56.25%');
 		}
-		
-	} else if (!enabled && video.hasClass('anchored')) {
+	} else {
+		// Rochester.setVideoAnchor(false);
 		video.removeClass('anchored');
+		video.css('top', 0);
 		
-		// reset in case they were adjusted
+		// placeholder div height
+		$("#stickyVideoPlaceholder").css('height', "0px");
+		
 		video.css('left', '0px');
 		video.css('right', '0px');
-		$("#stickyVideoPlaceholder").css('height', 0);
+		video.css('padding-bottom', '56.25%');
 	}
 }
 
