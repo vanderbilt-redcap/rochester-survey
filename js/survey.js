@@ -48,6 +48,7 @@ Rochester.initializePlayers = function() {
 				videoId: videoId,
 				playerVars: {
 					modestbranding: 1,
+					playsinline: 1,		// prevents fullscreen when user taps to select signer/see preview
 					rel: 0,
 					controls: 0,
 					showinfo: 0
@@ -256,7 +257,8 @@ Rochester.init = function() {
 		Rochester.setVideo(fieldName, rawAnswerValue);
 	});
 	
-	$('body').on('click', '.video-container', function() {
+	$('body').on('touchstart mousedown', '.video-container', function() {
+		console.log('video container clicked: ', this)
 		if ($(this).find('.signer-preview').length > 0)
 			Rochester.signerPreviewClicked(this)
 	});
@@ -802,6 +804,8 @@ Rochester.onModalClose = function() {
 		Rochester.log('signer selected', {
 			signerIndex: Rochester.signerIndex
 		})
+	} else {
+		player.playVideo();
 	}
 	
 	// clean up
