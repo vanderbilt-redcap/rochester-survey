@@ -39,7 +39,6 @@ Rochester.initializePlayers = function() {
 		if (!previewUrls[i]) {
 			// find first signer video since a preview video was not configured
 			previewUrls[i] = Rochester.findFirstSignerVideo(i);
-			console.log('found preview', previewUrls[i])
 		}
 	}
 	for (i = 0; i < Rochester.signerCount; i++) {
@@ -357,7 +356,7 @@ Rochester.countSigners = function() {
 	
 	// count instructions_urls and signer preview urls too
 	signerCount = Math.max(signerCount, Rochester.values.instructions_urls.length, Rochester.values.signer_urls.length)
-	console.log('count', signerCount)
+	// console.log('count', signerCount)
 	Rochester.signerCount = signerCount;
 }
 
