@@ -119,6 +119,7 @@ Rochester.initializePlayers = function() {
 
 $.extend(Rochester, {
 	playersReady: {},
+	initialZoom: document.documentElement.clientWidth / window.innerWidth,
 	curtain: {
 		locked: false
 	},
@@ -233,11 +234,14 @@ Rochester.init = function() {
 	
 	// hide most of #pagecontent (except surveytitlelogo and instructions)
 	$("#pagecontent form").addClass("unseen");
+	$(".sldrparent *").removeClass('unseen');
+	
 	Rochester.hideBackButtonIfAppropriate();
 	
 	// ---------------- register events
 	// stickify the survey video in portrait
 	$(window).on('resize orientationchange scroll', Rochester.setVideoAnchor);
+	$('body').on('focus', 'textarea, input[type="text"]', Rochester.setVideoAnchor);
 	
 	// nav, watch question video, exit survey
 	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
@@ -258,7 +262,6 @@ Rochester.init = function() {
 	});
 	
 	$('body').on('touchstart mousedown', '.video-container', function() {
-		console.log('video container clicked: ', this)
 		if ($(this).find('.signer-preview').length > 0)
 			Rochester.signerPreviewClicked(this)
 	});
@@ -358,7 +361,6 @@ Rochester.countSigners = function() {
 	
 	// count instructions_urls and signer preview urls too
 	signerCount = Math.max(signerCount, Rochester.values.instructions_urls.length, Rochester.values.signer_urls.length)
-	// console.log('count', signerCount)
 	Rochester.signerCount = signerCount;
 }
 
@@ -446,7 +448,6 @@ Rochester.playersAreReady = function() {
 // survey navigation
 
 Rochester.backClicked = function() {
-	Rochester.setVideoAnchor();
 	var foundNewTarget = false;
 	// try to find a suitable previous questiontable tbody tr to display
 	$(Rochester.surveyTarget).prevAll().each(function(i, e) {
@@ -459,6 +460,8 @@ Rochester.backClicked = function() {
 			// set video to this field's associated video
 			var fieldName = $(e).attr('sq_id');
 			Rochester.setVideo(fieldName);
+			window.scrollTo(0, 0);
+			Rochester.setVideoAnchor();
 			
 			Rochester.log('field changed', {
 				fieldName: fieldName,
@@ -482,6 +485,8 @@ Rochester.backClicked = function() {
 			// hide
 			$(Rochester.surveyTarget).addClass("unseen");
 			$("#pagecontent form").addClass("unseen");
+			$(".sldrparent *").removeClass('unseen');
+			
 			Rochester.hideBackButtonIfAppropriate();
 			
 			// show
@@ -491,6 +496,8 @@ Rochester.backClicked = function() {
 			
 			// no field name supplied, will default to showing instructions video (if possible)
 			Rochester.setVideo();
+			window.scrollTo(0, 0);
+			Rochester.setVideoAnchor();
 
 			Rochester.log('field changed back to survey instructions');
 		}
@@ -532,7 +539,6 @@ Rochester.hasCurrentFieldBeenAnswered = function() {
 }
 
 Rochester.nextClicked = function() {
-	Rochester.setVideoAnchor();
 	if(
 		$(Rochester.surveyTarget).find('.requiredlabel').length === 1
 		&&
@@ -556,6 +562,8 @@ Rochester.nextClicked = function() {
 			fieldName: fieldName,
 			direction: 'forward'
 		})
+		window.scrollTo(0, 0);
+		Rochester.setVideoAnchor();
 	}
 
 	var elementsToCheck
@@ -567,6 +575,7 @@ Rochester.nextClicked = function() {
 		$("#survey-navigation button:eq(0)").removeClass("unseen");
 		
 		$("#questiontable tbody").children().addClass("unseen");
+		$(".sldrparent *").removeClass('unseen');
 
 		elementsToCheck = $("#questiontable tbody").children()
 	} else {
@@ -884,7 +893,14 @@ Rochester.setVideoAnchor = function() {
 	var w = $(window).width();
 	var h = $(window).height();
 	var y = window.scrollY;
-	if (h > w && y > 0) {
+	
+	var newZoom = document.documentElement.clientWidth / window.innerWidth
+	
+	var textFocus = false
+	if ($(document.activeElement).is('textarea') || ($(document.activeElement).is('input') && $(document.activeElement).attr('type') == 'text'))
+		textFocus = true
+	
+	if (h > w && y > 0 && !textFocus && (Rochester.initialZoom == newZoom) && !$('#curtain').is(':visible')) {
 		// Rochester.setVideoAnchor(true);
 		video.css('top', y + "px");
 		video.addClass('anchored');
@@ -906,7 +922,7 @@ Rochester.setVideoAnchor = function() {
 	} else {
 		// Rochester.setVideoAnchor(false);
 		video.removeClass('anchored');
-		video.css('top', 0);
+		video.css('top', '0px');
 		
 		// placeholder div height
 		$("#stickyVideoPlaceholder").css('height', "0px");

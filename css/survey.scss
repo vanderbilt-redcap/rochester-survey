@@ -33,6 +33,7 @@ body {
 		We remove it since does not respect the text color like other borders.
 	*/
 	border-bottom: none;
+	padding: 24px 0px;
 }
 
 .signer-previews {
@@ -161,9 +162,10 @@ body {
 }
 
 .fl-button {
+	padding: 1px;
 	i {
 		margin-left: 12px;
-		padding: 4px;
+		padding: 2px;
 		border: 1px solid #007bff33;
 		border-radius: 2px;
 	}
