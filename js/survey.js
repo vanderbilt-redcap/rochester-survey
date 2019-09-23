@@ -276,20 +276,6 @@ Rochester.init = function() {
 		}
 	});
 	
-	$("#fontSizeSlider").on("change", function() {
-		var zoom = $("#fontSizeSlider").val() + "%";
-		$("html").css("zoom", zoom);
-		$("#spectrum_color_picker").spectrum({
-			color: "#FFF",
-			flat: true,
-			showButtons: false,
-			move: function(color) {
-				$("body").css("background-color", color.toHexString());
-				$("html").css("background-color", color.toHexString());
-			}
-		});
-	});
-	
 	// allow users to load question video after selecting answers
 	$("body").on("click", ".fl-button", function(target) {
 		// set video to this field's associated video
