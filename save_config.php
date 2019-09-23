@@ -54,8 +54,14 @@ foreach ($data['fields'] as $field_name => $field_arr) {
     }
 }
 
-$module->framework->setProjectSetting($filtered["form_name"], json_encode($filtered));
+// retrieve endOfSurveyImage edoc_id if set, (this makes sure we don't write null over it)
 $settings = $module->framework->getProjectSetting($filtered["form_name"]);
+if (!empty($settings))
+	$settings = json_decode($settings, true);
+
+$filtered['endOfSurveyImage'] = $settings['endOfSurveyImage'];
+
+$module->framework->setProjectSetting($filtered["form_name"], json_encode($filtered));
 
 exit('{
     "msg": "Saved settings for ' . print_r($survey_display_name, true) . '"
