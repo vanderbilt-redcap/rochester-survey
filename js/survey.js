@@ -261,7 +261,7 @@ Rochester.init = function() {
 		Rochester.setVideo(fieldName, rawAnswerValue);
 	});
 	
-	$('body').on('touchstart mousedown', '.video-container', function() {
+	$('body').on('click', '.video-container', function() {
 		if ($(this).find('.signer-preview').length > 0)
 			Rochester.signerPreviewClicked(this)
 	});

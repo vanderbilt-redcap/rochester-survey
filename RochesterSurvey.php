@@ -42,23 +42,13 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		</script>";
 	}
 	
+	// absolute
 	function redcap_survey_page($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1) {
 		$this->log('page loaded');
 		?>
-		<link rel="stylesheet" type="text/css" href="<?php
-			$url = $this->getUrl("css/survey.css");
-			$url = substr($url, strpos($url, "/redcap/"));
-			echo $url;
-		?>">
-		<link rel="stylesheet" type="text/css" href="<?php
-			$url = $this->getUrl("spectrum/spectrum.css");
-			$url = substr($url, strpos($url, "/redcap/"));
-			echo $url;
-		?>">
-		<script src="<?php
-			$url = $this->getUrl("spectrum/spectrum.js");
-			echo substr($url, strpos($url, "/redcap/"));
-		?>"></script>
+		<link rel="stylesheet" type="text/css" href="<?=$this->getUrl("css/survey.css")?>">
+		<link rel="stylesheet" type="text/css" href="<?=$this->getUrl("spectrum/spectrum.css")?>">
+		<script src="<?=$this->getUrl("spectrum/spectrum.js")?>"></script>
 		<?php
 		// get this instrument's associated field values
 		$associatedValues = $this->framework->getProjectSetting($instrument);
@@ -81,11 +71,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			Rochester.values = <?=$associatedValues?>;
 			Rochester.module = <?=$this->framework->getJavascriptModuleObjectName()?>;
 		</script>
-		<script src="<?php
-			$url = $this->getUrl("js/survey.js");
-			$url = substr($url, strpos($url, "/redcap/"));
-			echo $url;
-		?>"></script>
+		<script src="<?=$this->getUrl("js/survey.js")?>"></script>
 		<?php
 	}
 	
