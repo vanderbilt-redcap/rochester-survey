@@ -60,7 +60,6 @@ if (!empty($settings))
 	$settings = json_decode($settings, true);
 
 $filtered['endOfSurveyImage'] = $settings['endOfSurveyImage'];
-
 $module->framework->setProjectSetting($filtered["form_name"], json_encode($filtered));
 
 exit('{

@@ -10,13 +10,7 @@ $(function() {
 		var file_data = $(input).prop('files')[0];
 		var form_data = new FormData();
 		
-		if (group.hasClass('signer-portrait')) {
-			form_data.append("action", "portrait_upload");
-			form_data.append("portrait_index", input.attr('id'));
-		} else if (group.hasClass('logo-upload')) {
-			form_data.append("action", "logo_upload");
-		}
-		
+		form_data.append("action", "logo_upload");
 		form_data.append("image", file_data);
 		form_data.append("form_name", $("#assoc_table").attr('data-form-name'));
 		
@@ -49,15 +43,14 @@ $(function() {
 		var group = $(this).closest('.image-upload');
 		var data = {
 			action: 'image_delete',
-			form_name: $("#assoc_table").attr('data-form-name')
+			form_name: $("#assoc_table").attr('data-form-name'),
+			end_of_survey: true
 		};
 		
-		if (group.hasClass('signer-portrait')) {
-			data.portrait = true;
-			data.index = group.index() + 1;
-		} else if (group.hasClass('logo-upload')) {
-			data.end_of_survey = true;
-		}
+		group.find("img").remove()
+		group.find("button").remove()
+		group.find("input").val('')
+		group.find("label").html('Choose image')
 		
 		// console.log(data);
 		
@@ -65,15 +58,7 @@ $(function() {
 			url: Rochester.configAjaxUrl,
 			dataType: 'json',
 			data: data,
-			type: 'POST',
-			success: function(response) {
-				// console.log(response);
-			},
-			complete: function(data) {
-				// console.log(data);
-				group.find("img").remove();
-				group.find("button").remove();
-			}
+			type: 'POST'
 		});
 	});
 	
