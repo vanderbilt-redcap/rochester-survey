@@ -60,7 +60,7 @@ if (!empty($settings))
 	$settings = json_decode($settings, true);
 
 $filtered['endOfSurveyImage'] = $settings['endOfSurveyImage'];
-
+file_put_contents("C:/vumc/log.txt", "settings\n" . print_r($filtered, true));
 $module->framework->setProjectSetting($filtered["form_name"], json_encode($filtered));
 
 exit('{

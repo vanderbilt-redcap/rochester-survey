@@ -72,12 +72,13 @@ if ($action == 'get_form_config') {
 	
 	// have file, so check name, size
 	$errors = [];
-	if (preg_match("/[^A-Za-z0-9. ()-]/", $uploaded_image["name"])) {
+	$filename = $uploaded_image["name"];
+	if (preg_match("/[^A-Za-z0-9. ()-]/", $filename)) {
 		$errors[] = "File names can only contain alphabet, digit, period, space, hyphen, and parentheses characters.";
 		$errors[] = "	Allowed characters: A-Z a-z 0-9 . ( ) -";
 	}
 	
-	if (strlen($uploaded_image["name"]) > 127) {
+	if (strlen($filename) > 127) {
 		$errors[] = "Uploaded file has a name that exceeds the limit of 127 characters.";
 	}
 	
@@ -141,6 +142,7 @@ if ($action == 'get_form_config') {
 			$end_of_survey_images[$form_name] = $new_edoc_id;
 			$jsonArray = [
 				"success" => true,
+				"filename" => $filename,
 				"html" => $imgElement
 			];
 		}
