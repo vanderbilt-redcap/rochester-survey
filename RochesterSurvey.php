@@ -130,7 +130,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<div id="table-controls">
 			<div class="custom-control custom-switch">
 				<input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
-				<label class="custom-control-label" for="applyToDuplicates">Duplicate values for fields and answers with identical labels (per column)</label>
+				<label class="custom-control-label" for="applyToDuplicates">Automatically copy signer URLs to table rows with identical labels (per column)</label>
 			</div>
 			<br>
 			<button class="btn btn-outline-primary" type="button" id="add_value_col">
