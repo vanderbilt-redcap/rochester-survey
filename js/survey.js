@@ -33,7 +33,6 @@ Rochester.initializePlayers = function() {
 	
 	// determine video IDs for signer preview videos
 	Rochester.signerPlayers = [];
-	Rochester.optionsPlayers = [];
 	var previewUrls = Rochester.values['signer_urls']
 	for (i = 0; i < Rochester.signerCount; i++) {
 		if (!previewUrls[i]) {
@@ -44,7 +43,7 @@ Rochester.initializePlayers = function() {
 	for (i = 0; i < Rochester.signerCount; i++) {
 		var videoId = Rochester.getVideoIdFromUrl(previewUrls[i]);
 		if (videoId) {
-			var playerSettings = {
+			Rochester.signerPlayers[i] = new YT.Player('signer-preview-' + i, {
 				videoId: videoId,
 				playerVars: {
 					modestbranding: 1,
@@ -58,21 +57,10 @@ Rochester.initializePlayers = function() {
 						var i = $(target.target.getIframe()).parent().index();
 						if (!Rochester.playersReady.previews)
 							Rochester.playersReady.previews = [];
-						if (typeof Rochester.playersReady.previews[i] === 'undefined') {
-							Rochester.playersReady.previews[i] = 0
-						} else if (Rochester.playersReady.previews[i] === 0) {
-							Rochester.playersReady.previews[i] = true
-						}
-					},
-					onStateChange: function(target, data){
-						// if (target.data == YT.PlayerState.PLAYING || target.data == YT.PlayerState.BUFFERING) {
-							
-						// }
+						Rochester.playersReady.previews[i] = true
 					}
 				}
-			};
-			Rochester.signerPlayers[i] = new YT.Player('signer-preview-' + i, playerSettings);
-			Rochester.optionsPlayers[i] = new YT.Player('options-signer-preview-' + i, playerSettings);
+			});
 		}
 	}
 	
@@ -182,6 +170,23 @@ Rochester.init = function() {
 	
 	// add exit survey iframe video too
 	$("body").append(Rochester.getExitModalHtml());
+	
+	// add survey option buttons
+	$("#survey-video").after('\
+			<div id="survey-options">\
+				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal" onclick="player.pauseVideo()">\
+					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>\
+				</button>\
+				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#signerModal" onclick="player.pauseVideo()">\
+					Choose Signer<i class="fas fa-user-friends" style="margin-left: 8px"></i>\
+				</button>\
+				<button type="button" class="btn btn-secondary video">\
+					Hide Video<i class="fas fa-video-slash" style="margin-left: 8px"></i>\
+				</button>\
+				<button type="button" class="btn btn-danger">\
+					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>\
+				</button>\
+			</div>')
 	
 	// add options modal
 	$("#container").before(Rochester.getOptionsModalHtml());
@@ -625,17 +630,6 @@ Rochester.openSignerModal = function() {
 
 Rochester.getOptionsModalHtml = function() {
 	var html = '\
-			<div id="survey-options">\
-				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal" onclick="player.pauseVideo()">\
-					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>\
-				</button>\
-				<button type="button" class="btn btn-secondary video">\
-					Hide Video<i class="fas fa-video-slash" style="margin-left: 8px"></i>\
-				</button>\
-				<button type="button" class="btn btn-danger">\
-					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>\
-				</button>\
-			</div>\
 			<div class="modal fade" id="optionsModal" tabindex="-1" role="dialog" aria-labelledby="optionsModalLabel" aria-hidden="true">\
 				<div class="modal-dialog" role="document">\
 					<div class="modal-content">\
@@ -646,23 +640,6 @@ Rochester.getOptionsModalHtml = function() {
 							</button>\
 						</div>\
 						<div class="modal-body">\
-							<h5 id="choose-a-signer">Choose a Signer</h5>';
-	html += '\
-							<div class="signer-previews">';
-	
-	for (i = 0; i < Rochester.signerCount; i++) {
-		html += '\
-								<div class="video-container">\
-									<div class="signer-preview" id="options-signer-preview-' + i + '" data-signer-index="' + i + '"></div>\
-								</div>';
-	}
-	
-	// add select button
-	html += "\
-								<button type='button' style='display: none' class='btn btn-primary signer-select' data-dismiss='modal'>Select this signer</button>";
-	
-	html += '\
-							</div>\
 							<h5>Adjust Colors</h5>\
 							<div class="row justify-content-around">\
 								<div class="col-12 text-center">\
@@ -717,7 +694,6 @@ Rochester.signerPreviewClicked = function(container) {
 		}
 	}
 	Rochester.signerPlayers.forEach(handleAllPlayers)
-	Rochester.optionsPlayers.forEach(handleAllPlayers)
 	
 	$(".signer-previews div").removeClass('blueHighlight');
 	
@@ -771,9 +747,6 @@ Rochester.getExitModalHtml = function() {
 Rochester.onModalClose = function() {
 	// pause preview videos
 	Rochester.signerPlayers.forEach(function(player) {
-		player.pauseVideo();
-	});
-	Rochester.optionsPlayers.forEach(function(player) {
 		player.pauseVideo();
 	});
 	

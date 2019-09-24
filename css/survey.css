@@ -88,14 +88,14 @@ body {
 
 #survey-options {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-around;
-  padding-bottom: 12px;
-  padding-top: 12px;
 }
 #survey-options button {
-  white-space: nowrap;
   font-size: 12px;
+  padding: 8px;
+  margin: 8px;
 }
 
 #survey-navigation {
@@ -156,14 +156,18 @@ body {
   z-index: 1;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1280px) {
   #survey-options button {
-    font-size: 1rem;
+    font-size: 16px;
+    padding: 8px;
+    margin: 16px;
   }
 }
-@media (max-width: 442px) {
+@media (max-width: 568px) {
   #survey-options button {
     font-size: 10px;
+    padding: 4px;
+    margin: 4px;
   }
 }
 
