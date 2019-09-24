@@ -450,7 +450,7 @@ Rochester.backClicked = function() {
 			
 			// set video to this field's associated video
 			var fieldName = $(e).attr('sq_id');
-			Rochester.setVideo(fieldName);
+			Rochester.setPlaylist(fieldName);
 			window.scrollTo(0, 0);
 			Rochester.setVideoAnchor();
 			
@@ -547,7 +547,7 @@ Rochester.nextClicked = function() {
 		
 		// set video to this field's associated video
 		var fieldName = $(field).attr('sq_id');
-		var videoFound = Rochester.setVideo(fieldName);
+		Rochester.setPlaylist(fieldName);
 		
 		Rochester.log('field changed', {
 			fieldName: fieldName,
@@ -766,9 +766,12 @@ Rochester.onModalClose = function() {
 		var fieldName;
 		if (Rochester.surveyTarget != $("#surveytitlelogo")[0]) {
 			fieldName = $(Rochester.surveyTarget).attr('sq_id');
-		}			
-		// will set player to play video assigned for survey instructions or field visible, whichever is needed
-		Rochester.setVideo(fieldName);
+			Rochester.setPlaylist(fieldName);
+		} else {
+			// load instructions video
+			Rochester.setVideo()
+		}
+		
 		
 		Rochester.log('signer selected', {
 			signerIndex: Rochester.signerIndex
@@ -814,6 +817,41 @@ Rochester.endSurvey = function() {
 }
 
 // survey video player
+
+Rochester.setPlaylist = function(fieldName) {
+	/* this function should only be called when the user changes fields via the previous and next buttons */
+	/* NOT when clicking "watch question video" or answer video buttons */
+	var playlist = []
+	
+	var url;
+	if (Rochester.values.fields[fieldName])
+		url = Rochester.values.fields[fieldName].field[Rochester.signerIndex];
+	
+	var videoId
+	if (url)
+		videoId = Rochester.getVideoIdFromUrl(url);
+	
+	if (!videoId) {
+		Rochester.curtain.locked = true;
+		$("#curtain h5").text("There is no video for this part of the survey.");
+		$("#curtain").show();
+		return
+	}
+	
+	Rochester.curtain.locked = false;
+	$("#curtain h5").text("Click to play video.");
+	$("#curtain").hide();
+	
+	playlist.push(videoId)
+	
+	// add answer videos to playlist if applicable
+	for (var choice in Rochester.values.fields[fieldName].choices) {
+		videoId = Rochester.getVideoIdFromUrl(Rochester.values.fields[fieldName].choices[choice][Rochester.signerIndex]);
+		if (videoId)
+			playlist.push(videoId)
+	}
+	player.loadPlaylist(playlist, 0, 0)
+}
 
 Rochester.setVideo = function(fieldName, rawAnswerValue) {
 	// get videoId from stored url depending if we're setting based on answer choice, field name (question), or survey instructions (which is not a field)
