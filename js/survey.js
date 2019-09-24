@@ -689,6 +689,7 @@ Rochester.signerPreviewClicked = function(container) {
 		var state = playerInstance.getPlayerState()
 		if (thisPlayer === playerInstance) {
 			playerInstance.playVideo();
+			playerInstance.seekTo(0)
 		} else if (state == 1 || state == 3) {	// if video playing or buffering
 			playerInstance.pauseVideo();
 		}
@@ -844,6 +845,7 @@ Rochester.setVideo = function(fieldName, rawAnswerValue) {
 		$("#curtain h5").text("Click to play video.");
 		$("#curtain").hide();
 		player.loadVideoById(videoId);
+		player.seekTo(0)
 	}
 }
 
