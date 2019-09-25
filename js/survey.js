@@ -782,7 +782,8 @@ Rochester.onModalClose = function() {
 			// load instructions video
 			Rochester.setVideo()
 		}
-		
+
+		Rochester.setVideoAnchor();
 		
 		Rochester.log('signer selected', {
 			signerIndex: Rochester.signerIndex
@@ -910,9 +911,8 @@ Rochester.setVideoAnchor = function() {
 	if ($(document.activeElement).is('textarea') || ($(document.activeElement).is('input') && $(document.activeElement).attr('type') == 'text'))
 		textFocus = true
 	
-	if (h > w && y > 0 && !textFocus && (Rochester.initialZoom == newZoom) && !$('#curtain').is(':visible')) {
+	if (h > w && !textFocus && (Rochester.initialZoom == newZoom) && !$('#curtain').is(':visible')) {
 		// Rochester.setVideoAnchor(true);
-		video.css('top', y + "px");
 		video.addClass('anchored');
 		
 		// adjust placeholder div height
@@ -932,8 +932,6 @@ Rochester.setVideoAnchor = function() {
 	} else {
 		// Rochester.setVideoAnchor(false);
 		video.removeClass('anchored');
-		video.css('top', '0px');
-		
 		// placeholder div height
 		$("#stickyVideoPlaceholder").css('height', "0px");
 		

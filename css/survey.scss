@@ -176,10 +176,11 @@ body {
 }
 
 .anchored {
-	position: absolute;
+	position: fixed;
+	top: 0;
 	left: 0;
 	right: 0;
-	z-index: 1;
+	z-index: 1; // Appear over the 'Returning' corner button if return codes are enabled
 }
 
 // large screen adjustments
