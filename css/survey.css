@@ -42,6 +42,13 @@ body {
   position: relative;
   bottom: 95px;
   margin-bottom: -95px;
+  z-index: 2;
+}
+.signer-previews .ios-click-area {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 #optionsModal .modal-body {

@@ -54,7 +54,14 @@ Rochester.initializePlayers = function() {
 				},
 				events: {
 					onReady: function(target) {
-						var i = $(target.target.getIframe()).parent().index();
+						var iframe = $(target.target.getIframe())
+						var parent =  iframe.parent()
+						parent.find('.ios-click-area').css({
+							width: iframe.width()+15,
+							height: iframe.height()+15
+						})
+
+						var i = parent.index();
 						if (!Rochester.playersReady.previews)
 							Rochester.playersReady.previews = [];
 						Rochester.playersReady.previews[i] = true
@@ -266,7 +273,7 @@ Rochester.init = function() {
 		Rochester.setVideo(fieldName, rawAnswerValue);
 	});
 	
-	$('body').on('click touchend', '.video-container', function() {
+	$('body').on('click', '.video-container', function() {
 		if ($(this).find('.signer-preview').length > 0)
 			Rochester.signerPreviewClicked(this)
 	});
@@ -609,6 +616,7 @@ Rochester.openSignerModal = function() {
 	for (i = 0; i < Rochester.signerCount; i++) {
 		html += '\
 						<div class="video-container">\
+						<div class="ios-click-area"></div>\
 							<div class="signer-preview" id="signer-preview-' + i + '" data-signer-index="' + i + '"></div>\
 						</div>';
 	}
