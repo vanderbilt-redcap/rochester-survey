@@ -98,9 +98,12 @@ Rochester.initializePlayers = function() {
 				// if (target.data == YT.PlayerState.ENDED || target.data == YT.PlayerState.PAUSED) { // if paused or video ended
 				if (target.data == YT.PlayerState.ENDED) {
 					if (!Rochester.curtain.locked) {
-						$("#curtain h5").text("Click to play video.");
-						// $("#curtain").css('height', '88%');
-						$("#curtain").show();
+						if (Rochester.playlist) {
+							Rochester.advancePlaylist()
+						} else {
+							$("#curtain h5").text("Click to play video.");
+							$("#curtain").show();
+						}
 					}
 				} else {
 					if (!Rochester.curtain.locked) {
@@ -268,6 +271,7 @@ Rochester.init = function() {
 			True - False
 	*/
 	$("body").on("click", "#questiontable tr [class^=choice]", function() {
+		delete Rochester.playlist
 		var fieldName = $(this).closest("tr").attr("sq_id");
 		var rawAnswerValue = $(this).find("input").attr("value") || $(this).find("input").attr("code");
 		Rochester.setVideo(fieldName, rawAnswerValue);
@@ -281,16 +285,21 @@ Rochester.init = function() {
 	// triggers on all modals that get closed
 	$("body").on('hidden.bs.modal', Rochester.onModalClose);
 	
-	$("body").on("click", "#curtain", function() {
+	$("body").on("click touchend", "#curtain", function() {
 		if (!Rochester.curtain.locked) {
 			$("#curtain").hide();
-			player.playVideo();
+			if (Rochester.playlist) {
+				player.loadVideoById(Rochester.playlist.videoIds[Rochester.playlist.videoIndex])
+			} else {
+				player.playVideo();
+			}
 		}
 	});
 	
 	// allow users to load question video after selecting answers
 	$("body").on("click", ".fl-button", function(target) {
 		// set video to this field's associated video
+		delete Rochester.playlist
 		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
 		Rochester.setVideo(fieldName);
 	});
@@ -450,6 +459,7 @@ Rochester.playersAreReady = function() {
 
 Rochester.backClicked = function() {
 	var foundNewTarget = false;
+	delete Rochester.playlist
 	// try to find a suitable previous questiontable tbody tr to display
 	$(Rochester.surveyTarget).prevAll().each(function(i, e) {
 		if (Rochester.isRealField(e)) {
@@ -549,6 +559,7 @@ Rochester.nextClicked = function() {
 		return
 	}
 	
+	delete Rochester.playlist
 	var setSurveyToField = function(field) {
 		// hide/show field elements
 		$(Rochester.surveyTarget).addClass("unseen");
@@ -830,6 +841,29 @@ Rochester.endSurvey = function() {
 
 // survey video player
 
+Rochester.advancePlaylist = function() {
+	var ids = Rochester.playlist.videoIds
+	
+	Rochester.playlist.videoIndex++
+	var index = Rochester.playlist.videoIndex
+	
+	if (index > ids.length - 1) {
+		Rochester.playlist.videoIndex = 0
+		$("#curtain h5").text("Click to play video.")
+		Rochester.curtain.locked = false
+	} else {
+		$("#curtain h5").text("Loading next video.")
+		Rochester.curtain.locked = true
+		setTimeout(function() {
+			Rochester.curtain.locked = false
+			$("#curtain").hide()
+			player.loadVideoById(ids[index])
+			player.seekTo(0)
+		}, 1000)
+	}
+	$("#curtain").show();
+}
+
 Rochester.setPlaylist = function(fieldName) {
 	/* this function should only be called when the user changes fields via the previous and next buttons */
 	/* NOT when clicking "watch question video" or answer video buttons */
@@ -862,7 +896,14 @@ Rochester.setPlaylist = function(fieldName) {
 		if (videoId)
 			playlist.push(videoId)
 	}
-	player.loadPlaylist(playlist, 0, 0)
+	
+	Rochester.playlist = {
+		videoIds: playlist,
+		videoIndex: 0
+	}
+	
+	player.loadVideoById(Rochester.playlist.videoIds[0])
+	player.seekTo(0)
 }
 
 Rochester.setVideo = function(fieldName, rawAnswerValue) {
