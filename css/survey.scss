@@ -2,7 +2,7 @@
 //sass.bat base.scss base.css
 
 html {
-	overflow: hidden; // Prevents return code corner button from oddly hanging off the page and affecting zoom & dialog sizes.
+	overflow-x: hidden; // Prevents return code corner button from oddly hanging off the page and affecting zoom & dialog sizes.
 }
 
 body {
