@@ -1,15 +1,13 @@
 // recompile command (when working in css folder):
 //sass.bat base.scss base.css
 
-html {
-	overflow-x: hidden; // Prevents return code corner button from oddly hanging off the page and affecting zoom & dialog sizes.
-}
-
 body {
 	background-color: #FFF;
 }
 
 #pagecontent {
+	overflow-x: hidden; // Prevents return code corner button from oddly hanging off the page and affecting zoom & dialog sizes.
+
 	// margin-top: none;
 	table, td, tr, div {
 		background: rgba(0,0,0,0);	// browsers\

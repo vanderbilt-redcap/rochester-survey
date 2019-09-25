@@ -1,11 +1,10 @@
-html {
-  overflow-x: hidden;
-}
-
 body {
   background-color: #FFF;
 }
 
+#pagecontent {
+  overflow-x: hidden;
+}
 #pagecontent table, #pagecontent td, #pagecontent tr, #pagecontent div {
   background: rgba(0, 0, 0, 0);
 }
