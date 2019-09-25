@@ -285,7 +285,7 @@ Rochester.init = function() {
 	// triggers on all modals that get closed
 	$("body").on('hidden.bs.modal', Rochester.onModalClose);
 	
-	$("body").on("click touchend", "#curtain", function() {
+	$('div#curtain').click(function(){
 		if (!Rochester.curtain.locked) {
 			$("#curtain").hide();
 			if (Rochester.playlist) {
