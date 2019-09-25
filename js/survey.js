@@ -334,6 +334,9 @@ Rochester.init = function() {
 		Rochester.openSignerModal();
 	// }
 
+	// Prevent automatic scrolling on refresh (in browsers that support it).
+	history.scrollRestoration = "manual";
+
 	Rochester.initializePlayers();
 }
 
