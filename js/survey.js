@@ -111,6 +111,9 @@ Rochester.initializePlayers = function() {
 						$("#curtain").hide();
 					}
 				}
+				
+				if (target.data == YT.PlayerState.PLAYING && Rochester.playlist && Rochester.curtain.locked)
+					player.pauseVideo()
 			}
 		}
 	});
@@ -883,11 +886,12 @@ Rochester.advancePlaylist = function() {
 	} else {
 		$("#curtain h5").text("Loading next video.")
 		Rochester.curtain.locked = true
+		player.loadVideoById(ids[index])
 		setTimeout(function() {
 			Rochester.curtain.locked = false
-			$("#curtain").hide()
-			player.loadVideoById(ids[index])
+			player.playVideo()
 			player.seekTo(0)
+			$("#curtain").hide()
 		}, 1000)
 	}
 	$("#curtain").show();
