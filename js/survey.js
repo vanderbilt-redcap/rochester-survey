@@ -165,11 +165,32 @@ Rochester.init = function() {
 	Rochester.surveyTarget = $("#surveytitlelogo")[0];
 	Rochester.countSigners();
 	
+	/* the following event triggers when an answer is selected from these field types:
+			Multiple Choice - Radio Buttons (Single Answer)
+			Checkboxes (Multiple Answers)
+			Yes - No
+			True - False
+	*/
+	$("#questiontable tr [class^=choice]").click(function() {
+		delete Rochester.playlist
+		var fieldName = $(this).closest("tr").attr("sq_id");
+		var rawAnswerValue = $(this).find("input").attr("value") || $(this).find("input").attr("code");
+		Rochester.setVideo(fieldName, rawAnswerValue);
+	});
+	
 	// add video button to field labels
 	$(".fl").each(function(i, e) {
 		$(e).after('<button type="button" class="btn btn-outline-primary fl-button">\
 				<span>Watch Question Video<span><i class="fas fa-video"></i>\
 			</button>');
+	});
+	
+	// allow users to load question video after selecting answers
+	$(".fl-button").click(function(target) {
+		// set video to this field's associated video
+		delete Rochester.playlist
+		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
+		Rochester.setVideo(fieldName);
 	});
 	
 	// add video iframe element, survey control div/button, hide most of the #pagecontent and questiontable children children
@@ -191,10 +212,10 @@ Rochester.init = function() {
 				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">\
 					Options <i class="fas fa-cog"></i>\
 				</button>\
-				<button type="button" class="btn btn-secondary video">\
+				<button type="button" class="btn btn-secondary video" onclick="Rochester.videoButtonClicked()">\
 					Hide Video <i class="fas fa-video-slash"></i>\
 				</button>\
-				<button type="button" class="btn btn-danger">\
+				<button type="button" class="btn btn-danger" onclick="Rochester.exitClicked()">\
 					Exit Survey <i class="far fa-times-circle"></i>\
 				</button>\
 			</div>')
@@ -202,11 +223,23 @@ Rochester.init = function() {
 	// add options modal
 	$("#container").before(Rochester.getOptionsModalHtml());
 	
+	// font resize buttons available in Survey Options modal
+	$("#changeFont").hide();
+	var optionsModal = $('#optionsModal')
+	$(".shrinkFont").click(function() {
+		$(".decreaseFont").trigger("click");
+		updateExampleTextFontSize();
+	});
+	$(".growFont").click(function() {
+		$(".increaseFont").trigger("click");
+		updateExampleTextFontSize();
+	});
+	
 	// add survey navigation buttons
 	$("#container").after('\
 			<div id="survey-navigation">\
-				<button class="btn btn-primary">Back</button>\
-				<button class="btn btn-primary">Next</button>\
+				<button class="btn btn-primary" onclick="Rochester.backClicked()">Back</button>\
+				<button class="btn btn-primary" onclick="Rochester.nextClicked()">Next</button>\
 			</div>');
 	
 	// spectrum color picker creation/initialization
@@ -259,30 +292,6 @@ Rochester.init = function() {
 	$(window).on('resize orientationchange scroll', Rochester.setVideoAnchor);
 	$('body').on('focus', 'textarea, input[type="text"]', Rochester.setVideoAnchor);
 	
-	// nav, watch question video, exit survey
-	$("body").on('click', "#survey-navigation button:first-child", Rochester.backClicked);
-	$("body").on('click', "#survey-navigation button:last-child", Rochester.nextClicked);
-	$("body").on('click', "#survey-options button.video", Rochester.videoButtonClicked);
-	$("body").on('click', "#survey-options button:last-child", Rochester.exitClicked);
-	
-	/* the following event triggers when an answer is selected from these field types:
-			Multiple Choice - Radio Buttons (Single Answer)
-			Checkboxes (Multiple Answers)
-			Yes - No
-			True - False
-	*/
-	$("body").on("click", "#questiontable tr [class^=choice]", function() {
-		delete Rochester.playlist
-		var fieldName = $(this).closest("tr").attr("sq_id");
-		var rawAnswerValue = $(this).find("input").attr("value") || $(this).find("input").attr("code");
-		Rochester.setVideo(fieldName, rawAnswerValue);
-	});
-	
-	$('body').on('click', '.video-container', function() {
-		if ($(this).find('.signer-preview').length > 0)
-			Rochester.signerPreviewClicked(this)
-	});
-	
 	// triggers on all modals that get closed
 	$("body").on('hidden.bs.modal', Rochester.onModalClose);
 	
@@ -297,16 +306,7 @@ Rochester.init = function() {
 		}
 	});
 	
-	// allow users to load question video after selecting answers
-	$("body").on("click", ".fl-button", function(target) {
-		// set video to this field's associated video
-		delete Rochester.playlist
-		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
-		Rochester.setVideo(fieldName);
-	});
-	
 	// yt player controls listen
-	// $("body").on('change', '#ytCaptions, #ytVolume', function() {Rochester.useYtControls = true});
 	var updateExampleTextFontSize = function(){
 		var fontSize = $($('.labelrc')[0]).css('font-size');
 		$('#optionsModal .font-size-example').css('font-size', fontSize);
@@ -314,23 +314,6 @@ Rochester.init = function() {
 			size: fontSize
 		});
 	}
-	
-	// font resize buttons available in Survey Options modal
-	$("#changeFont").hide();
-	var optionsModal = $('#optionsModal')
-	$("body").on("click", ".shrinkFont", function() {
-		$(".decreaseFont").trigger("click");
-		updateExampleTextFontSize();
-	});
-	$("body").on("click", ".growFont", function() {
-		$(".increaseFont").trigger("click");
-		updateExampleTextFontSize();
-	});
-	
-	// add on-screen keyboards to textareas
-	// $("textarea").each(function(i, e) {
-		// $(e).keyboard({});
-	// });
 	
 	$("body").on("hide.bs.modal", function(event) {
 		if (!Rochester.playersAreReady())
@@ -343,7 +326,12 @@ Rochester.init = function() {
 		// prompt user to select a signer
 		Rochester.openSignerModal();
 	// }
-
+	
+	$('.video-container').click(function() {
+		if ($(this).find('.signer-preview').length > 0)
+			Rochester.signerPreviewClicked(this)
+	});
+	
 	// Prevent automatic scrolling on refresh (in browsers that support it).
 	history.scrollRestoration = "manual";
 
@@ -423,19 +411,20 @@ Rochester.clickNextOrSubmitButton = function() {
 }
 
 Rochester.videoButtonClicked = function() {
-	var html = $(this).html();
+	var button = $("#survey-options button.video")
+	var html = $(button).html();
 	var logMessage;
 	if (html.search("Hide") != -1) {
 		html = html.replace("Hide", "Show")
 		html = html.replace("video-slash", "video")
-		$(this).html(html);
+		$(button).html(html);
 		player.pauseVideo();
 		$("#survey-video").css('display', 'none');
 		logMessage = 'hidden';
 	} else {
 		html = html.replace("Show", "Hide")
 		html = html.replace("video", "video-slash")
-		$(this).html(html);
+		$(button).html(html);
 		player.playVideo();
 		$("#survey-video").css('display', 'flex');
 		logMessage = 'shown';
