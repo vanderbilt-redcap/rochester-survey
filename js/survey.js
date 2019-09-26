@@ -118,7 +118,7 @@ Rochester.initializePlayers = function() {
 
 $.extend(Rochester, {
 	playersReady: {},
-	initialZoom: document.documentElement.clientWidth / window.innerWidth,
+	initialZoom: Math.round(window.devicePixelRatio * 100),
 	curtain: {
 		locked: false
 	},
@@ -975,39 +975,51 @@ Rochester.setVideoAnchor = function() {
 	var h = $(window).height();
 	var y = window.scrollY;
 	
-	var newZoom = document.documentElement.clientWidth / window.innerWidth
+	var newZoom = Math.round(window.devicePixelRatio * 100)
 	
 	var textFocus = false
 	if ($(document.activeElement).is('textarea') || ($(document.activeElement).is('input') && $(document.activeElement).attr('type') == 'text'))
 		textFocus = true
 	
+	if (w > h) {
+		// linearly interpolate new padding-bottom value to ensure dynamic video height
+		var minHeight = 320
+		var maxHeight = 1200
+		var diffHeight = maxHeight - minHeight
+		var minPadBottom = 130
+		var maxPadBottom = 450
+		var diffPadBottom = maxPadBottom - minPadBottom
+		var paddingBottom = Math.round(Math.min(Math.max(minPadBottom + (h-minHeight)*(diffPadBottom/diffHeight), minPadBottom), maxPadBottom))
+		video.css('padding-bottom', paddingBottom + 'px')
+	} else {
+		if (h * 0.5625 > 450) {
+			video.css('padding-bottom', '450px')
+		} else {
+			video.css('padding-bottom', '56.25%')
+		}
+	}
+	
 	if (h > w && !textFocus && (Rochester.initialZoom == newZoom) && !$('#curtain').is(':visible')) {
-		// Rochester.setVideoAnchor(true);
 		video.addClass('anchored');
 		
-		// adjust placeholder div height
-		var videoHeight = Math.min(480, $("#survey-video iframe").height());
+		// detect video actual height
+		var videoHeight = $("#survey-video iframe").height();
 		$("#stickyVideoPlaceholder").css('height', videoHeight);
 		
 		if (w > 800) {
 			var offset = (w - 800)/2;
 			video.css('left', offset + 'px');
 			video.css('right', offset + 'px');
-			video.css('padding-bottom', '450px');
 		} else {
 			video.css('left', '0px');
 			video.css('right', '0px');
-			video.css('padding-bottom', '56.25%');
 		}
 	} else {
-		// Rochester.setVideoAnchor(false);
 		video.removeClass('anchored');
-		// placeholder div height
 		$("#stickyVideoPlaceholder").css('height', "0px");
 		
 		video.css('left', '0px');
 		video.css('right', '0px');
-		video.css('padding-bottom', '56.25%');
 	}
 }
 
