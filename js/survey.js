@@ -349,6 +349,30 @@ Rochester.init = function() {
 	Rochester.initializePlayers();
 }
 
+Rochester.logSettingsJSON = function() {
+	var data = []
+	$('#assoc_table tr').each(function(i, row){
+		$(row).find('.value_column input').each(function(j, input){
+			if(!data[i]){
+				data[i] = [];
+			}
+
+			data[i][j] = $(input).val();
+		});
+	});
+
+	console.log(JSON.stringify(data))
+}
+
+Rochester.setSettingsFromJSON = function(data) {
+	data = JSON.parse(data)
+	$('#assoc_table tr').each(function(i, row){
+		$(row).find('.value_column input').each(function(j, input){
+			$(input).val(data[i][j]);
+		});
+	});
+}
+
 Rochester.countSigners = function() {
 	if (!Rochester.values.fields) {
 		Rochester.signerCount = 0;
