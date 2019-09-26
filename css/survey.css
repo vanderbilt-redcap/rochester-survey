@@ -132,7 +132,6 @@ body {
 
 .play-video-button {
   padding: 1px;
-  margin-right: 10px;
   vertical-align: 2px;
 }
 .play-video-button i {
@@ -141,7 +140,13 @@ body {
   border-radius: 2px;
 }
 
+.question-video-button {
+  margin-left: 1px;
+  margin-right: 8px;
+}
+
 .answer-video-button {
+  margin-right: 10px;
   text-indent: 0em;
 }
 
