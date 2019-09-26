@@ -194,6 +194,10 @@ body {
 	z-index: 1; // Appear over the 'Returning' corner button if return codes are enabled
 }
 
+.choicevert {
+	margin-top: 15px;
+}
+
 // large screen adjustments
 @media (min-width: 1280px) {
 	#survey-options button {

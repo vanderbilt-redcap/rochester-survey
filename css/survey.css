@@ -178,6 +178,10 @@ body {
   z-index: 1;
 }
 
+.choicevert {
+  margin-top: 15px;
+}
+
 @media (min-width: 1280px) {
   #survey-options button {
     font-size: 16px;
