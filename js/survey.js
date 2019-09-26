@@ -973,24 +973,21 @@ Rochester.setVideoAnchor = function() {
 	var textFocus = false
 	if ($(document.activeElement).is('textarea') || ($(document.activeElement).is('input') && $(document.activeElement).attr('type') == 'text'))
 		textFocus = true
+		
+	// linearly interpolate new padding-bottom value to ensure dynamic video height
+	var minHeight = 320
+	var maxHeight = 1200
+	var diffHeight = maxHeight - minHeight
+	var minPadBottom = 130
+	var maxPadBottom = 450
+	var diffPadBottom = maxPadBottom - minPadBottom
+	var paddingBottom = Math.round(Math.min(Math.max(minPadBottom + (h-minHeight)*(diffPadBottom/diffHeight), minPadBottom), maxPadBottom))
 	
-	if (w > h) {
-		// linearly interpolate new padding-bottom value to ensure dynamic video height
-		var minHeight = 320
-		var maxHeight = 1200
-		var diffHeight = maxHeight - minHeight
-		var minPadBottom = 130
-		var maxPadBottom = 450
-		var diffPadBottom = maxPadBottom - minPadBottom
-		var paddingBottom = Math.round(Math.min(Math.max(minPadBottom + (h-minHeight)*(diffPadBottom/diffHeight), minPadBottom), maxPadBottom))
-		video.css('padding-bottom', paddingBottom + 'px')
-	} else {
-		if (h * 0.5625 > 450) {
-			video.css('padding-bottom', '450px')
-		} else {
-			video.css('padding-bottom', '56.25%')
-		}
-	}
+	// limit video height so that it satisfies 4:3 aspect ratio (most common YT aspect ratio)
+	// remember paddingBottom + paddingTop = height (paddingTop is always 30)
+	paddingBottom = Math.min(paddingBottom, (3/4)*w - 30)
+	
+	video.css('padding-bottom', paddingBottom + 'px')
 	
 	if (h > w && !textFocus && (Rochester.initialZoom == newZoom) && !$('#curtain').is(':visible')) {
 		video.addClass('anchored');
