@@ -182,8 +182,8 @@ Rochester.init = function() {
 	
 	// add video button to field labels
 	$(".fl").each(function(i, e) {
-		$(e).after('<button type="button" class="btn btn-outline-primary play-video-button question-video-button">\
-				<span>Watch Question Video<span><i class="fas fa-video"></i>\
+		$(e).prepend('<button type="button" class="btn btn-outline-primary play-video-button question-video-button">\
+				<i class="fas fa-video"></i>\
 			</button>');
 	});
 	// allow users to load question video after selecting answers

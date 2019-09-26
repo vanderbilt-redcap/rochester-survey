@@ -132,6 +132,8 @@ body {
 
 .play-video-button {
   padding: 1px;
+  margin-right: 10px;
+  vertical-align: 2px;
 }
 .play-video-button i {
   padding: 2px;
@@ -139,14 +141,8 @@ body {
   border-radius: 2px;
 }
 
-.question-video-button i {
-  margin-left: 12px;
-}
-
 .answer-video-button {
   text-indent: 0em;
-  margin-right: 10px;
-  vertical-align: 2px;
 }
 
 #form {

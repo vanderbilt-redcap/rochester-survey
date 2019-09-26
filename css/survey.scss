@@ -147,6 +147,9 @@ body {
 
 .play-video-button {
 	padding: 1px;
+	margin-right: 10px;
+	vertical-align: 2px;
+
 	i {
 		padding: 2px;
 		border: 1px solid #007bff33;
@@ -154,16 +157,8 @@ body {
 	}
 }
 
-.question-video-button {
-	i {
-		margin-left: 12px;
-	}
-}
-
 .answer-video-button {
 	text-indent: 0em; // required for IE11
-	margin-right: 10px;
-	vertical-align: 2px;
 }
 
 #form {
