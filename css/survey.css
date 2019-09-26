@@ -70,11 +70,12 @@ body {
 #optionsModal .modal-body div.row div.col {
   width: 100%;
 }
-#optionsModal .modal-body div.row i {
-  font-size: 200px;
-}
 #optionsModal .modal-body .sp-container {
   border: 0;
+}
+
+.modal {
+  overflow-y: auto;
 }
 
 #curtain {
@@ -98,7 +99,7 @@ body {
 
 #survey-options {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: none;
   align-items: center;
   justify-content: space-around;
 }

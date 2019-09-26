@@ -80,14 +80,16 @@ body {
 		div.col {
 			width: 100%;
 		}
-		i {
-			font-size: 200px;
-		}
 	}
 	
 	.sp-container {
 		border: 0;
 	}
+}
+
+// ensure mobile can scroll on signer modal when opening via options modal
+.modal {
+	overflow-y: auto;
 }
 
 #curtain {
@@ -112,7 +114,7 @@ body {
 
 #survey-options {
 	display: flex;
-	flex-wrap: wrap;
+	flex-wrap: none;
 	align-items: center;
 	justify-content: space-around;
 	button {

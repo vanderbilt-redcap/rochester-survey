@@ -84,6 +84,7 @@ Rochester.initializePlayers = function() {
 		events: {
 			onReady: function(target) {
 				Rochester.playersReady.player = true;
+				$('body').on('shown.bs.modal', function() {player.pauseVideo()})
 			},
 			onStateChange: function(target, data) {
 				/*
@@ -184,17 +185,14 @@ Rochester.init = function() {
 	// add survey option buttons
 	$("#survey-video").after('\
 			<div id="survey-options">\
-				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal" onclick="player.pauseVideo()">\
-					Survey Options<i class="fas fa-cog" style="margin-left: 8px"></i>\
-				</button>\
-				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#signerModal" onclick="player.pauseVideo()">\
-					Choose Signer<i class="fas fa-user-friends" style="margin-left: 8px"></i>\
+				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">\
+					Options <i class="fas fa-cog"></i>\
 				</button>\
 				<button type="button" class="btn btn-secondary video">\
-					Hide Video<i class="fas fa-video-slash" style="margin-left: 8px"></i>\
+					Hide Video <i class="fas fa-video-slash"></i>\
 				</button>\
 				<button type="button" class="btn btn-danger">\
-					Exit Survey<i class="far fa-times-circle" style="margin-left: 8px"></i>\
+					Exit Survey <i class="far fa-times-circle"></i>\
 				</button>\
 			</div>')
 	
@@ -439,7 +437,8 @@ Rochester.videoButtonClicked = function() {
 		$("#survey-video").css('display', 'flex');
 		logMessage = 'shown';
 	}
-
+	
+	Rochester.setVideoAnchor()
 	Rochester.log('video ' + logMessage);
 }
 
@@ -686,6 +685,12 @@ Rochester.getOptionsModalHtml = function() {
 							</button>\
 						</div>\
 						<div class="modal-body">\
+							<h5>Choose a Signer</h5>\
+							<div class="row justify-content-around">\
+								<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#signerModal" onclick="$(\'#optionsModal\').modal(\'hide\')">\
+									Choose Signer <i class="fas fa-user-friends"></i>\
+								</button>\
+							</div>\
 							<h5>Adjust Colors</h5>\
 							<div class="row justify-content-around">\
 								<div class="col-12 text-center">\
