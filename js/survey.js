@@ -138,8 +138,10 @@ $.extend(Rochester, {
 	updateTextColor: function(color) {
 		$("#container").css("color", color);
 		$("#container").css("border-color", color);
-		$(".fl-button").contents().addBack(".fl-button").css("color", color);
-		$(".fl-button").contents().addBack(".fl-button").css("border-color", color);
+		$(".play-video-button").css({
+			"color": color,
+			"border-color": color
+		})
 		$("#pagecontent").css("margin-top", "0px");
 
 		Rochester.log('text color changed', {
@@ -174,23 +176,42 @@ Rochester.init = function() {
 	$("#questiontable tr [class^=choice]").click(function() {
 		delete Rochester.playlist
 		var fieldName = $(this).closest("tr").attr("sq_id");
-		var rawAnswerValue = $(this).find("input").attr("value") || $(this).find("input").attr("code");
+		var rawAnswerValue = Rochester.getInputValue($(this).find("input"));
 		Rochester.setVideo(fieldName, rawAnswerValue);
 	});
 	
 	// add video button to field labels
 	$(".fl").each(function(i, e) {
-		$(e).after('<button type="button" class="btn btn-outline-primary fl-button">\
+		$(e).after('<button type="button" class="btn btn-outline-primary play-video-button question-video-button">\
 				<span>Watch Question Video<span><i class="fas fa-video"></i>\
 			</button>');
 	});
-	
 	// allow users to load question video after selecting answers
-	$(".fl-button").click(function(target) {
+	$(".question-video-button").click(function(target) {
 		// set video to this field's associated video
 		delete Rochester.playlist
 		var fieldName = $(Rochester.surveyTarget).attr('sq_id');
 		Rochester.setVideo(fieldName);
+	});
+
+	$('.choicehoriz, .choicevert').each(function(i, container){
+		$(container).prepend('\
+			<button class="btn btn-outline-primary play-video-button answer-video-button">\
+				<i class="fas fa-video"></i>\
+			</button>\
+		')
+	});	
+	// allow users to load question video after selecting answers
+	$(".answer-video-button").click(function(e) {
+		e.preventDefault()
+		e.stopPropagation()
+
+		delete Rochester.playlist
+
+		var button = $(this)
+		var fieldName = button.closest("tr").attr("sq_id")
+		var input = button.next()
+		Rochester.setVideo(fieldName, Rochester.getInputValue(input))
 	});
 	
 	// add video iframe element, survey control div/button, hide most of the #pagecontent and questiontable children children
@@ -336,6 +357,15 @@ Rochester.init = function() {
 	history.scrollRestoration = "manual";
 
 	Rochester.initializePlayers();
+}
+
+Rochester.getInputValue = function(input) {
+	if(input.attr('type') === 'checkbox'){
+		return input.attr('code')
+	}
+	else{
+		return input.val()
+	}
 }
 
 Rochester.logSettingsJSON = function() {
