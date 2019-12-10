@@ -230,10 +230,10 @@ Rochester.init = function() {
 	// add survey option buttons
 	$("#survey-video").after('\
 			<div id="survey-options">\
-				<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#optionsModal">\
+				<button type="button" class="btn btn-black" data-toggle="modal" data-target="#optionsModal">\
 					Options <i class="fas fa-cog"></i>\
 				</button>\
-				<button type="button" class="btn btn-secondary video" onclick="Rochester.videoButtonClicked()">\
+				<button type="button" class="btn btn-black video" onclick="Rochester.videoButtonClicked()">\
 					Hide Video <i class="fas fa-video-slash"></i>\
 				</button>\
 				<button type="button" class="btn btn-danger" onclick="Rochester.exitClicked()">\
@@ -259,8 +259,8 @@ Rochester.init = function() {
 	// add survey navigation buttons
 	$("#container").after('\
 			<div id="survey-navigation">\
-				<button class="btn btn-primary" onclick="Rochester.backClicked()">Back</button>\
-				<button class="btn btn-primary" onclick="Rochester.nextClicked()">Next</button>\
+				<button class="btn btn-primary" onclick="Rochester.backClicked()"><i class="fa fa-arrow-left"></i>	Back</button>\
+				<button class="btn btn-primary" onclick="Rochester.nextClicked()">Next	<i class="fa fa-arrow-right"></i></button>\
 			</div>');
 	
 	// spectrum color picker creation/initialization
@@ -724,7 +724,7 @@ Rochester.getOptionsModalHtml = function() {
 									<input id="spectrum_text_color">\
 								</div>\
 								<div class="col-12 text-center">\
-									<button type="button" class="btn btn-outline-primary resetColors" style="margin-top: 20px; margin-bottom: 10px">Reset Colors</button>\
+									<button type="button" class="btn btn-black resetColors" style="margin-top: 20px; margin-bottom: 10px">Reset Colors</button>\
 								</div>\
 							</div>\
 							<h5>Adjust Text Size</h5>\

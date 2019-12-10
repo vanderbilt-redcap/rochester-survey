@@ -150,6 +150,11 @@ body {
   text-indent: 0em;
 }
 
+.btn-black {
+  background-color: #000;
+  color: #fff;
+}
+
 #form {
   border: none;
 }
