@@ -43,8 +43,7 @@ body {
 }
 .signer-previews button {
   position: relative;
-  bottom: 95px;
-  margin-bottom: -95px;
+  margin: 1em;
   z-index: 2;
 }
 .signer-previews .ios-click-area {
