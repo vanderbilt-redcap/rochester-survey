@@ -152,6 +152,11 @@ body {
 
 .btn-black {
   background-color: #000;
+  color: #efefef;
+}
+
+.btn-black:hover {
+  background-color: #222;
   color: #fff;
 }
 

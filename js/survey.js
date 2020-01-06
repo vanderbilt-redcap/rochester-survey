@@ -128,6 +128,7 @@ $.extend(Rochester, {
 	updateBackgroundColor: function(color) {
 		$("body").css("background-color", color);
 		$("html").css("background-color", color);
+		$(".modal-content").css("background-color", color);
 		$("#pagecontent").css("background-color", color);
 		$("#pagecontent").css("margin-top", "0px");
 
@@ -138,6 +139,8 @@ $.extend(Rochester, {
 	updateTextColor: function(color) {
 		$("#container").css("color", color);
 		$("#container").css("border-color", color);
+		$(".modal-content").css("color", color);
+		$(".modal-dialog div").css("border-color", color);
 		$(".play-video-button").css({
 			"color": color,
 			"border-color": color
@@ -249,11 +252,11 @@ Rochester.init = function() {
 	var optionsModal = $('#optionsModal')
 	$(".shrinkFont").click(function() {
 		$(".decreaseFont").trigger("click");
-		updateExampleTextFontSize();
+		updateModalTextSize();
 	});
 	$(".growFont").click(function() {
 		$(".increaseFont").trigger("click");
-		updateExampleTextFontSize();
+		updateModalTextSize();
 	});
 	
 	// add survey navigation buttons
@@ -328,9 +331,9 @@ Rochester.init = function() {
 	});
 	
 	// yt player controls listen
-	var updateExampleTextFontSize = function(){
+	var updateModalTextSize = function(){
 		var fontSize = $($('.labelrc')[0]).css('font-size');
-		$('#optionsModal .font-size-example').css('font-size', fontSize);
+		$('.modal-content *').css('font-size', fontSize);
 		Rochester.log('font size changed', {
 			size: fontSize
 		});
@@ -716,6 +719,9 @@ Rochester.getOptionsModalHtml = function() {
 							<h5>Adjust Colors</h5>\
 							<div class="row justify-content-around">\
 								<div class="col-12 text-center">\
+									<button type="button" class="btn btn-black resetColors" style="margin-top: 20px; margin-bottom: 10px">Reset Colors</button>\
+								</div>\
+								<div class="col-12 text-center">\
 									<h5>Background Color</h5>\
 									<input id="spectrum_bg_color">\
 								</div>\
@@ -723,15 +729,12 @@ Rochester.getOptionsModalHtml = function() {
 									<h5>Text Color</h5>\
 									<input id="spectrum_text_color">\
 								</div>\
-								<div class="col-12 text-center">\
-									<button type="button" class="btn btn-black resetColors" style="margin-top: 20px; margin-bottom: 10px">Reset Colors</button>\
-								</div>\
 							</div>\
 							<h5>Adjust Text Size</h5>\
 							<div class="row justify-content-around">\
 								<div class="col-12 text-center">\
-									<button type="button" class="btn btn-outline-primary shrinkFont">Smaller</button>\
-									<button type="button" class="btn btn-outline-primary growFont">Larger</button>\
+									<button type="button" class="btn btn-primary shrinkFont">Smaller</button>\
+									<button type="button" class="btn btn-primary growFont">Larger</button>\
 								</div>\
 								<div class="col-12 text-center font-size-example" style="margin-top: 12px">\
 									<b>Example Text</b>\
