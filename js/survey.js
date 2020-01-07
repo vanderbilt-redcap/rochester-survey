@@ -214,6 +214,7 @@ Rochester.init = function() {
 		var button = $(this)
 		var fieldName = button.closest("tr").attr("sq_id")
 		var input = button.next()
+		input.click()
 		Rochester.setVideo(fieldName, Rochester.getInputValue(input))
 	});
 	
