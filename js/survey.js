@@ -85,6 +85,10 @@ Rochester.initializePlayers = function() {
 			onReady: function(target) {
 				Rochester.playersReady.player = true;
 				$('body').on('shown.bs.modal', function() {player.pauseVideo()})
+				
+				// load instructions video
+				Rochester.setVideo()
+				Rochester.setVideoAnchor()
 			},
 			onStateChange: function(target, data) {
 				/*
@@ -150,7 +154,8 @@ $.extend(Rochester, {
 		Rochester.log('text color changed', {
 			color: color
 		});
-	}
+	},
+	hasOpenedSignerModal: false
 });
 
 // load dashboard content
@@ -349,7 +354,7 @@ Rochester.init = function() {
 	// We may want to change this if we add support preserving settings when navigating between surveys.
 	// if(Rochester.isInitialLoad){
 		// prompt user to select a signer
-		Rochester.openSignerModal();
+		Rochester.createSignerModal();
 	// }
 	
 	$('.video-container').click(function() {
@@ -360,6 +365,9 @@ Rochester.init = function() {
 	// Prevent automatic scrolling on refresh (in browsers that support it).
 	history.scrollRestoration = "manual";
 
+	// user first signer for instructions video
+	Rochester.signerIndex = 0;
+	
 	Rochester.initializePlayers();
 }
 
@@ -599,6 +607,11 @@ Rochester.hasCurrentFieldBeenAnswered = function() {
 }
 
 Rochester.nextClicked = function() {
+	if (Rochester.hasOpenedSignerModal == false) {
+		$("#signerModal").modal('show')
+		return
+	}
+	
 	if(
 		$(Rochester.surveyTarget).find('.requiredlabel').length === 1
 		&&
@@ -662,7 +675,7 @@ Rochester.nextClicked = function() {
 
 // modals
 
-Rochester.openSignerModal = function() {
+Rochester.createSignerModal = function() {
 	var html = '\
 	<div class="modal fade" id="signerModal" tabindex="-1" role="dialog" aria-labelledby="signerModalLabel" aria-hidden="true">\
 		<div class="modal-dialog" role="document">\
@@ -696,7 +709,7 @@ Rochester.openSignerModal = function() {
 	</div>';
 	
 	$("body").prepend(html);
-	$("#signerModal").modal('show');
+	// $("#signerModal").modal('show');
 }
 
 Rochester.getOptionsModalHtml = function() {
@@ -861,6 +874,11 @@ Rochester.onModalClose = function() {
 	// clean up
 	$(".signer-previews div").removeClass('blueHighlight');
 	$(".signer-select").hide();
+	
+	if (!Rochester.hasOpenedSignerModal) {
+		Rochester.hasOpenedSignerModal = true
+		Rochester.nextClicked()
+	}
 }
 
 Rochester.resetExitVideo = function() {
@@ -972,6 +990,7 @@ Rochester.setVideo = function(fieldName, rawAnswerValue) {
 		if (Rochester.values.fields[fieldName])
 		url = Rochester.values.fields[fieldName].field[Rochester.signerIndex];
 	} else {
+		console.log('setting video to instructions')
 		if (Rochester.values.instructions_urls[Rochester.signerIndex])
 			url = Rochester.values.instructions_urls[Rochester.signerIndex];
 	}
@@ -980,6 +999,8 @@ Rochester.setVideo = function(fieldName, rawAnswerValue) {
 	var videoId;
 	if (url)
 		videoId = Rochester.getVideoIdFromUrl(url);
+	
+	console.log('videoId', videoId)
 	
 	// set video and/or curtain
 	if (!videoId) {
