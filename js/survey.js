@@ -228,7 +228,7 @@ Rochester.init = function() {
 			<div id="stickyVideoPlaceholder"></div>\
 			<div class="video-container" id="survey-video">\
 				<div id="curtain">\
-					<h5>No video associated with this question or answer</h5>\
+					<h5></h5>\
 				</div>\
 				<div id="ytplayer"></div>\
 			</div>');

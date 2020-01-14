@@ -3,7 +3,7 @@ body {
 }
 
 #pagecontent {
-  overflow-x: hidden;
+  overflow-x: scroll;
 }
 #pagecontent table, #pagecontent td, #pagecontent tr, #pagecontent div {
   background: rgba(0, 0, 0, 0);
@@ -106,6 +106,10 @@ body {
   font-size: 12px;
   padding: 8px;
   margin: 8px;
+}
+
+#surveyinstructions p {
+	line-height: normal !important;
 }
 
 #survey-navigation {
