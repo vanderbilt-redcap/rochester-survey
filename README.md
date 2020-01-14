@@ -1,2 +1,2 @@
 # rochester-survey
-REDCap external module that administers user-friendly surveys for hearing impaired users.
+REDCap external module presents user-friendly surveys for vision or hearing impaired users.
