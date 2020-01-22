@@ -63,9 +63,7 @@ table.field_value tfoot td {
 }
 
 .value_column {
-  min-width: 18%;
-  width: 25%;
-  max-width: 30%;
+  width: 200px;
 }
 .value_column div {
   display: flex;
