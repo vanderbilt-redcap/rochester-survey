@@ -259,17 +259,19 @@ Rochester.init = function() {
 	$(".shrinkFont").click(function() {
 		$(".decreaseFont").trigger("click");
 		updateModalTextSize();
+		updateButtonTextSize();
 	});
 	$(".growFont").click(function() {
 		$(".increaseFont").trigger("click");
 		updateModalTextSize();
+		updateButtonTextSize();
 	});
 	
 	// add survey navigation buttons
 	$("#container").after('\
 			<div id="survey-navigation">\
-				<button class="btn btn-primary" onclick="Rochester.backClicked()"><i class="fa fa-arrow-left"></i>	Back</button>\
-				<button class="btn btn-primary" onclick="Rochester.nextClicked()">Next	<i class="fa fa-arrow-right"></i></button>\
+				<button class="btn btn-black" onclick="Rochester.backClicked()"><i class="fa fa-arrow-left"></i>	Back</button>\
+				<button class="btn btn-black" onclick="Rochester.nextClicked()">Next	<i class="fa fa-arrow-right"></i></button>\
 			</div>');
 	
 	// spectrum color picker creation/initialization
@@ -343,6 +345,10 @@ Rochester.init = function() {
 		Rochester.log('font size changed', {
 			size: fontSize
 		});
+	}
+	var updateButtonTextSize = function(){
+		var fontSize = $($('.labelrc')[0]).css('font-size');
+		$("button").css('font-size', fontSize);
 	}
 	
 	$("body").on("hide.bs.modal", function(event) {
@@ -726,7 +732,7 @@ Rochester.getOptionsModalHtml = function() {
 						<div class="modal-body">\
 							<h5>Choose a Signer</h5>\
 							<div class="row justify-content-around">\
-								<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#signerModal" onclick="$(\'#optionsModal\').modal(\'hide\')">\
+								<button type="button" class="btn btn-black" data-toggle="modal" data-target="#signerModal" onclick="$(\'#optionsModal\').modal(\'hide\')">\
 									Choose Signer <i class="fas fa-user-friends"></i>\
 								</button>\
 							</div>\
@@ -747,8 +753,8 @@ Rochester.getOptionsModalHtml = function() {
 							<h5>Adjust Text Size</h5>\
 							<div class="row justify-content-around">\
 								<div class="col-12 text-center">\
-									<button type="button" class="btn btn-primary shrinkFont">Smaller</button>\
-									<button type="button" class="btn btn-primary growFont">Larger</button>\
+									<button type="button" class="btn btn-black shrinkFont">Smaller</button>\
+									<button type="button" class="btn btn-black growFont">Larger</button>\
 								</div>\
 								<div class="col-12 text-center font-size-example" style="margin-top: 12px">\
 									<b>Example Text</b>\
@@ -756,7 +762,7 @@ Rochester.getOptionsModalHtml = function() {
 							</div>\
 						</div>\
 						<div class="modal-footer">\
-							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\
+							<button type="button" class="btn btn-black" data-dismiss="modal">Close</button>\
 						</div>\
 					</div>\
 				</div>\
@@ -826,7 +832,7 @@ Rochester.getExitModalHtml = function() {
 				</div>\
 				<div class="modal-footer">\
 					<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="Rochester.endSurvey()">Exit</button>\
-					<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="Rochester.resetExitVideo()">Cancel</button>\
+					<button type="button" class="btn btn-black" data-dismiss="modal" onclick="Rochester.resetExitVideo()">Cancel</button>\
 				</div>\
 			</div>\
 		</div>\
