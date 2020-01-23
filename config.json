@@ -3,7 +3,7 @@
 	
 	"namespace": "Vanderbilt\\RochesterSurvey",
 	
-	"description": "REDCap external module that administers user-friendly surveys for hearing impaired users.",
+	"description": "This is an external module for REDCap that improves the accessibility of surveys for users who are deaf, hard of hearing, or have hearing loss and/or low vision.",
 	
 	"authors": [
 		{
