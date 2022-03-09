@@ -23,7 +23,6 @@ $(function() {
 			data: form_data,
 			type: 'POST',
 			success: function(response) {
-				// console.log(response);
 				group.find("img").remove();
 				group.prepend(response.html);
 				if (group.find("div.row button").length == 0 && !response.error) {
@@ -52,8 +51,6 @@ $(function() {
 		group.find("input").val('')
 		group.find("label").html('Choose image')
 		
-		// console.log(data);
-		
 		$.ajax({
 			url: Rochester.configAjaxUrl,
 			dataType: 'json',
@@ -62,7 +59,7 @@ $(function() {
 		});
 	});
 	
-	$(".form_picker_dd").on("click", "a", function(i, e) {
+	$(".form_picker_dd").on("click", "a.dropdown-item", function(i, e) {
 		form_name = $(this).attr("value");
 		$.ajax({
 			method: "POST",
@@ -78,6 +75,68 @@ $(function() {
 		$("#form_picker").text($(this).text());
 	})
 	
+	
+	
+	
+	
+	// video url export settings
+	$("body").on("click", "button#export_settings", function(i, e) {
+		var form_name = $("#assoc_table").attr('data-form-name');
+		var ajax_url_full = Rochester.configAjaxUrl + "&action=export_settings&form_name=" + encodeURIComponent(form_name);
+		window.last_ajax_url_full = ajax_url_full;
+		window.location.href = ajax_url_full;
+	});
+	
+	// video url import settings
+	$("body").on("click", "button#import_settings", function(i, e) {
+		// create simple dialog modal
+		simpleDialog("<label for='import_file_select'><p>Upload settings file (.zip)</p></label><br><input id='import_file_select' type='file' accept='application/zip'><br><br><span id='importing_in_process'>Importing in process...</span>");
+		$("#importing_in_process").hide();
+		// add import button
+		var buttonset = $(".simpleDialog:visible").parent().find("div.ui-dialog-buttonset");
+		buttonset.prepend("<button class='ui-button ui-corner-all ui-widget import_settings_from_file'>Import</button>");
+	});
+	
+	$("body").on("click", "button.import_settings_from_file", function(e) {
+		var file_data = $('#import_file_select').prop('files')[0];
+		var form_data = new FormData();
+		form_data.set('import_file', file_data, 'import_file.zip');
+		form_data.set('action', "import_settings");
+		form_data.set('form_name', $("#assoc_table").attr('data-form-name'));
+		$("#importing_in_process").show();
+		$.ajax({
+			type: 'POST',
+			url: Rochester.configAjaxUrl,
+			// dataType: 'json',
+			// cache: false,
+			contentType: false,
+			processData: false,
+			data: form_data,
+			complete: function(response){
+				$.ajax({
+					method: "POST",
+					url: Rochester.configAjaxUrl,
+					data: {
+						action: "get_form_config",
+						form_name: $("#assoc_table").attr("data-form-name")
+					},
+					dataType: "html"
+				}).done(function(msg) {
+					$("#form_assocs").html(msg);
+					var close_btn = $(".simpleDialog").parent().find("button:contains('Close')").first();
+					if (close_btn) {
+						close_btn.click();
+					}
+				});
+				$("#form_picker").text($(this).text());
+			}
+		});
+	});
+	
+	
+	
+	
+	
 	$("body").on("click", "#add_value_col", function(i, e) {
 		var n = $("#assoc_table th").length - 1;
 		$("#assoc_table").find("th").eq(n).after("\
@@ -92,19 +151,6 @@ $(function() {
 		$("#assoc_table").find("tr").each(function(i, e) {
 			$(this).find("td").eq(n).after("<td class=\"value_column\"><input type=\"text\" class=\"form-control\" placeholder=\"URL\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\"></td>");
 		});
-		
-		// // add another signer portrait upload div
-		// var portraitIndex = $('.signer-portrait').length + 1;
-		// $("#signer-portraits").append("\
-		// <div class='signer-portrait'>\
-			// <h6>Signer " + portraitIndex + "</h6>\
-			// <div class='input-group'>\
-				// <div class='custom-file'>\
-					// <input type='file' class='custom-file-input' id='portrait" + portraitIndex + "' aria-describedby='upload'>\
-					// <label class='custom-file-label text-truncate' for='portrait" + portraitIndex + "'>Choose image</label>\
-				// </div>\
-			// </div>\
-		// </div>");
 	});
 	
 	$("body").on("click", ".remove_column", function() {
@@ -166,17 +212,15 @@ $(function() {
 			}
 		});
 		
-		// // send to server to save on db
+		// send to server to save on db
 		var data = {
 			form_name: form_name,
 			instructions_urls: instructionsURLs,
 			signer_urls: signerPreviews,
 			fields: fields,
 			exitModalText: $("#exitModalTextInput").val(),
-			exitModalVideo: $("#exitVideoUrl").val(),
+			exitModalVideo: $("#exitVideoUrl").val()
 		};
-		
-		// console.log('sending data:', data);
 		
 		$.ajax({
 			method: "POST",

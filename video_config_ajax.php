@@ -1,7 +1,6 @@
 <?php
 
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
-
 /////////////
 // from: https://stackoverflow.com/questions/15188033/human-readable-file-size
 function humanFileSize($size,$unit="") {
@@ -49,6 +48,11 @@ function file_upload_max_size() {
 /////////////
 
 $action = $_POST['action'];
+
+if (empty($action) && isset($_GET['action'])) {
+	$action = $_GET['action'];
+}
+
 if ($action !== 'save_changes') {
 	$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 }
@@ -56,7 +60,9 @@ if ($action !== 'save_changes') {
 if ($action == 'get_form_config') {
 	$html = $module->make_field_val_association_page($_POST['form_name']);
 	echo $html;
-} elseif (!empty($_FILES['image'])) {
+}
+
+if (!empty($_FILES['image'])) {
 	$uploaded_image = $_FILES['image'];
 	$form_name = $_POST['form_name'];
 	
@@ -109,28 +115,8 @@ if ($action == 'get_form_config') {
 	];
 	
 	if ($action == 'logo_upload') {
-		// get settings or make new settings array
-		$settings = $module->framework->getProjectSetting($form_name);
-		if (empty($settings)) {
-			$settings = [];
-		} else {
-			$settings = json_decode($settings, true);
-			
-			// delete old image
-			$old_edoc_id = $settings['endOfSurveyImage'];
-			if (!empty($old_edoc_id)) {
-				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
-				$result = db_query($sql);
-				while ($row = db_fetch_assoc($result)) {
-					unlink(EDOC_PATH . $row["stored_name"]);
-				}
-			}
-		}
-		
-		// save file
-		$new_edoc_id = $module->framework->saveFile($file['tmp_name']);
-		$settings['endOfSurveyImage'] = $new_edoc_id;
-		$module->framework->setProjectSetting($form_name, json_encode($settings));
+		// save new image
+		$new_edoc_id = $module->set_end_of_survey_image($form_name, $file['tmp_name']);
 		
 		// send back image
 		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$new_edoc_id";
@@ -146,10 +132,13 @@ if ($action == 'get_form_config') {
 				"html" => $imgElement
 			];
 		}
+		
 	}
 	
 	exit(json_encode($jsonArray));
-} elseif ($action == 'image_delete') {
+}
+
+if ($action == 'image_delete') {
 	$end_of_survey = $_POST['end_of_survey'];
 	$form_name = $_POST['form_name'];
 	
@@ -172,7 +161,130 @@ if ($action == 'get_form_config') {
 	while ($row = db_fetch_assoc($result)) {
 		unlink(EDOC_PATH . $row["stored_name"]);
 	}
-} else {
+}
+
+if ($action == 'export_settings') {
+	// check for ZipArchive class
+	if (!class_exists("ZipArchive")) {
+		exit(json_encode(["error" => "The Rochester Accessibility Survey couldn't export video configuration settings because the ZipArchive class doesn't exist in this server environment."]));
+	}
+	
+	$path = stream_get_meta_data(tmpfile())['uri'];
+    $zip = new ZipArchive;
+    $zip->open($path, ZipArchive::CREATE);
+	
+	// user clicked Export Settings on Video Configuration page
+	$form_name = $_GET['form_name'];
+	$project = new \Project($module->framework->getProjectId());
+	$form = &$project->forms[$form_name];
+	if (empty($form)) {
+		exit(json_encode(["error" => "Couldn't find field information for survey with form_name: $form_name"]));
+	}
+	if (empty($form["survey_id"])) {
+		exit(json_encode(["error" => "This form is not a survey: $form_name"]));
+	}
+	
+	$settings = $module->framework->getProjectSetting($form_name);
+	
+	if (empty($settings)) {
+		exit(json_encode(["error" => "Couldn't find field information for survey with form_name: $form_name"]));
+	} else {
+		$settings_obj = json_decode($settings);
+		if (empty($settings_obj)) {
+			exit(json_encode(["error" => "No saved settings found for survey with form_name: $form_name"]));
+		} else {
+			$endOfSurveyImage = $settings_obj->endOfSurveyImage;
+			if ($endOfSurveyImage == (int) $endOfSurveyImage and $endOfSurveyImage != 0) {
+				// have a valid edoc_id, fetch image and save in zip archive
+				$edocPath = \Files::copyEdocToTemp($endOfSurveyImage);
+				if ($edocPath !== false) {
+					if(!$zip->addFile($edocPath, "/endOfSurveyImage.jpg")){
+						throw new Exception("Error adding edoc image to export zip");
+					}
+				}
+				unset($settings_obj->endOfSurveyImage);
+			}
+			
+			$zip->addFromString("/video_configuration.json", json_encode($settings_obj));
+			if(!$zip->close()){
+				throw new Exception('Error closing export zip');
+			}
+			
+			$export_filename = "$form_name Video Configuration.zip";
+			header("Content-Type: application/zip");
+			header("Content-Disposition: attachment; filename=$export_filename");
+			header("Content-Length: " . filesize($path));
+
+			readfile($path);
+		}
+	}
+	
+}
+
+if ($action == 'import_settings') {
+	// determine form_name and import_file_path
+	$form_name = $_POST['form_name'];
+	
+	$import_file_path = @$_FILES['import_file']['tmp_name'];
+    if(empty($import_file_path)){
+		$errormsg = "Video Configuration import failed for form '$form_name' -- couldn't determine import filepath.";
+		\REDCap::logEvent("Rochester Survey Accessibility", $errormsg);
+		header('Content-type: application/json');
+		exit(json_encode(['error' => $errormsg]));
+	}
+	
+	// read import file
+	$import_file_contents = file_get_contents($import_file_path);
+	
+	// make ziparchive obj
+	$zip = new \ZipArchive;
+    $openResult = $zip->open($import_file_path);
+	
+    if($openResult !== true){
+		$errormsg = "Video Configuration import failed for form '$form_name' -- the Rochester Survey Accessibility module couldn't open an empty ZipArchive object in this server environment.";
+		\REDCap::logEvent("Rochester Survey Accessibility", $errormsg);
+		header('Content-type: application/json');
+		exit(json_encode(['error' => $errormsg]));
+    }
+	
+	// count files in zip (should be 1 settings file and 0 or 1 image file)
+	$file_count = $zip->count();
+	if ($settings_json = $zip->getFromName("/video_configuration.json")) {
+		// check json encoding
+		$settings_arr = json_decode($settings_json, true);
+		if (empty($settings_arr)) {
+			$errormsg = "Video Configuration import failed for form '$form_name' -- the Rochester Survey Accessibility couldn't decode the JSON string from 'video_configuration.json'.";
+			\REDCap::logEvent("Rochester Survey Accessibility", $errormsg);
+			header('Content-type: application/json');
+			exit(json_encode(['error' => $errormsg]));
+		}
+		// remove endOfSurveyImage setting if set
+		unset($filtered['endOfSurveyImage']);
+		
+		// sanitize
+		$filtered = $module->sanitize_video_form_settings($settings_arr);
+		$module->setProjectSetting($filtered['form_name'], json_encode($filtered));
+	} else {
+		$errormsg = "Video Configuration import failed for form '$form_name' -- the Rochester Survey Accessibility module couldn't find the expected 'video_configuration.json' in the uploaded zip file.";
+		\REDCap::logEvent("Rochester Survey Accessibility", $errormsg);
+		header('Content-type: application/json');
+		exit(json_encode(['error' => $errormsg]));
+	}
+	
+	if ($image_data = $zip->getFromName("/endOfSurveyImage.jpg")) {
+		$extractionPath = tempnam(sys_get_temp_dir(),'module-settings-import-');
+		unlink($extractionPath);
+		mkdir($extractionPath);
+		$zip->open();
+		$zip->extractTo($extractionPath, "/endOfSurveyImage.jpg");
+		$zip->close();
+		$module->set_end_of_survey_image($form_name, "$extractionPath/endOfSurveyImage.jpg");
+	}
+	
+	exit("{msg: 'Imported settings.'}");
+} 
+
+if (empty($action)) {
 	echo '<p>No form_name or action POST parameter supplied.</p>';
 	// \REDCap::logEvent("video_config_ajax called with no ", "msg", null, null, null, $_GET["pid"]);
 }

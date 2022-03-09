@@ -73,6 +73,89 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<?php
 	}
 	
+	function sanitize_video_form_settings($settings_arr) {
+		// create $filtered array to hold validated settings properties
+		$filtered = [
+			"signer_urls" => [],
+			"instructions_urls" => [],
+			"fields" => []
+		];
+		$filtered['form_name'] = filter_var($settings_arr['form_name'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+
+		// sanitize JSON -- starting with non-url fields
+		$filtered['exitModalText'] = filter_var($settings_arr['exitModalText'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+		
+		// I tried using the FILTER_SANITIZE_URL flag, but users expect invalid URLs to be saved correctly
+		$filtered['exitModalVideo'] = filter_var($settings_arr['exitModalVideo'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+
+		// sanitize instructions urls
+		foreach($settings_arr['instructions_urls'] as $i => $url) {
+			$filtered['instructions_urls'][$i] = filter_var($url, FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+		}
+		// sanitize signer urls
+		foreach($settings_arr['signer_urls'] as $i => $url) {
+			$filtered['signer_urls'][$i] = filter_var($url, FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+		}
+
+		// sanitize field/choice URLs
+		foreach ($settings_arr['fields'] as $field_name => $field_arr) {
+			$filtered['fields'][$field_name] = [];
+			if (isset($field_arr['field'])) {
+				$filtered['fields'][$field_name]['field'] = [];
+				foreach ($field_arr['field'] as $i => $url) {
+					$filtered['fields'][$field_name]['field'][$i] = filter_var($url, FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+				}
+			}
+			if (isset($field_arr['choices'])) {
+				$filtered['fields'][$field_name]['choices'] = [];
+				foreach ($field_arr['choices'] as $raw_value => $choice_arr) {
+					$filtered['fields'][$field_name]['choices'][$raw_value] = [];
+					foreach ($choice_arr as $i => $url) {
+						$filtered['fields'][$field_name]['choices'][$raw_value][$i] = filter_var($url, FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
+					}
+				}
+			}
+		}
+		
+		// keep endOfSurveyImage edocId value if previously saved
+		$prev_settings = $this->getProjectSetting($filtered['form_name']);
+		if (!empty($prev_settings)) {
+			$prev_settings = json_decode($prev_settings, true);
+			if (!empty($prev_settings['endOfSurveyImage'])) {
+				$filtered['endOfSurveyImage'] = (int) $prev_settings['endOfSurveyImage'];
+			}
+		}
+		
+		return $filtered;
+	}
+	
+	function set_end_of_survey_image($form_name, $image_filepath) {
+		// get settings or make new settings array
+		$settings = $this->getProjectSetting($form_name);
+		if (empty($settings)) {
+			$settings = [];
+		} else {
+			$settings = json_decode($settings, true);
+			
+			// delete old image
+			$old_edoc_id = $settings['endOfSurveyImage'];
+			if (!empty($old_edoc_id)) {
+				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
+				$result = db_query($sql);
+				while ($row = db_fetch_assoc($result)) {
+					unlink(EDOC_PATH . $row["stored_name"]);
+				}
+			}
+		}
+		
+		// save file and settings
+		$new_edoc_id = $this->saveFile($image_filepath);
+		$settings['endOfSurveyImage'] = $new_edoc_id;
+		$this->setProjectSetting($form_name, json_encode($settings));
+		
+		return $new_edoc_id;
+	}
+	
 	function make_field_val_association_page($form_name) {
 		$project = new \Project($this->framework->getProjectId());
 		$form = &$project->forms[$form_name];
@@ -119,6 +202,12 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			<br>
 			<button class="btn btn-outline-primary" type="button" id="add_value_col">
 				Add Signer
+			</button>
+			<button class="btn btn-outline-primary" type="button" id="export_settings">
+				Export Settings
+			</button>
+			<button class="btn btn-outline-primary" type="button" id="import_settings">
+				Import Settings
 			</button>
 		</div>
 		
@@ -295,4 +384,5 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		return $html;
 	}
+
 }
