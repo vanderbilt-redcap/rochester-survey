@@ -209,7 +209,7 @@ if ($action == 'export_settings') {
 				throw new Exception('Error closing export zip');
 			}
 			
-			$export_filename = "$form_name Video Configuration.zip";
+			$export_filename = "Survey Video Configuration.zip";
 			header("Content-Type: application/zip");
 			header("Content-Disposition: attachment; filename=$export_filename");
 			header("Content-Length: " . filesize($path));
