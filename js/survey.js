@@ -397,8 +397,6 @@ Rochester.logSettingsJSON = function() {
 			data[i][j] = $(input).val();
 		});
 	});
-
-	console.log(JSON.stringify(data))
 }
 
 Rochester.setSettingsFromJSON = function(data) {
@@ -996,7 +994,6 @@ Rochester.setVideo = function(fieldName, rawAnswerValue) {
 		if (Rochester.values.fields[fieldName])
 		url = Rochester.values.fields[fieldName].field[Rochester.signerIndex];
 	} else {
-		console.log('setting video to instructions')
 		if (Rochester.values.instructions_urls[Rochester.signerIndex])
 			url = Rochester.values.instructions_urls[Rochester.signerIndex];
 	}
@@ -1005,8 +1002,6 @@ Rochester.setVideo = function(fieldName, rawAnswerValue) {
 	var videoId;
 	if (url)
 		videoId = Rochester.getVideoIdFromUrl(url);
-	
-	console.log('videoId', videoId)
 	
 	// set video and/or curtain
 	if (!videoId) {

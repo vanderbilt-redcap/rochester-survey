@@ -1,8 +1,35 @@
 var form_name = "";
 
+window.closeAllSimpleDialogs = function() {
+	$(".simpleDialog").each(function(i, modal) {
+		var close_btn = $(modal).parent().find("button:contains('Close')").first();
+		if (close_btn) {
+			close_btn.click();
+		}
+	});
+}
+
 $(function() {
+	// get and render form table
+	$(".form_picker_dd").on("click", "a.dropdown-item", function(i, e) {
+		form_name = $(this).attr("value");
+		$.ajax({
+			method: "POST",
+			url: Rochester.configAjaxUrl,
+			data: {
+				action: "get_form_config",
+				form_name: $(this).attr("value")
+			},
+			dataType: "html"
+		}).done(function(msg) {
+			$("#form_assocs").html(msg);
+		});
+		$("#form_picker").text($(this).text());
+	})
+	
+	
+	// upload image
 	$('body').on('change', ".custom-file-input", function() {
-		// upload user image for signer portrait
 		var fileName = $(this).val().split('\\').pop();
 		$(this).next('.custom-file-label').addClass("selected").html(fileName);
 		var group = $(this).closest('.image-upload');
@@ -23,7 +50,6 @@ $(function() {
 			data: form_data,
 			type: 'POST',
 			success: function(response) {
-				// console.log(response);
 				group.find("img").remove();
 				group.prepend(response.html);
 				if (group.find("div.row button").length == 0 && !response.error) {
@@ -39,7 +65,6 @@ $(function() {
 	
 	// delete image button
 	$("body").on("click", ".image-upload button", function() {
-		// delete portrait for this signer index
 		var group = $(this).closest('.image-upload');
 		var data = {
 			action: 'image_delete',
@@ -52,8 +77,6 @@ $(function() {
 		group.find("input").val('')
 		group.find("label").html('Choose image')
 		
-		// console.log(data);
-		
 		$.ajax({
 			url: Rochester.configAjaxUrl,
 			dataType: 'json',
@@ -62,22 +85,88 @@ $(function() {
 		});
 	});
 	
-	$(".form_picker_dd").on("click", "a", function(i, e) {
-		form_name = $(this).attr("value");
-		$.ajax({
-			method: "POST",
-			url: Rochester.configAjaxUrl,
-			data: {
-				action: "get_form_config",
-				form_name: $(this).attr("value")
-			},
-			dataType: "html"
-		}).done(function(msg) {
-			$("#form_assocs").html(msg);
-		});
-		$("#form_picker").text($(this).text());
-	})
 	
+	// video url export/import settings
+	$("body").on("click", "button#export_settings", function(i, e) {
+		var form_name = $("#assoc_table").attr('data-form-name');
+		var ajax_url_full = Rochester.configAjaxUrl + "&action=export_settings&form_name=" + encodeURIComponent(form_name);
+		window.last_ajax_url_full = ajax_url_full;
+		window.location.href = ajax_url_full;
+	});
+	
+	$("body").on("click", "button#import_settings", function(i, e) {
+		// create simple dialog modal
+		simpleDialog("<label for='import_file_select'><p>Upload settings file (.zip)</p></label><br><input class='import_file_select' type='file' accept='application/zip'><br><br><span class='importing_in_process'>Importing in process...</span>");
+		$(".importing_in_process").hide();
+		// add import button
+		var buttonset = $(".simpleDialog:visible").parent().find("div.ui-dialog-buttonset");
+		buttonset.prepend("<button class='ui-button ui-corner-all ui-widget import_settings_from_file'>Import</button>");
+	});
+	
+	$("body").on("click", "button.import_settings_from_file", function(e) {
+		var file_data = $('.import_file_select:visible').prop('files')[0];
+		var form_data = new FormData();
+		var this_form_name = $("#assoc_table").attr("data-form-name");
+		form_data.set('import_file', file_data, 'import_file.zip');
+		form_data.set('action', "import_settings");
+		form_data.set('form_name', $("#assoc_table").attr('data-form-name'));
+		$(".importing_in_process").show();
+		var jqxhr = $.ajax({
+			type: 'POST',
+			url: Rochester.configAjaxUrl,
+			contentType: false,
+			processData: false,
+			data: form_data
+		});
+		
+		jqxhr.always(window.closeAllSimpleDialogs);
+		
+		jqxhr.done(function(data, textStatus, jqXHR) {
+			if (data.error) {
+				simpleDialog(data.error);
+			} else {
+				// refresh video url table
+				var jqxhr = $.ajax({
+					method: "POST",
+					url: Rochester.configAjaxUrl,
+					data: {
+						action: "get_form_config",
+						form_name: this_form_name
+					},
+					dataType: "html"
+				});
+				jqxhr.always(window.closeAllSimpleDialogs);
+				jqxhr.done(function(msg) {
+					// set new html for url table
+					$("#form_assocs").html(msg);
+					
+					// get display name
+					var form_display_name = $("div.form_picker_dd").find("a[value='" + this_form_name + "']").text();
+					$("#form_picker").text(form_display_name);
+					
+					if (data.msg) {
+						simpleDialog(data.msg);
+					}
+					if (data.endOfSurveyImage) {
+						debugger;
+						var upload_div = $("div.image-upload.logo-upload");
+						upload_div.find("img").remove();
+						upload_div.prepend(data.endOfSurveyImage);
+						if (upload_div.find("div.row button").length == 0) {
+							upload_div.find("div.row").append("<button type='button' class='btn btn-outline-danger'>Delete</button>");
+						}
+					}
+				});
+			}
+		});
+		
+		jqxhr.fail(function() {
+			simpleDialog(errorThrown);
+		});
+	});
+	
+	
+	// updating table state
 	$("body").on("click", "#add_value_col", function(i, e) {
 		var n = $("#assoc_table th").length - 1;
 		$("#assoc_table").find("th").eq(n).after("\
@@ -92,19 +181,6 @@ $(function() {
 		$("#assoc_table").find("tr").each(function(i, e) {
 			$(this).find("td").eq(n).after("<td class=\"value_column\"><input type=\"text\" class=\"form-control\" placeholder=\"URL\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\"></td>");
 		});
-		
-		// // add another signer portrait upload div
-		// var portraitIndex = $('.signer-portrait').length + 1;
-		// $("#signer-portraits").append("\
-		// <div class='signer-portrait'>\
-			// <h6>Signer " + portraitIndex + "</h6>\
-			// <div class='input-group'>\
-				// <div class='custom-file'>\
-					// <input type='file' class='custom-file-input' id='portrait" + portraitIndex + "' aria-describedby='upload'>\
-					// <label class='custom-file-label text-truncate' for='portrait" + portraitIndex + "'>Choose image</label>\
-				// </div>\
-			// </div>\
-		// </div>");
 	});
 	
 	$("body").on("click", ".remove_column", function() {
@@ -166,17 +242,15 @@ $(function() {
 			}
 		});
 		
-		// // send to server to save on db
+		// send to server to save on db
 		var data = {
 			form_name: form_name,
 			instructions_urls: instructionsURLs,
 			signer_urls: signerPreviews,
 			fields: fields,
 			exitModalText: $("#exitModalTextInput").val(),
-			exitModalVideo: $("#exitVideoUrl").val(),
+			exitModalVideo: $("#exitVideoUrl").val()
 		};
-		
-		// console.log('sending data:', data);
 		
 		$.ajax({
 			method: "POST",
@@ -208,4 +282,5 @@ $(function() {
 			}
 		});
 	})
+
 })
