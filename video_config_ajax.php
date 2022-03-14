@@ -58,13 +58,13 @@ if ($action !== 'save_changes') {
 }
 
 if ($action == 'get_form_config') {
-	$html = $module->make_field_val_association_page($_POST['form_name']);
+	$html = $module->make_field_val_association_page(html_entities($_POST['form_name'], ENT_QUOTES));
 	echo $html;
 }
 
 if (!empty($_FILES['image'])) {
 	$uploaded_image = $_FILES['image'];
-	$form_name = $_POST['form_name'];
+	$form_name = html_entities($_POST['form_name'], ENT_QUOTES);
 	
 	// check for transfer errors
 	if ($uploaded_image["error"] !== 0) {
@@ -139,7 +139,7 @@ if (!empty($_FILES['image'])) {
 
 if ($action == 'image_delete') {
 	$end_of_survey = $_POST['end_of_survey'];
-	$form_name = $_POST['form_name'];
+	$form_name = html_entities($_POST['form_name'], ENT_QUOTES);
 	
 	// get settings or make new settings array
 	$settings = $module->framework->getProjectSetting($form_name);
@@ -173,7 +173,7 @@ if ($action == 'export_settings') {
     $zip->open($path, ZipArchive::CREATE);
 	
 	// user clicked Export Settings on Video Configuration page
-	$form_name = $_GET['form_name'];
+	$form_name = html_entities($_GET['form_name'], ENT_QUOTES);
 	$project = new \Project($module->framework->getProjectId());
 	$form = &$project->forms[$form_name];
 	if (empty($form)) {
@@ -222,7 +222,7 @@ if ($action == 'export_settings') {
 
 if ($action == 'import_settings') {
 	// determine form_name and import_file_path
-	$form_name = $_POST['form_name'];
+	$form_name = html_entities($_POST['form_name'], ENT_QUOTES);
 	
 	$import_file_path = @$_FILES['import_file']['tmp_name'];
     if(empty($import_file_path)){
