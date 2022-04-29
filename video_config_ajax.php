@@ -154,9 +154,8 @@ if ($action == 'image_delete') {
 	$module->setProjectSetting($form_name, json_encode($settings));
 		
 	// remove old edoc file
-	$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
-	$result = db_query($sql);
-	while ($row = db_fetch_assoc($result)) {
+	$result = $module->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$old_edoc_id]);
+	while ($row = $result->fetch_assoc()) {
 		unlink(EDOC_PATH . $row["stored_name"]);
 	}
 }
