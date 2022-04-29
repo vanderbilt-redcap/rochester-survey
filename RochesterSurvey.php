@@ -139,9 +139,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			// delete old image if possible
 			$old_edoc_id = $settings['endOfSurveyImage'];
 			if (!empty($old_edoc_id)) {
-				$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$old_edoc_id";
-				$result = db_query($sql);
-				while ($row = db_fetch_assoc($result)) {
+				$result = $this->framework->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$old_edoc_id]);
+				while ($row = $result->fetch_assoc()) {
 					unlink(EDOC_PATH . $row["stored_name"]);
 				}
 			}
