@@ -119,9 +119,8 @@ if (!empty($_FILES['image'])) {
 		$new_edoc_id = $module->set_end_of_survey_image($form_name, $file['tmp_name']);
 		
 		// send back image
-		$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$new_edoc_id";
-		$result = db_query($sql);
-		while ($row = db_fetch_assoc($result)) {
+		$result = $module->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$new_edoc_id]);
+		while ($row = $result->fetch_assoc()) {
 			$uri = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
 			$iconSrc = "data: {$row["mime_type"]};base64,$uri";
 			$imgElement = "<img src='$iconSrc' class='logo-image'>";
