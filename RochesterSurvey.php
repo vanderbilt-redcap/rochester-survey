@@ -16,9 +16,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$settings = json_decode($settings, true);
 		$edoc_id = $settings['endOfSurveyImage'];
 		if (!empty($edoc_id)) {
-			$sql = "SELECT * FROM redcap_edocs_metadata WHERE doc_id=$edoc_id";
-			$result = db_query($sql);
-			if ($row = db_fetch_assoc($result)) {
+			$result = $this->framework->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$edoc_id]);
+			if ($row = $result->fetch_assoc()) {
 				$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
 				$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
 				$img = "<img src=\'$imgSrc\'>";
