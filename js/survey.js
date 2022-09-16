@@ -181,10 +181,16 @@ Rochester.init = function() {
 			Yes - No
 			True - False
 	*/
-	$("#questiontable tr [class^=choice]").click(function() {
+	$("#questiontable tr [class^=choice], #questiontable tr [class^=enhancedchoice]").click(function() {
 		delete Rochester.playlist
 		var fieldName = $(this).closest("tr").attr("sq_id");
-		var rawAnswerValue = Rochester.getInputValue($(this).find("input"));
+		var rawAnswerValue
+		if($(this).hasClass('enhancedchoice')){
+			rawAnswerValue = $(this).find("label").attr('comps').split(',').at(-1);
+		}
+		else{
+			rawAnswerValue = Rochester.getInputValue($(this).find("input"));
+		}
 		Rochester.setVideo(fieldName, rawAnswerValue);
 	});
 	
