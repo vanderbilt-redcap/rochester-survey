@@ -18,8 +18,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		if (!empty($edoc_id)) {
 			$result = $this->framework->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$edoc_id]);
 			if ($row = $result->fetch_assoc()) {
-				$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-				$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+				$encodedImage = base64_encode(file_get_contents($this->framework->getSafePath($row["stored_name"], EDOC_PATH)));
+				$mimeType = htmlspecialchars($row["mime_type"], ENT_QUOTES);
+				$imgSrc = "data: $mimeType;base64,$encodedImage";
 				$img = "<img src=\'$imgSrc\'>";
 			}
 		}
@@ -143,7 +144,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			if (!empty($old_edoc_id)) {
 				$result = $this->framework->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$old_edoc_id]);
 				while ($row = $result->fetch_assoc()) {
-					unlink(EDOC_PATH . $row["stored_name"]);
+					unlink($this->framework->getSafePath($row["stored_name"], EDOC_PATH));
 				}
 			}
 		}
@@ -193,7 +194,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		
 		// we'll want at least one value column and signer upload input
 		$columns = max(1, $columns);
-		
+
 		if($settings['applyToDuplicates'] ?? true){
 			$applyToDuplicatesAttributes = ' checked ';
 		}
@@ -361,8 +362,9 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		if (!empty($edoc_id)) {
 			$result = $this->framework->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$edoc_id]);
 			if ($row = $result->fetch_assoc()) {
-				$encodedImage = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-				$imgSrc = "data: {$row["mime_type"]};base64,$encodedImage";
+				$encodedImage = base64_encode(file_get_contents($this->framework->getSafePath($row["stored_name"], EDOC_PATH)));
+				$mimeType = htmlspecialchars($row["mime_type"], ENT_QUOTES);
+				$imgSrc = "data: $mimeType;base64,$encodedImage";
 				$img = "<img src='$imgSrc'>";
 				$delete_button = "<button type='button' class='btn btn-outline-danger'>Delete</button>";
 			}

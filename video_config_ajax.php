@@ -121,8 +121,9 @@ if (!empty($_FILES['image'])) {
 		// send back image
 		$result = $module->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$new_edoc_id]);
 		while ($row = $result->fetch_assoc()) {
-			$uri = base64_encode(file_get_contents(EDOC_PATH . $row["stored_name"]));
-			$iconSrc = "data: {$row["mime_type"]};base64,$uri";
+			$uri = base64_encode(file_get_contents($module->framework->getSafePath($row["stored_name"], EDOC_PATH)));
+			$mimeType = htmlspecialchars($row["mime_type"], ENT_QUOTES);
+			$iconSrc = "data: $mimeType;base64,$uri";
 			$imgElement = "<img src='$iconSrc' class='logo-image'>";
 			$jsonArray = [
 				"success" => true,
@@ -156,7 +157,7 @@ if ($action == 'image_delete') {
 	// remove old edoc file
 	$result = $module->query("SELECT * FROM redcap_edocs_metadata WHERE doc_id=?", [$old_edoc_id]);
 	while ($row = $result->fetch_assoc()) {
-		unlink(EDOC_PATH . $row["stored_name"]);
+		unlink($module->framework->getSafePath($row["stored_name"], EDOC_PATH));
 	}
 }
 
