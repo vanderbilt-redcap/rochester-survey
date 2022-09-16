@@ -249,7 +249,8 @@ $(function() {
 			signer_urls: signerPreviews,
 			fields: fields,
 			exitModalText: $("#exitModalTextInput").val(),
-			exitModalVideo: $("#exitVideoUrl").val()
+			exitModalVideo: $("#exitVideoUrl").val(),
+			applyToDuplicates: $('#applyToDuplicates').is(':checked')			
 		};
 		
 		$.ajax({

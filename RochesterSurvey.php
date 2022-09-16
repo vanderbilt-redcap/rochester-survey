@@ -87,6 +87,8 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// I tried using the FILTER_SANITIZE_URL flag, but users expect invalid URLs to be saved correctly
 		$filtered['exitModalVideo'] = filter_var($settings_arr['exitModalVideo'], FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
 
+		$filtered['applyToDuplicates'] = filter_var($settings_arr['applyToDuplicates'], FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+
 		// sanitize instructions urls
 		foreach($settings_arr['instructions_urls'] as $i => $url) {
 			$filtered['instructions_urls'][$i] = filter_var($url, FILTER_SANITIZE_STRING, FILTER_NULL_ON_FAILURE);
@@ -192,6 +194,10 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		// we'll want at least one value column and signer upload input
 		$columns = max(1, $columns);
 		
+		if($settings['applyToDuplicates'] ?? true){
+			$applyToDuplicatesAttributes = ' checked ';
+		}
+		
 		$html .= '
 		<h5>Survey Instrument Configuration</h5>
 		
@@ -199,7 +205,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<p>Enter Youtube video URLs for each field and answer.</p>
 		<div id="table-controls">
 			<div class="custom-control custom-switch">
-				<input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
+				<input type="checkbox" class="custom-control-input" ' . $applyToDuplicatesAttributes . ' id="applyToDuplicates">
 				<label class="custom-control-label" for="applyToDuplicates">When changing URLs in the table below, automatically copy them to all rows that have identical values in the "Label" column.<br>This only applies to the current survey.</label>
 			</div>
 			<br>
