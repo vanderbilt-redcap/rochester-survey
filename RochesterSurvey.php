@@ -200,7 +200,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		<div id="table-controls">
 			<div class="custom-control custom-switch">
 				<input type="checkbox" class="custom-control-input" checked="true" id="applyToDuplicates">
-				<label class="custom-control-label" for="applyToDuplicates">Automatically copy URLs to rows in the table below (the current form) that have identical values in the "Label" column</label>
+				<label class="custom-control-label" for="applyToDuplicates">When changing URLs in the table below, automatically copy them to all rows that have identical values in the "Label" column.<br>This only applies to the current survey.</label>
 			</div>
 			<br>
 			<button class="btn btn-outline-primary" type="button" id="add_value_col">
