@@ -245,7 +245,7 @@ Rochester.init = function() {
 	// add survey option buttons
 	$("#survey-video").after('\
 			<div id="survey-options">\
-				<button type="button" class="btn btn-black" data-toggle="modal" data-target="#optionsModal">\
+				<button type="button" class="btn btn-black" data-bs-toggle="modal" data-bs-target="#optionsModal">\
 					Options <i class="fas fa-cog"></i>\
 				</button>\
 				<button type="button" class="btn btn-black video" onclick="Rochester.videoButtonClicked()">\
@@ -692,7 +692,7 @@ Rochester.createSignerModal = function() {
 			<div class="modal-content">\
 				<div class="modal-header">\
 					<h5 class="modal-title" id="signerModalLabel">Choose a Signer</h5>\
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">\
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">\
 						<span aria-hidden="true">&times;</span>\
 					</button>\
 				</div>\
@@ -709,7 +709,7 @@ Rochester.createSignerModal = function() {
 	
 	// add select button
 	html += "\
-						<button type='button' style='display: none' class='btn btn-primary signer-select' data-dismiss='modal'>Select this signer</button>";
+						<button type='button' style='display: none' class='btn btn-primary signer-select' data-bs-dismiss='modal'>Select this signer</button>";
 	
 	html += '\
 					</div>\
@@ -736,7 +736,7 @@ Rochester.getOptionsModalHtml = function() {
 						<div class="modal-body">\
 							<h5>Choose a Signer</h5>\
 							<div class="row justify-content-around">\
-								<button type="button" class="btn btn-black" data-toggle="modal" data-target="#signerModal" onclick="$(\'#optionsModal\').modal(\'hide\')">\
+								<button type="button" class="btn btn-black" data-bs-toggle="modal" data-bs-target="#signerModal" onclick="$(\'#optionsModal\').modal(\'hide\')">\
 									Choose Signer <i class="fas fa-user-friends"></i>\
 								</button>\
 							</div>\
@@ -766,7 +766,7 @@ Rochester.getOptionsModalHtml = function() {
 							</div>\
 						</div>\
 						<div class="modal-footer">\
-							<button type="button" class="btn btn-black" data-dismiss="modal">Close</button>\
+							<button type="button" class="btn btn-black" data-bs-dismiss="modal">Close</button>\
 						</div>\
 					</div>\
 				</div>\
@@ -814,7 +814,7 @@ Rochester.getExitModalHtml = function() {
 			<div class="modal-content">\
 				<div class="modal-header">\
 					<h5 class="modal-title" id="exitModalLabel">Exit Survey?</h5>\
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">\
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">\
 						<span aria-hidden="true">&times;</span>\
 					</button>\
 				</div>\
@@ -835,8 +835,8 @@ Rochester.getExitModalHtml = function() {
 	modalHtml += '\
 				</div>\
 				<div class="modal-footer">\
-					<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="Rochester.endSurvey()">Exit</button>\
-					<button type="button" class="btn btn-black" data-dismiss="modal" onclick="Rochester.resetExitVideo()">Cancel</button>\
+					<button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="Rochester.endSurvey()">Exit</button>\
+					<button type="button" class="btn btn-black" data-bs-dismiss="modal" onclick="Rochester.resetExitVideo()">Cancel</button>\
 				</div>\
 			</div>\
 		</div>\
