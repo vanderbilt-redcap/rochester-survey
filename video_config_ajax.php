@@ -168,8 +168,8 @@ if ($action == 'export_settings') {
 	}
 	
 	$path = stream_get_meta_data(tmpfile())['uri'];
-    $zip = new ZipArchive;
-    $zip->open($path, ZipArchive::CREATE);
+    $zip = new \ZipArchive;
+    $zip->open($path, \ZipArchive::CREATE);
 	
 	// user clicked Export Settings on Video Configuration page
 	$form_name = htmlentities($_GET['form_name'], ENT_QUOTES);
@@ -197,7 +197,7 @@ if ($action == 'export_settings') {
 				$edocPath = \Files::copyEdocToTemp($endOfSurveyImage);
 				if ($edocPath !== false) {
 					if(!$zip->addFile($edocPath, "endOfSurveyImage.jpg")){
-						throw new Exception("Error adding edoc image to export zip");
+						throw new \Exception("Error adding edoc image to export zip");
 					}
 				}
 				unset($settings_obj->endOfSurveyImage);
@@ -205,7 +205,7 @@ if ($action == 'export_settings') {
 			
 			$zip->addFromString("video_configuration.json", json_encode($settings_obj));
 			if(!$zip->close()){
-				throw new Exception('Error closing export zip');
+				throw new \Exception('Error closing export zip');
 			}
 			
 			$export_filename = "Survey Video Configuration.zip";
