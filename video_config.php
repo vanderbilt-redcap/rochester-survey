@@ -16,7 +16,7 @@ foreach($project->forms as $form_name => $form) {
 if (count($surveys) == 0) {
 	echo "<p>The Rochester Survey module found 0 survey instruments for this REDCap project. Please enable surveys and add a survey instrument.</p>";
 } elseif (count($surveys) == 1) {
-	echo $module->make_field_val_association_page($surveys[0]["form_name"]);
+	echo $module->make_field_val_association_page($module->escape($surveys[0]["form_name"]));
 } else {
 	$html = "
 	<div>

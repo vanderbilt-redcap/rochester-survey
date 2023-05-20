@@ -13,7 +13,7 @@ if (empty($filtered['instructions_urls']) and
     empty($filtered['exitModalVideo'])) {
         $module->framework->removeProjectSetting($data['form_name']);
         exit('{
-            "msg": "Removed all survey settings for ' . print_r($survey_display_name, true) . '"
+            "msg": "Removed all survey settings for ' . print_r($module->escape($survey_display_name), true) . '"
         }');
 }
 
