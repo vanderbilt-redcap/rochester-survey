@@ -1,4 +1,5 @@
 <?php
+namespace Vanderbilt\RochesterSurvey;
 
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 /////////////
