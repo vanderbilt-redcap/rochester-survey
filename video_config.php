@@ -16,7 +16,7 @@ foreach($project->forms as $form_name => $form) {
 if (count($surveys) == 0) {
 	echo "<p>The Rochester Survey module found 0 survey instruments for this REDCap project. Please enable surveys and add a survey instrument.</p>";
 } elseif (count($surveys) == 1) {
-	echo $module->make_field_val_association_page($module->escape($surveys[0]["form_name"]));
+	echo "<p>". $module->framework->escape($module->make_field_val_association_page($surveys[0]["form_name"])) . "</p>";
 } else {
 	$html = "
 	<div>
@@ -28,7 +28,7 @@ if (count($surveys) == 0) {
 			</button>
 			<div class='dropdown-menu form_picker_dd' aria-labelledby='form_picker'>";
 	foreach($surveys as $survey) {
-		$html .= '<a value="' . $survey["form_name"] . '"class="dropdown-item" href="#">' . $survey["form_menu"] . '</a>';
+		$html .= '<a value="' . $module->framework->escape($survey["form_name"]) . '"class="dropdown-item" href="#">' . $module->framework->escape($survey["form_menu"]) . '</a>';
 	}
 	$html .= "
 			</div>

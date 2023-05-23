@@ -166,12 +166,12 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		$project = new \Project($this->framework->getProjectId());
 		$form = &$project->forms[$form_name];
 		if (empty($form)) {
-			return "<p>Couldn't find field information for survey with form_name: $form_name</p>";
+			return "Couldn't find field information for survey with form_name: " . $this->framework->escape($form_name);
 		}
 		if (empty($form["survey_id"])) {
-			return "<p>This form is not a survey: $form_name</p>";
+			return "This form is not a survey: "  . $this->framework->escape($form_name);
 		}
-		
+
 		$settings = $this->framework->getProjectSetting($form_name);
 		if (!empty($settings)) {
 			$settings = json_decode($settings, true);
@@ -199,7 +199,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 			$applyToDuplicatesAttributes = ' checked ';
 		}
 		
-		$html .= '
+		$html = '
 		<h5>Survey Instrument Configuration</h5>
 		
 		<h6>Field and Answer Video Association</h6>
