@@ -7,8 +7,8 @@ $surveys = [];
 foreach($project->forms as $form_name => $form) {
 	if (!empty($form["survey_id"])) {
 		$surveys[] = [
-			"form_name" => $form_name,
-			"form_menu" => $form["menu"]
+			"form_name" => htmlspecialchars($form_name, ENT_QUOTES),
+			"form_menu" => htmlspecialchars($form["menu"], ENT_QUOTES)
 		];
 	}
 }
