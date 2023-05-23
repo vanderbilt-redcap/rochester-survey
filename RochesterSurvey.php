@@ -275,11 +275,12 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 		}
 		
 		foreach($form["fields"] as $field_name => $field) {
+			$field_name = htmlspecialchars($field_name, ENT_QUOTES);
 			if (!empty($field) and \REDCap::getRecordIdField() != $field_name) {
 				$value_col = "<input type=\"text\" class=\"form-control\" aria-label=\"Associated value\" aria-describedby=\"basic-addon1\">";
-				$label_col = nl2br($project->metadata[$field_name]["element_label"]);
+				$label_col = htmlspecialchars(nl2br($project->metadata[$field_name]["element_label"]), ENT_QUOTES);
 				$type_col = "Descriptive";
-				$fieldType = $project->metadata[$field_name]["element_type"];
+				$fieldType = htmlspecialchars($project->metadata[$field_name]["element_type"], ENT_QUOTES);
 				if ($project->metadata[$field_name]["element_preceding_header"] == "Form Status") {
 					continue;
 				} else {
@@ -310,6 +311,7 @@ class RochesterSurvey extends \ExternalModules\AbstractExternalModule {
 				if (!empty($project->metadata[$field_name]["element_enum"]) and $isApplicableFieldType) {
 					$labels = explode("\\n", $project->metadata[$field_name]["element_enum"]);
 					foreach($labels as $label) {
+						$label = htmlspecialchars($label, ENT_QUOTES);
 						$raw_value = trim(explode(",", $label)[0]);
 						$label = trim(explode(",", $label)[1]);
 						$html .= "
